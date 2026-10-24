@@ -1,241 +1,265 @@
 # AGENTS.md — RESQ AI
 
-> **Lee este archivo completo antes de tocar código.** Es la fuente de verdad del proyecto para personas y agentes de IA (Cursor, Claude Code, Codex). Al terminar cada sesión de trabajo, actualiza **§8 Estado actual**, **§9 Próximos pasos** y, si decidiste algo, **§10 Registro de decisiones**.
+> **Read this whole file before touching code.** It is the project's source of truth for people and AI agents (Cursor, Claude Code, Codex). At the end of every work session, update **§8 Current status**, **§9 Next steps** and, if you decided something, **§10 Decision log**.
 
-Última actualización: 2026-10-23 (GT) · por: Juan (con Claude Code): plan v2 y reparto
+Last updated: 2026-10-24 (GT) · by: Juan (with Claude Code): switched the project language to English and renamed contracts
 
 ---
 
-## 1. El proyecto en 30 segundos
+## 1. The project in 30 seconds
 
-**RESQ AI** es un sistema multiagente que ayuda a un **coordinador municipal de emergencias** a decidir cómo distribuir ayuda durante una **inundación**. Combina datos de comunidades, albergues, bodegas, carreteras, vehículos, lluvia y reportes de campo contradictorios; prioriza con reglas de protocolo; y entrega un **plan de distribución versionado** que se replantea cuando cambia la realidad (ej.: se bloquea una carretera), explicando **qué cambió y por qué**.
+**RESQ AI** is a multi-agent system that helps a **municipal emergency coordinator** decide how to distribute aid during a **flood**. It combines data on communities, shelters, warehouses, roads, vehicles, rainfall and contradictory field reports; prioritizes using protocol rules; and delivers a **versioned distribution plan** that is re-planned when reality changes (e.g. a road segment gets blocked), explaining **what changed and why**.
 
-- Evento: **Open Agent Hackathon 2026** · **Track 3: Reasoning Architecture**
-- Entrega: **martes 27-oct-2026, 17:45 hora de Guatemala** (23:45 UTC). Meta interna: martes 12:00.
-- Equipo (reparto completo en `docs/PLAN.md` §3):
-  - **Juan:** Linux, host de Zetaris. Datos, World Model, Conciliador y Analista; integración y entrega. No puede correr Nightshift.
-  - **Harry:** Windows, equipo potente, host de Nightshift. `llm.py`, grafo, Planificador, Crítico y Explicador; pruebas pesadas, demo y video.
-  - **Chema:** equipo modesto. Rutas, validadores, Intake, UI sobre datos de ejemplo, protocolo y deck; trabaja en `SAMPLE_MODE`.
-- Plan completo: `docs/PLAN.md` · Setup de entorno: `docs/SETUP_EQUIPO.md`
+- Event: **Open Agent Hackathon 2026** · **Track 3: Reasoning Architecture**
+- Deadline: **Tuesday 27-Oct-2026, 17:45 Guatemala time** (23:45 UTC). Internal target: Tuesday 12:00.
+- Team (full split in `docs/PLAN.md` §3):
+  - **Juan:** Linux, Zetaris host. Data, World Model, Reconciler and Risk Analyst; integration and submission. Cannot run Nightshift.
+  - **Harry:** Windows, powerful machine, Nightshift host. `llm.py`, graph, Planner, Critic and Explainer; heavy testing, demo and video.
+  - **Chema:** modest machine. Routing, validators, Intake, UI on sample data, protocol and deck; works in `SAMPLE_MODE`.
+- Full plan: `docs/PLAN.md` · Environment setup: `docs/TEAM_SETUP.md`
 
-## 2. Reglas no negociables (si se rompe una, quedamos descalificados o perdemos puntos)
+## 2. Non-negotiable rules (breaking one gets us disqualified or costs points)
 
-1. **Zetaris es la única fuente de datos del agente.** Todo dato del escenario se lee con SQL a través de Zetaris (`resq/tools/zetaris.py`). La excepción es `SAMPLE_MODE=true` (copia local para jueces y desarrollo sin servicios).
-2. **Meterless Nightshift es el proveedor principal de IA.** Toda llamada a un modelo pasa por `resq/llm.py`, que usa la API compatible con OpenAI de Nightshift. NVIDIA directo solo se permite en desarrollo, cambiando `.env`; nunca como valor por defecto.
-3. **Al menos un Meterless Engine funcionando de verdad:** usamos **World Model** como estado compartido de los agentes, con su suite de conformance pasando. Mencionarlo o instalarlo sin usarlo no cuenta.
-4. **Desarrollo en Cursor** (además se permiten Claude Code y Codex).
-5. **Secretos solo en `.env`** (ignorado por git). En el repo, `.env.example` con valores falsos. Nunca imprimas, registres en logs ni escribas en código claves o tokens.
-6. **Nada hardcodeado en la demo.** Los resultados salen de los datos y del razonamiento de los agentes. Las contradicciones se siembran en los datos, nunca en el código.
-7. **Datos sintéticos.** Nada de datos reales de personas. El municipio es ficticio; la lluvia viene de Open-Meteo (pública, sin clave).
-8. **Sistema multiagente real**, no un pipeline lineal: debe haber crítica, revisión, reintentos acotados, ramificación y escalamiento, con traza visible.
+1. **Zetaris is the agent's only data source.** Every scenario datum is read with SQL through Zetaris (`resq/tools/zetaris.py`). The exception is `SAMPLE_MODE=true` (local copy for judges and for development without services).
+2. **Meterless Nightshift is the primary AI provider.** Every model call goes through `resq/llm.py`, which uses Nightshift's OpenAI-compatible API. Direct NVIDIA is only allowed in development, by changing `.env`; never as the default.
+3. **At least one Meterless Engine actually working:** we use **World Model** as the agents' shared state, with its conformance suite passing. Mentioning or installing it without using it does not count.
+4. **Development in Cursor** (Claude Code and Codex are also allowed).
+5. **Secrets only in `.env`** (ignored by git). The repo holds `.env.example` with fake values. Never print, log or hardcode keys or tokens.
+6. **Nothing hardcoded in the demo.** Results come from the data and the agents' reasoning. Contradictions are seeded in the data, never in the code.
+7. **Synthetic data.** No real personal data. The municipality is fictional; rainfall comes from Open-Meteo (public, no key).
+8. **A real multi-agent system**, not a linear pipeline: there must be critique, revision, bounded retries, branching and escalation, with a visible trace.
+9. **Everything in English.** This is an international event and the judges review the repo: code, identifiers, comments, docstrings, logs, UI text, agent prompts and outputs, docs, commit messages and PRs are written in English. Team chat can stay in Spanish; anything that lands in the repo or the demo is English.
 
-## 3. Arquitectura
+## 3. Architecture
 
 ```text
-UI (Streamlit) ── pregunta / evento ("bloquear tramo T7")
+UI (Streamlit) ── question / event ("block segment T7")
   ▼
-Intake ─ clasifica: situacion | plan | evento | por_que
+Intake ─ classifies: situation | plan | event | why
   ▼
-Conciliador ─ reportes contradictorios → hechos + confianza ─► World Model
+Reconciler ─ contradictory reports → facts + confidence ─► World Model
   ▼
-Analista de riesgo ─ SQL (Zetaris) → riesgo por comunidad ─► World Model
+Risk Analyst ─ SQL (Zetaris) → risk per community ─► World Model
   ▼
-Planificador ─ reglas + best_route + capacidades → Plan vN
+Planner ─ rules + best_route + capacities → Plan vN
   ▼
-Crítico ─ validadores en código + LLM
-  │  ✗ → vuelve al Planificador con observaciones (máx. 3 vueltas)
-  │  ✗✗ → escalado=True: "requiere decisión humana"
+Critic ─ code validators + LLM
+  │  ✗ → back to the Planner with feedback (max. 3 rounds)
+  │  ✗✗ → escalated=True: "requires a human decision"
   ✓
-Explicador ─ plan final + cambios vs. versión anterior (historial del World Model)
+Explainer ─ final plan + changes vs. previous version (World Model history)
 
-Compartido: Zetaris · World Model · Nightshift→Nemotron · traza JSONL en logs/
+Shared: Zetaris · World Model · Nightshift→Nemotron · JSONL trace in logs/
 ```
 
-**Principio: el LLM decide y explica; el código calcula.** Rutas, capacidades, inventario y validaciones duras son funciones deterministas y probadas. Los agentes razonan sobre sus resultados.
+**Principle: the LLM decides and explains; the code computes.** Routes, capacities, inventory and hard validations are deterministic, tested functions. Agents reason over their results.
 
-| Agente | Lane | Herramientas | Salida |
-| --- | --- | --- | --- |
-| Intake | fast | reglas (Scout Intent opcional) | tipo de solicitud |
-| Conciliador | fast | `run_sql` | eventos de hecho verificado → World Model |
-| Analista de riesgo | fast | `run_sql` | riesgo por comunidad → World Model |
-| Planificador | deep | `best_route`, inventario | `Plan` |
-| Crítico | deep | `validators.*` | aprobado / observaciones / escalado |
-| Explicador | fast | `world.history()` | reporte final |
+| Agent | Module | Lane | Tools | Output |
+| --- | --- | --- | --- | --- |
+| Intake | `intake` | fast | rules (Scout Intent optional) | request type |
+| Reconciler | `reconciler` | fast | `run_sql` | verified-fact events → World Model |
+| Risk Analyst | `risk_analyst` | fast | `run_sql` | risk per community → World Model |
+| Planner | `planner` | deep | `best_route`, inventory | `Plan` |
+| Critic | `critic` | deep | `validators.*` | approved / feedback / escalated |
+| Explainer | `explainer` | fast | `world.history()` | final report |
 
-Framework: **LangGraph** (Python). Estado del grafo = `ResqState` (pydantic) + World Model como estado de dominio compartido.
+Framework: **LangGraph** (Python). Graph state = `ResqState` (pydantic) + World Model as shared domain state.
 
-## 4. Stack y servicios
+## 4. Stack and services
 
-| Pieza | Detalle |
+| Piece | Detail |
 | --- | --- |
-| Python | 3.12 recomendado (Juan usa 3.14 en Linux; si una dependencia falla, usar 3.12) |
-| Agentes | LangGraph, `openai` (cliente compatible), pydantic |
-| Rutas | networkx sobre la tabla `tramos` |
+| Python | 3.12 recommended (Juan uses 3.14 on Linux; if a dependency fails, use 3.12) |
+| Agents | LangGraph, `openai` (compatible client), pydantic |
+| Routing | networkx over the `road_segments` table |
 | UI | Streamlit |
-| Zetaris | Corre en la laptop de Juan (Docker). UI `:3000`, REST `:8888/api/v1.0`. El equipo entra por Tailscale |
-| Nightshift | Corre en el Windows de Harry (Juan en Linux no puede instalarlo). Base URL `:8088/v1`. Lanes: fast = `nvidia/nemotron-3.5-lightning-30b-a3b`; deep = Nemotron super (por confirmar) |
-| World Model | Meterless engine (TypeScript). Plan recomendado: servicio Node + cliente Python en `resq/world/` (ver `docs/PLAN.md` R1). Spec y conformance: https://github.com/Meterless/Meterless/tree/main/engines/world-model |
-| Prompts de Meterless | https://meterless.ai/engines.html (IMPLEMENT → *Keep parallel agents in sync*; POWER → *Add Meterless as a provider*) |
+| Zetaris | Runs on Juan's laptop (Docker). UI `:3000`, REST `:8888/api/v1.0`. The team connects through Tailscale |
+| Nightshift | Runs on Harry's Windows machine (Juan cannot install it on Linux). Base URL `:8088/v1`. Lanes: fast = `nvidia/nemotron-3.5-lightning-30b-a3b`; deep = Nemotron super (to be confirmed) |
+| World Model | Meterless engine (TypeScript). Recommended plan: Node service + Python client in `resq/world/` (see `docs/PLAN.md` R1). Spec and conformance: https://github.com/Meterless/Meterless/tree/main/engines/world-model |
+| Meterless prompts | https://meterless.ai/engines.html (IMPLEMENT → *Keep parallel agents in sync*; POWER → *Add Meterless as a provider*) |
 
-### Cómo hablar con Zetaris
+### Talking to Zetaris
 
 - `POST {ZETARIS_REST_URL}/sql-editor/sqls/run`
-- Headers: `Authorization: Bearer {ZETARIS_API_KEY}`, `X-Org-ID: {ZETARIS_ORG_ID}`, `X-Request-ID: <uuid4 nuevo>`
-- Body: `{"queryId": "<uuid4>", "sql": "<UNA sentencia>", "source": "SqlEditor", "limit": N}` → respuesta con `data` (filas)
-- Dialecto **Lightning SQL**. **Una sentencia por request.** Referencia: http://localhost:8888/redoc/index.html y https://github.com/zetaris/getting-started (su `AGENTS.md`)
-- Zetaris **no lee archivos de la laptop**: los datos del escenario van en un Postgres propio registrado como fuente.
-- Nunca uses el puerto 8889 (interno).
+- Headers: `Authorization: Bearer {ZETARIS_API_KEY}`, `X-Org-ID: {ZETARIS_ORG_ID}`, `X-Request-ID: <new uuid4>`
+- Body: `{"queryId": "<uuid4>", "sql": "<ONE statement>", "source": "SqlEditor", "limit": N}` → response with `data` (rows)
+- **Lightning SQL** dialect. **One statement per request.** Reference: http://localhost:8888/redoc/index.html and https://github.com/zetaris/getting-started (its `AGENTS.md`)
+- Zetaris **does not read files from the laptop**: scenario data lives in our own Postgres registered as a data source.
+- Never use port 8889 (internal).
 
-### Cómo hablar con Nightshift
+### Talking to Nightshift
 
-- API compatible con OpenAI: `GET /v1/models`, `POST /v1/chat/completions`
+- OpenAI-compatible API: `GET /v1/models`, `POST /v1/chat/completions`
 - Headers: `Authorization: Bearer {METERLESS_RUNTIME_TOKEN}`, `meterless-app: resq-ai`, `meterless-scope: user`
-- `meterless/auto` puede enrutar a un modelo no-NVIDIA: para la demo y el premio NVIDIA, **fijar un lane con Nemotron**.
-- Errores conocidos: `404 page not found` = URL sin `/v1` o modelo no-chat (`rerank`, `embed`); `Function … Not found for account` = modelo sin endpoint para la cuenta.
+- `meterless/auto` may route to a non-NVIDIA model: for the demo and the NVIDIA prize, **pin a lane to Nemotron**.
+- Known errors: `404 page not found` = URL without `/v1` or a non-chat model (`rerank`, `embed`); `Function … Not found for account` = model with no endpoint for the account.
 
-## 5. Estructura del repo (objetivo)
+## 5. Repo structure (target)
 
 ```text
 RESQ_AI/
-├── AGENTS.md              # este archivo (contexto vivo)
-├── CLAUDE.md              # apunta a AGENTS.md
-├── README.md              # instalación, uso, dependencias (para jueces)
+├── AGENTS.md              # this file (living context)
+├── CLAUDE.md              # points to AGENTS.md (local only, gitignored)
+├── README.md              # install, usage, dependencies (for judges)
 ├── requirements.txt
-├── .env.example           # sin secretos
-├── smoke_test.py          # verifica Zetaris + modelo (de la guía oficial)
+├── .env.example           # no secrets
+├── smoke_test.py          # checks Zetaris + model (from the official guide)
 ├── docs/
-│   ├── PLAN.md            # plan por fases
-│   ├── SETUP_EQUIPO.md    # guía de entorno
-│   └── protocolo.md       # reglas de prioridad (conocimiento del dominio)
+│   ├── PLAN.md            # phased plan
+│   ├── TEAM_SETUP.md      # environment guide
+│   └── protocol.md        # priority rules (domain knowledge)
 ├── resq/
-│   ├── config.py          # lee .env, SAMPLE_MODE
+│   ├── config.py          # reads .env, SAMPLE_MODE
 │   ├── llm.py             # chat(messages, lane, tools) → Nightshift
-│   ├── schemas.py         # Asignacion, Plan, Evento, ResqState
-│   ├── graph.py           # grafo LangGraph
-│   ├── agents/            # intake, conciliador, analista, planificador, critico, explicador
+│   ├── schemas.py         # Assignment, Plan, Event, ResqState
+│   ├── graph.py           # LangGraph graph
+│   ├── agents/            # intake, reconciler, risk_analyst, planner, critic, explainer
 │   ├── tools/
 │   │   ├── zetaris.py     # run_sql
 │   │   ├── routing.py     # best_route
-│   │   └── validators.py  # reglas duras del crítico
-│   ├── world/             # integración World Model
-│   └── run.py             # CLI: python -m resq.run --pregunta "..."
+│   │   └── validators.py  # the critic's hard rules
+│   ├── world/             # World Model integration
+│   └── run.py             # CLI: python -m resq.run --question "..."
 ├── app/streamlit_app.py   # UI
-├── scripts/generate_data.py   # datos sintéticos (semilla fija)
+├── scripts/generate_data.py   # synthetic data (fixed seed)
 ├── data/sample/ + data/README.md
 ├── input_examples/  output_examples/
-├── logs/                  # trazas JSONL (no se suben los .log)
+├── logs/                  # JSONL traces (.log files are not committed)
 └── tests/
 ```
 
-## 6. Contratos entre módulos
+## 6. Contracts between modules
 
-Cambiar un contrato = avisar al grupo + anotarlo en §10.
+Changing a contract = tell the group + record it in §10.
 
 ```python
-# resq/tools/zetaris.py
-def run_sql(sql: str, limit: int = 500) -> list[dict]: ...   # una sentencia; lanza ZetarisError
+# resq/tools/zetaris.py  (Juan)
+def run_sql(sql: str, limit: int = 500) -> list[dict]: ...   # one statement; raises ZetarisError
 
-# resq/llm.py
+# resq/llm.py  (Harry)
 def chat(messages: list[dict], lane: str = "fast", tools: list | None = None) -> dict: ...  # "fast" | "deep"
 
-# resq/world/
-def get_state() -> dict: ...
-def apply_event(event: dict) -> None: ...    # {"tipo": "tramo_bloqueado", "id": "T7", "fuente": "...", "ts": "..."}
-def history() -> list[dict]: ...
+# resq/world/  (Juan)
+def get_state() -> dict: ...                 # communities, road segments, shelters with their current status
+def apply_event(event: dict) -> None: ...    # {"type": "segment_blocked", "id": "T7", "source": "...", "ts": "..."}
+def history() -> list[dict]: ...             # events in order
 
-# resq/tools/routing.py
-def best_route(origen: str, destino: str, state: dict, vehiculo: str) -> "Route | None": ...
+# resq/tools/routing.py  (Chema)
+def best_route(origin: str, destination: str, state: dict, vehicle_id: str) -> "Route | None": ...
 
-# resq/schemas.py
-class Asignacion(BaseModel): comunidad_id: str; origen_id: str; recurso: str; cantidad: int; vehiculo_id: str; ruta: list[str]; prioridad: int; razon: str; evidencia: list[str]
-class Plan(BaseModel): version: int; asignaciones: list[Asignacion]; sin_atender: list[str]; riesgos: list[str]; confianza: float; escalado: bool; cambios_vs_anterior: list[str]
+# resq/tools/validators.py  (Chema)
+def validate_plan(plan: Plan, state: dict) -> list[str]: ...  # empty list = no violations; each message cites IDs
+
+# resq/schemas.py  (everyone; Harry creates it)
+class Assignment(BaseModel): community_id: str; origin_id: str; resource: str; quantity: int; vehicle_id: str; route: list[str]; priority: int; reason: str; evidence: list[str]
+class Plan(BaseModel): version: int; assignments: list[Assignment]; unserved: list[str]; risks: list[str]; confidence: float; escalated: bool; changes_vs_previous: list[str]
+
+# Graph nodes (each owner implements theirs; Harry defines the shape)
+def node_<agent>(state: ResqState) -> dict: ...   # returns only the fields it updates
+
+# resq/run.py  (Harry) — what Chema's UI calls
+def execute(question: str, event: dict | None = None) -> dict: ...  # {"plan": Plan, "trace": list[dict], "escalated": bool}
 ```
 
-### Datos del escenario (tablas en Zetaris)
+### Scenario data (tables in Zetaris)
 
-`comunidades`(id, nombre, poblacion, pct_ninos, pct_adultos_mayores, vulnerabilidad 1–5, elevacion_m, lat, lon, nodo_vial) · `albergues`(id, nombre, capacidad, ocupacion_actual, nodo_vial) · `bodegas`(id, nombre, nodo_vial) · `inventario`(bodega_id, recurso, cantidad) · `tramos`(id, origen, destino, distancia_km, superficie, estado_oficial) · `vehiculos`(id, tipo, capacidad_kg, puede_vadear, bodega_id) · `reportes_campo`(id, timestamp, fuente: oficial|brigada|redes, objeto_tipo, objeto_id, estado_reportado, detalle) · `lluvia` (REST Open-Meteo: fecha_hora, precipitacion_mm).
+`communities`(id, name, population, pct_children, pct_elderly, vulnerability 1–5, elevation_m, lat, lon, road_node) · `shelters`(id, name, capacity, current_occupancy, road_node) · `warehouses`(id, name, road_node) · `inventory`(warehouse_id, resource, quantity) · `road_segments`(id, origin, destination, distance_km, surface, official_status) · `vehicles`(id, type, capacity_kg, can_ford, warehouse_id) · `field_reports`(id, timestamp, source: official|brigade|social_media, object_type, object_id, reported_status, detail) · `rainfall` (Open-Meteo REST: datetime, precipitation_mm).
 
-Tamaño: 12–15 comunidades, 3–4 albergues, 2 bodegas, ~20 tramos, 5–8 vehículos, ~30 reportes.
+Size: 12–15 communities, 3–4 shelters, 2 warehouses, ~20 road segments, 5–8 vehicles, ~30 reports.
 
-## 7. Convenciones para agentes de IA y personas
+> `docs/PLAN.md` is still in Spanish and uses the old Spanish names (`comunidades`, `Asignacion`, `validar_plan`, `ejecutar`…). **The English names in this file win**; PLAN.md will be translated.
 
-- **Idioma:** código e identificadores en español sin tildes o en inglés, pero consistente por módulo; textos al usuario en español.
-- **Cambios pequeños** y enfocados en la tarea pedida; no reescribas módulos de otro integrante sin avisar.
-- **No inventes APIs** de Zetaris o Meterless: consulta las fuentes de §4. Si no estás seguro, dilo y deja un `TODO(verificar)`.
-- **Modelos:** solo a través de `resq/llm.py`. Ningún otro archivo crea clientes de OpenAI.
-- **Datos:** solo a través de `resq/tools/zetaris.py` (o `SAMPLE_MODE`).
-- **Traza:** cada paso de agente escribe una línea JSONL en `logs/` (`ts, run_id, agente, entrada_resumida, salida_resumida, lane, modelo, duracion_ms, iteracion`). Nunca incluir secretos.
-- **Límites:** timeouts en toda llamada externa (Zetaris 60 s, modelo 90 s); máximo 3 vueltas del crítico; reintentos máximo 2.
-- **Pruebas:** `pytest` en `tests/` para herramientas deterministas (routing, validators). Correr `python smoke_test.py` y `pytest` antes de abrir un PR.
-- **Git:** ramas `feat/<area>-<tema>`; commits pequeños en español; PR a `main`; revisa Juan. Nunca `git add .env`.
-- **Al cerrar sesión:** actualizar §8, §9 y §10 de este archivo.
+## 7. Conventions for AI agents and people
 
-### Cómo correr
+- **Language:** English for everything in the repo and the demo (rule 9 of §2). Identifiers in `snake_case`/`PascalCase` English; no Spanish names in new code.
+- **Small changes** focused on the requested task; do not rewrite another member's modules without telling them.
+- **Do not invent APIs** for Zetaris or Meterless: check the sources in §4. If unsure, say so and leave a `TODO(verify)`.
+- **Models:** only through `resq/llm.py`. No other file creates OpenAI clients.
+- **Data:** only through `resq/tools/zetaris.py` (or `SAMPLE_MODE`).
+- **Trace:** every agent step writes one JSONL line in `logs/` (`ts, run_id, agent, input_summary, output_summary, lane, model, duration_ms, iteration`). Never include secrets.
+- **Limits:** timeouts on every external call (Zetaris 60 s, model 90 s); max. 3 critic rounds; max. 2 retries.
+- **Tests:** `pytest` in `tests/` for deterministic tools (routing, validators). Run `python smoke_test.py` and `pytest` before opening a PR.
+- **Git:** branches `feat/<area>-<topic>`; small commits with English messages; PR to `main`; Juan reviews. Never `git add .env`.
+- **When closing a session:** update §8, §9 and §10 of this file.
+
+### How to run
 
 ```bash
 # Linux/macOS
 python -m venv .venv && source .venv/bin/activate
 # Windows: py -3.12 -m venv .venv ; .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-cp .env.example .env        # y completar valores reales
-python smoke_test.py        # 3 PASS esperados
-# (cuando existan)
-python -m resq.run --pregunta "¿Cómo distribuimos la ayuda ahora?"
+cp .env.example .env        # then fill in real values
+python smoke_test.py        # 3 PASS expected
+# (once they exist)
+python -m resq.run --question "How should we distribute aid right now?"
 streamlit run app/streamlit_app.py
 ```
 
-### Variables de entorno
+### Environment variables
 
-| Variable | Uso |
+| Variable | Use |
 | --- | --- |
-| `ZETARIS_BASE_URL` | UI de Zetaris (smoke test) |
-| `ZETARIS_REST_URL`, `ZETARIS_ORG_ID`, `ZETARIS_API_KEY` | API REST de Zetaris |
-| `METERLESS_BASE_URL`, `METERLESS_RUNTIME_TOKEN`, `METERLESS_MODEL` | Nightshift (proveedor principal) |
-| `MODEL_BASE_URL`, `MODEL_API_KEY`, `NEMOTRON_MODEL` | Modelo activo (Nightshift por defecto; NVIDIA directo solo en desarrollo) |
-| `LANE_FAST_MODEL`, `LANE_DEEP_MODEL` | Modelo por lane (por definir) |
-| `SAMPLE_MODE` | `true` = usar `data/sample/` sin Zetaris |
-| `WORLD_MODEL_URL` | (propuesta, se confirma con R1) URL del servicio World Model local |
+| `ZETARIS_BASE_URL` | Zetaris UI (smoke test) |
+| `ZETARIS_REST_URL`, `ZETARIS_ORG_ID`, `ZETARIS_API_KEY` | Zetaris REST API |
+| `METERLESS_BASE_URL`, `METERLESS_RUNTIME_TOKEN`, `METERLESS_MODEL` | Nightshift (primary provider) |
+| `MODEL_BASE_URL`, `MODEL_API_KEY`, `NEMOTRON_MODEL` | Active model (Nightshift by default; direct NVIDIA only in development) |
+| `LANE_FAST_MODEL`, `LANE_DEEP_MODEL` | Model per lane (to be defined) |
+| `SAMPLE_MODE` | `true` = use `data/sample/` without Zetaris |
+| `WORLD_MODEL_URL` | (proposal, confirmed with R1) URL of the local World Model service |
 
 ---
 
-## 8. Estado actual
+## 8. Current status
 
-**Fase actual: 0, Arranque** (meta: viernes 23, 14:00)
+**Current phase: 0, Kickoff — behind schedule** (target was Friday 23, 14:00; the Friday 18:00/20:00 Phase 1 milestones were also missed). Harry and Chema cannot work yet, so Juan moves forward alone on everything that does not need Nightshift.
 
-Hecho:
-- [x] Track 3 elegido; idea RESQ AI definida
-- [x] Zetaris instalado y corriendo en la laptop de Juan (`verify.sh` OK, token de API creado, REST probado)
-- [x] Cursor funcionando (Juan)
-- [x] `smoke_test.py` → 3 PASS en Linux de Juan, con NVIDIA directo y `nvidia/nemotron-3.5-lightning-30b-a3b`
-- [x] Repo `JuanGualim/RESQ_AI` con commits iniciales (`smoke_test.py`, `.gitignore`, `.env.example`, `requirements.txt`, `AGENTS.md`, `docs/PLAN.md`)
-- [x] `docs/PLAN.md` v2: reparto por máquina (Juan / Harry / Chema), hitos con hora, stubs para no bloquearse, contratos nuevos (`validar_plan`, nodos, `ejecutar`), riesgos R9–R11
+Done:
+- [x] Track 3 chosen; RESQ AI idea defined
+- [x] Zetaris installed and running on Juan's laptop (`verify.sh` OK, API token created, REST tested)
+- [x] Cursor working (Juan)
+- [x] `smoke_test.py` → 3 PASS on Juan's Linux, with direct NVIDIA and `nvidia/nemotron-3.5-lightning-30b-a3b`
+- [x] Repo `JuanGualim/RESQ_AI` with initial commits (`smoke_test.py`, `.gitignore`, `.env.example`, `requirements.txt`, `AGENTS.md`, `docs/PLAN.md`)
+- [x] `docs/PLAN.md` v2: split by machine (Juan / Harry / Chema), timed milestones, stubs to avoid blocking, new contracts, risks R9–R11
+- [x] Project language switched to English: this file translated, contracts and table names renamed (§6)
 
-Pendiente / bloqueado:
-- [ ] `docs/SETUP_EQUIPO.md` se referencia pero **no existe** en el repo
-- [ ] `CLAUDE.md` está en `.gitignore`, así que no se sube aunque §5 lo lista. Decidir si se versiona
-- [ ] Nightshift instalado en el Windows de Harry y expuesto por Tailscale
-- [ ] Tailscale entre las 3 máquinas; Zetaris y Nightshift alcanzables
-- [ ] Setup de Harry y Chema (smoke test en sus máquinas)
-- [ ] Decidir la integración de World Model (R1). Recomendado: servicio Node + cliente Python
+Pending / blocked:
+- [ ] `docs/PLAN.md`, `.env.example` comments and `smoke_test.py` messages are still in Spanish
+- [ ] `docs/TEAM_SETUP.md` is referenced but **does not exist**
+- [ ] No code yet: no `resq/` skeleton, no `config.py`, no `data/sample/`
+- [ ] Nightshift installed on Harry's Windows machine and exposed over Tailscale (blocked: Harry)
+- [ ] Tailscale between the 3 machines; Zetaris and Nightshift reachable
+- [ ] Harry and Chema setup (smoke test on their machines) (blocked: Harry, Chema)
+- [ ] Decide the World Model integration (R1). Recommended: Node service + Python client
+- [ ] `CLAUDE.md` is in `.gitignore`, so it is not committed even though §5 lists it. Decide whether to version it
 
-## 9. Próximos pasos (en orden)
+## 9. Next steps (in order)
 
-1. **Juan:** invitar colaboradores; crear `docs/SETUP_EQUIPO.md`; Tailscale y exponer Zetaris; esqueleto de carpetas + `config.py`; *90-second proof* del World Model y cierre de R1.
-2. **Harry:** Nightshift + NVIDIA + lanes (confirmar el Nemotron *super* para `deep`); exponer por Tailscale; compartir URL y token por privado.
-3. **Chema:** entorno Python 3.12 + smoke test; empezar `docs/protocolo.md`.
-4. **Todos (~12:00):** llamada de 45 min para confirmar esquema y contratos (`docs/PLAN.md` §5).
-5. **Fase 1, hitos del viernes:** `data/sample/` (Juan, 18:00) · `schemas.py` (Harry, 18:00) · `protocolo.md` (Chema, 20:00) · World Model en memoria (Juan, 20:00).
+Juan, solo, while Harry and Chema are unavailable (all of this works with direct NVIDIA or no model at all):
 
-## 10. Registro de decisiones
+1. Translate `docs/PLAN.md` to English with the new names; translate `.env.example` comments and `smoke_test.py` messages.
+2. Repo skeleton from §5 + `resq/config.py` (`.env`, `SAMPLE_MODE`) + `docs/TEAM_SETUP.md`; invite collaborators on GitHub.
+3. **`scripts/generate_data.py` (fixed seed) → `data/sample/`** with the seeded contradictions. Top priority: it unblocks everyone.
+4. Unblocking stubs for Harry's contracts, telling him first: `resq/schemas.py` (§6) and a minimal `resq/llm.py` that already works with direct NVIDIA.
+5. World Model *90-second proof* on Linux → close R1 → in-memory stub of `resq/world/` with the real contract.
+6. Postgres in Docker + register it in Zetaris + `run_sql` + 10 key queries tested + Open-Meteo `rainfall` table.
+7. Real World Model (Node service) + Python client + **conformance green**.
+8. Reconciler and Risk Analyst agents on `SAMPLE_MODE` first, then on real SQL.
+9. Install Tailscale and expose Zetaris, ready for when the others join.
 
-| Fecha (GT) | Decisión | Por qué |
+When Harry and Chema are back: 45-minute call to confirm the English contracts (§6), then pick up their Phase 1 items from `docs/PLAN.md` §4.
+
+## 10. Decision log
+
+| Date (GT) | Decision | Why |
 | --- | --- | --- |
-| 2026-10-22 | Track 3: Reasoning Architecture | El resultado es una decisión que se replantea con estado nuevo |
-| 2026-10-23 | Zetaris en la laptop Linux de Juan; Nightshift en el Windows de Harry; red Tailscale | Nightshift no tiene versión Linux; Zetaris necesita 16 GB; Harry tiene el mejor equipo |
-| 2026-10-23 | Desarrollo con NVIDIA directo permitido; Nightshift obligatorio en demo y valores por defecto | No bloquear a nadie si el host de Nightshift no está disponible |
-| 2026-10-23 | Engine principal: World Model | Estado compartido + historial de eventos = explicación de replanes |
-| 2026-10-23 | Rutas y validaciones en código determinista; el LLM decide y explica | Confiabilidad y reproducibilidad ante jueces |
-| 2026-10-23 | Datos del escenario en Postgres propio registrado en Zetaris | Zetaris no lee CSV locales |
-| 2026-10-23 | Reparto por máquina: Juan = datos + World Model + Conciliador/Analista; Harry = Nightshift + `llm.py`/grafo/Planificador/Crítico/Explicador + pruebas pesadas + demo; Chema = rutas, validadores, Intake, UI, protocolo, deck | Juan no puede correr Nightshift; el equipo de Chema es modesto; Harry tiene Windows potente |
-| 2026-10-23 | Nuevos contratos: `validar_plan(plan, state) -> list[str]`, `nodo_<agente>(state) -> dict`, `run.ejecutar(pregunta, evento) -> dict` | La UI y el Crítico necesitaban una interfaz fija para trabajar en paralelo |
-| 2026-10-23 | Cada dueño publica un stub con el contrato antes de la versión real | Evitar bloqueos en Fase 1 |
+| 2026-10-22 | Track 3: Reasoning Architecture | The output is a decision that gets re-planned with new state |
+| 2026-10-23 | Zetaris on Juan's Linux laptop; Nightshift on Harry's Windows machine; Tailscale network | Nightshift has no Linux version; Zetaris needs 16 GB; Harry has the best machine |
+| 2026-10-23 | Development with direct NVIDIA allowed; Nightshift mandatory for the demo and defaults | Don't block anyone if the Nightshift host is unavailable |
+| 2026-10-23 | Main engine: World Model | Shared state + event history = explanation of re-plans |
+| 2026-10-23 | Routing and validations in deterministic code; the LLM decides and explains | Reliability and reproducibility in front of judges |
+| 2026-10-23 | Scenario data in our own Postgres registered in Zetaris | Zetaris does not read local CSVs |
+| 2026-10-23 | Split by machine: Juan = data + World Model + Reconciler/Risk Analyst; Harry = Nightshift + `llm.py`/graph/Planner/Critic/Explainer + heavy testing + demo; Chema = routing, validators, Intake, UI, protocol, deck | Juan cannot run Nightshift; Chema's machine is modest; Harry has a powerful Windows machine |
+| 2026-10-23 | New contracts: `validate_plan(plan, state) -> list[str]`, `node_<agent>(state) -> dict`, `run.execute(question, event) -> dict` | The UI and the Critic needed a fixed interface to work in parallel |
+| 2026-10-23 | Each owner publishes a stub with the contract before the real version | Avoid blocking in Phase 1 |
+| 2026-10-24 | **Everything in the repo and demo is in English** (code, identifiers, docs, prompts, UI, commits). Contracts and tables renamed: `Asignacion`→`Assignment`, `validar_plan`→`validate_plan`, `ejecutar`→`execute`, `comunidades`→`communities`, `tramos`→`road_segments`, etc. (§6) | International event with international judges; renaming now costs nothing because no code exists yet |
