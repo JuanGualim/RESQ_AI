@@ -47,6 +47,7 @@ class Settings:
     model_name: str = ""
     lane_fast_model: str = ""
     lane_deep_model: str = ""
+    lane_deep_thinking: bool = False  # Nemotron reasoning on the deep lane (slower)
     # World Model service (TODO(verify): confirmed once R1 is closed)
     world_model_url: str = ""
     # No-services mode: read data/sample/ instead of Zetaris
@@ -83,6 +84,7 @@ def load_settings() -> Settings:
         model_name=model_name,
         lane_fast_model=fast_model,
         lane_deep_model=_env("LANE_DEEP_MODEL") or fast_model,
+        lane_deep_thinking=_env_bool("LANE_DEEP_THINKING"),
         world_model_url=_env("WORLD_MODEL_URL").rstrip("/"),
         sample_mode=_env_bool("SAMPLE_MODE"),
         logs_dir=Path(_env("RESQ_LOGS_DIR") or LOGS_DIR),

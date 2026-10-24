@@ -16,8 +16,10 @@ Field reports contradict each other. The Reconciler scores every reported status
 
 - **Recency:** each report's weight is multiplied by `0.5 ^ (age_hours / 2)`, where `age_hours` is measured from the latest report in the dataset (half-life of 2 hours).
 - **Score per status** = sum of the decayed weights of the reports for that status.
-- **Verified status** = the status with the highest score. **Confidence** = winner score / total score.
-- **P1.1** If confidence is below **0.6**, the status is `uncertain`. An uncertain road segment is treated as passable only by vehicles that can ford, and it is listed in the plan's risks.
+- **Verified status** = the status with the highest score.
+- **Confidence** = `(winner score / total score) * min(1, winner score / 0.5)`. The second factor is the support: one fresh brigade report gives full support, a lone social media post cannot be certain.
+- **P1.1** When reports **disagree** and the confidence is below **0.65**, the status is `uncertain`. When all reports agree, their status is accepted with its confidence (a lone social media post stays low-confidence, so it does not add reported need in P3). An uncertain road segment is treated as passable only by vehicles that can ford; an uncertain shelter receives nobody; an uncertain community status does not add reported need. All of them are listed in the plan's risks for verification.
+- **P1.3** When reports disagree, the Reconciler (LLM) reads the report details and may choose another candidate status or `uncertain`, explaining why; it cannot invent a status nobody reported.
 - **P1.2** Coordinator events entered in the UI (for example, blocking a segment) are authoritative: confidence 1.0, and they override any earlier report.
 
 ## P2. Road segment passability
@@ -61,9 +63,20 @@ risk = 0.30 * exposure + 0.25 * vulnerability + 0.20 * dependents + 0.15 * isola
 
 A community whose verified status is `stable` gets half the need (it reported its own supplies).
 
+**P4.1 Delivery tiers.** The Planner chooses one tier per community; code turns it into quantities (`need x share`):
+
+| Tier | water_20l | food_kit | medical_kit | hygiene_kit | blanket |
+| --- | --- | --- | --- | --- | --- |
+| `full` | 100 % | 100 % | 100 % | 100 % | 100 % |
+| `essential` | 100 % | 100 % | 100 % | 50 % | 50 % |
+| `minimum` | 50 % | 50 % | 100 % | 0 | 0 |
+| `none` | 0 | 0 | 0 | 0 | 0 |
+
+Communities are served in the Planner's rank order; when a resource runs out, later communities get less and the cut is reported to the Critic.
+
 ## P5. Allocation priority
 
-- **P5.1** Serve communities in descending risk order.
+- **P5.1** Serve communities in descending risk order: a community with a risk score at least 0.05 higher never gets more than 10 points less coverage of water or food than a lower-risk one, unless it is harder to reach (only fording vehicles reach it).
 - **P5.2** Every `critical` community must receive water and food (at least 50 % of its need of each) before any `medium` community receives anything.
 - **P5.3** When stock is short, `water_20l` comes first, then `food_kit`, `medical_kit`, `hygiene_kit`, `blanket`.
 - **P5.4** Communities that cannot be reached (P2) go to `unserved` with the reason; they are never assigned a route.
@@ -83,5 +96,6 @@ A community whose verified status is `stable` gets half the need (it reported it
 ## P8. Evidence, review and escalation
 
 - **P8.1** Every assignment's `reason` cites evidence: field report IDs (`R0xx`), protocol rules (`P#`) or the computed risk.
-- **P8.2** The Critic rejects a plan that breaks any hard rule (P2, P5.2, P5.4, P6) and sends concrete feedback to the Planner, at most **3 rounds**.
+- **P8.2** The Critic rejects a plan that breaks any hard rule (P2, P5.1, P5.2, P5.4, P6) and sends concrete feedback to the Planner, at most **3 rounds**. Its model review of reasons can send a plan back once (first round); later remarks are notes.
+- **P8.2.1** When P5.2 cannot be met at all (not enough stock, or not enough capacity in the vehicles that can reach the critical communities), the Critic does not loop: it accepts the best effort and escalates with the exact gap.
 - **P8.3** The plan is **escalated to a human decision** when the Critic still rejects it after 3 rounds, when a `critical` community cannot be served, or when the plan's confidence is below **0.5**.

@@ -5,9 +5,10 @@ with the protocol rule and citing the IDs involved. An empty list = valid.
 """
 from __future__ import annotations
 
+import math
 from collections import defaultdict
 
-from resq.protocol import CRITICAL_ESSENTIALS, CRITICAL_MIN_SHARE, MAX_TRIPS_PER_VEHICLE
+from resq.protocol import CRITICAL_ESSENTIALS, CRITICAL_MIN_SHARE, MAX_TRIPS_PER_VEHICLE, PRIORITY_GAP, TIERS
 from resq.schemas import Assignment, Plan
 from resq.tools.routing import as_bool, can_pass, road_node
 
@@ -20,6 +21,7 @@ def validate_plan(plan: Plan, state: dict) -> list[str]:
     violations += _check_inventory(plan, state)
     violations += _check_unserved(plan)
     violations += _check_critical_first(plan, state)
+    violations += _check_priority_order(plan, state)
     return violations
 
 
@@ -135,3 +137,74 @@ def _check_critical_first(plan: Plan, state: dict) -> list[str]:
     if medium_served:
         short.append(f"P5.2: medium/low communities {', '.join(medium_served)} are served while critical ones are short")
     return short
+
+
+def _coverage(plan: Plan, community_id: str, resource: str, state: dict) -> float | None:
+    need = int(state["communities"][community_id].get("needs", {}).get(resource, 0))
+    if not need:
+        return None
+    return sum(a.quantity for a in plan.assignments if a.community_id == community_id and a.resource == resource) / need
+
+
+REACH_ORDER = {"all": 0, "ford_only": 1, "none": 2}
+
+
+def _check_priority_order(plan: Plan, state: dict) -> list[str]:
+    """P5.1: a clearly higher-risk community never gets clearly less water or food than a lower-risk one.
+
+    Pairs where the higher-risk community is harder to reach (ford_only vs all) are exempt: a
+    different, smaller part of the fleet limits it.
+    """
+    ranked = sorted(((cid, c) for cid, c in state.get("communities", {}).items() if c.get("needs")),
+                    key=lambda item: item[1].get("risk_score", 0), reverse=True)
+    problems = []
+    for i, (high_id, high) in enumerate(ranked):
+        if high.get("reachability") == "none":
+            continue
+        for low_id, low in ranked[i + 1:]:
+            if high.get("risk_score", 0) - low.get("risk_score", 0) < PRIORITY_GAP:
+                continue
+            if REACH_ORDER.get(high.get("reachability"), 0) > REACH_ORDER.get(low.get("reachability"), 0):
+                continue
+            for resource in CRITICAL_ESSENTIALS:
+                high_cov, low_cov = _coverage(plan, high_id, resource, state), _coverage(plan, low_id, resource, state)
+                if high_cov is not None and low_cov is not None and high_cov + 0.1 < low_cov:
+                    problems.append(f"P5.1: {high_id} (risk {high['risk_score']}) gets {high_cov:.0%} of its {resource} need "
+                                    f"while lower-risk {low_id} (risk {low['risk_score']}) gets {low_cov:.0%}")
+                    break
+    return problems
+
+
+def critical_minimum_gaps(state: dict) -> list[str]:
+    """Can P5.2 be met at all? Compares the 'minimum' tier of every reachable critical community
+    with total stock and with the capacity of the vehicles that can reach them."""
+    minimum = TIERS["minimum"]
+    critical = {cid: c for cid, c in state.get("communities", {}).items()
+                if c.get("risk_level") == "critical" and c.get("reachability") in ("all", "ford_only")}
+    weights: dict[str, float] = {}
+    for items in state.get("inventory", {}).values():
+        for resource, item in items.items():
+            weights[resource] = float(item["unit_weight_kg"])
+    gaps = []
+    stock = defaultdict(int)
+    for items in state.get("inventory", {}).values():
+        for resource, item in items.items():
+            stock[resource] += int(item["quantity"])
+    for resource in CRITICAL_ESSENTIALS:
+        required = sum(math.ceil(int(c.get("needs", {}).get(resource, 0)) * minimum[resource]) for c in critical.values())
+        if required > stock[resource]:
+            gaps.append(f"P5.2 infeasible: critical communities need at least {required} {resource}, stock is {stock[resource]}")
+    def minimum_kg(communities) -> float:
+        return sum(int(c.get("needs", {}).get(r, 0)) * share * weights.get(r, 0)
+                   for c in communities for r, share in minimum.items())
+    vehicles = state.get("vehicles", {}).values()
+    fording_kg = sum(MAX_TRIPS_PER_VEHICLE * float(v["capacity_kg"]) for v in vehicles if as_bool(v.get("can_ford")))
+    fleet_kg = sum(MAX_TRIPS_PER_VEHICLE * float(v["capacity_kg"]) for v in vehicles)
+    ford_only = [c for c in critical.values() if c.get("reachability") == "ford_only"]
+    if ford_only and minimum_kg(ford_only) > fording_kg:
+        gaps.append(f"P5.2 infeasible: critical communities reachable only by fording vehicles "
+                    f"({', '.join(sorted(cid for cid, c in critical.items() if c.get('reachability') == 'ford_only'))}) "
+                    f"need at least {minimum_kg(ford_only):,.0f} kg; fording vehicles carry {fording_kg:,.0f} kg")
+    if minimum_kg(critical.values()) > fleet_kg:
+        gaps.append(f"P5.2 infeasible: critical minimum is {minimum_kg(critical.values()):,.0f} kg; the fleet carries {fleet_kg:,.0f} kg")
+    return gaps

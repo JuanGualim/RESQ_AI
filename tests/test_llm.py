@@ -34,6 +34,7 @@ def client(monkeypatch):
 def model_env(monkeypatch):
     monkeypatch.setenv("NEMOTRON_MODEL", "nvidia/nemotron-test")
     monkeypatch.setenv("LANE_DEEP_MODEL", "nvidia/nemotron-deep-test")
+    monkeypatch.setenv("LANE_DEEP_THINKING", "true")
     from resq import config
     config.get_settings.cache_clear()
 

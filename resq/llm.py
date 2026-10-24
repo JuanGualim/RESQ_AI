@@ -3,8 +3,9 @@
 Talks to an OpenAI-compatible API: Meterless Nightshift by default, direct
 NVIDIA only in development (both are set in .env). Two lanes:
 
-- fast: thinking off, short answers (Intake, Reconciler, Risk Analyst, Explainer)
-- deep: thinking on, larger budget (Planner, Critic)
+- fast: thinking off, short answers (Reconciler, Risk Analyst, Explainer)
+- deep: larger budget (Planner, Critic); thinking only if LANE_DEEP_THINKING=true,
+  because with thinking a plan takes longer than the 90 s timeout on direct NVIDIA
 
 Nemotron 3.5 thinks by default; with a small max_tokens budget the reasoning
 consumes every token and `content` comes back empty, so the fast lane turns it
@@ -23,7 +24,7 @@ from resq.config import get_settings
 
 LANES = {
     "fast": {"thinking": False, "max_tokens": 2000, "temperature": 0.2},
-    "deep": {"thinking": True, "max_tokens": 12000, "temperature": 0.2},
+    "deep": {"thinking": False, "max_tokens": 8000, "temperature": 0.2},
 }
 METERLESS_HEADERS = {"meterless-app": "resq-ai", "meterless-scope": "user"}
 _FENCE = re.compile(r"^```(?:json)?\s*|\s*```$", re.MULTILINE)
@@ -53,13 +54,14 @@ def chat(messages: list[dict], lane: str = "fast", tools: list | None = None, ma
         raise ValueError(f"unknown lane: {lane!r} (expected 'fast' or 'deep')")
     settings = get_settings()
     config = LANES[lane]
+    thinking = settings.lane_deep_thinking if lane == "deep" else config["thinking"]
     model = settings.lane_model(lane)
     request = {
         "model": model,
         "messages": messages,
         "max_tokens": max_tokens or config["max_tokens"],
         "temperature": config["temperature"],
-        "extra_body": {"chat_template_kwargs": {"enable_thinking": config["thinking"]}},
+        "extra_body": {"chat_template_kwargs": {"enable_thinking": thinking}},
     }
     if tools:
         request["tools"] = tools

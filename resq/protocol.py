@@ -4,7 +4,8 @@ from __future__ import annotations
 # P1. Source reliability
 SOURCE_WEIGHTS = {"brigade": 0.9, "official": 0.7, "social_media": 0.3}
 RECENCY_HALF_LIFE_H = 2.0
-UNCERTAIN_BELOW = 0.6
+UNCERTAIN_BELOW = 0.65
+FULL_SUPPORT_SCORE = 0.5
 COORDINATOR_SOURCE = "coordinator"
 
 # P2. Passability by verified status
@@ -30,11 +31,19 @@ FAMILY_SIZE = 5
 MEDICAL_PEOPLE_PER_KIT_HIGH, MEDICAL_PEOPLE_PER_KIT_LOW = 50, 100
 MEDICAL_ELDERLY_PCT = 10
 STABLE_NEED_FACTOR = 0.5
+# P4.1 Delivery tiers: share of each need delivered this round
+TIERS = {
+    "full": {"water_20l": 1.0, "food_kit": 1.0, "medical_kit": 1.0, "hygiene_kit": 1.0, "blanket": 1.0},
+    "essential": {"water_20l": 1.0, "food_kit": 1.0, "medical_kit": 1.0, "hygiene_kit": 0.5, "blanket": 0.5},
+    "minimum": {"water_20l": 0.5, "food_kit": 0.5, "medical_kit": 1.0, "hygiene_kit": 0.0, "blanket": 0.0},
+    "none": {"water_20l": 0.0, "food_kit": 0.0, "medical_kit": 0.0, "hygiene_kit": 0.0, "blanket": 0.0},
+}
 
 # P5. Allocation priority
 RESOURCE_PRIORITY = ["water_20l", "food_kit", "medical_kit", "hygiene_kit", "blanket"]
 CRITICAL_MIN_SHARE = 0.5
 CRITICAL_ESSENTIALS = ["water_20l", "food_kit"]
+PRIORITY_GAP = 0.05  # P5.1: risk difference that makes an order inversion a violation
 
 # P6. Vehicles
 MAX_TRIPS_PER_VEHICLE = 2

@@ -64,8 +64,10 @@ class ResqState(BaseModel):
     event: Event | None = None
     request_type: RequestType | None = None
     as_of: str = ""  # scenario time of this run
+    situation: list[str] = Field(default_factory=list)  # Risk Analyst summary
     plan: Plan | None = None
     previous_plan: Plan | None = None
+    pack_shortfalls: list[str] = Field(default_factory=list)  # what packing could not carry
     critic_round: int = 0
     reviews: Annotated[list[CriticReview], operator.add] = Field(default_factory=list)
     approved: bool = False
