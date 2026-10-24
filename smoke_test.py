@@ -1,8 +1,8 @@
-"""smoke_test.py: comprueba las capas Data (Zetaris) y Power (modelo Nemotron).
+"""smoke_test.py: checks the Data (Zetaris) and Power (Nemotron model) layers.
 
-Instalar una vez (dentro del entorno virtual):
+Install once (inside the virtual environment):
     pip install openai python-dotenv requests
-Uso:
+Usage:
     python smoke_test.py
 """
 import os
@@ -26,7 +26,7 @@ def check(name, fn):
 
 def need(*names):
     for name in names:
-        assert os.environ.get(name), f"{name} falta en .env"
+        assert os.environ.get(name), f"{name} is missing from .env"
 
 
 def zetaris_web():
@@ -53,7 +53,7 @@ def zetaris_sql():
     )
     response.raise_for_status()
     data = response.json().get("data")
-    assert data and str(data[0][0]) == "1", "respuesta inesperada: " + response.text[:80]
+    assert data and str(data[0][0]) == "1", "unexpected response: " + response.text[:80]
 
 
 def nemotron():
@@ -61,7 +61,7 @@ def nemotron():
     client = OpenAI(
         base_url=os.environ["MODEL_BASE_URL"],
         api_key=os.environ["MODEL_API_KEY"],
-        # Headers que pide Meterless Nightshift; NVIDIA directo los ignora.
+        # Headers required by Meterless Nightshift; direct NVIDIA ignores them.
         default_headers={"meterless-app": "resq-ai", "meterless-scope": "user"},
     )
     reply = client.chat.completions.create(
@@ -69,13 +69,13 @@ def nemotron():
         messages=[{"role": "user", "content": "Reply with the single word: ready"}],
         max_tokens=20,
     )
-    assert reply.choices, "el modelo no respondió"
-    print("   modelo dijo:", (reply.choices[0].message.content or "").strip()[:60])
+    assert reply.choices, "the model did not reply"
+    print("   model said:", (reply.choices[0].message.content or "").strip()[:60])
 
 
-check("Data: interfaz web de Zetaris", zetaris_web)
-check("Data: Zetaris ejecuta SQL por su API REST", zetaris_sql)
-check("Power: Nemotron responde", nemotron)
+check("Data: Zetaris web UI", zetaris_web)
+check("Data: Zetaris runs SQL through its REST API", zetaris_sql)
+check("Power: Nemotron replies", nemotron)
 
 for status, name, detail in results:
     print(f"{status} {name} {detail}")

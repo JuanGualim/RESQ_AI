@@ -1,297 +1,299 @@
-# RESQ AI — Plan por fases del equipo
+# RESQ AI — Team phased plan
 
 **Open Agent Hackathon 2026 · Track 3: Reasoning Architecture**
-Versión 2 · viernes 23 de octubre de 2026 (reparto ajustado a las máquinas del equipo) · horas en **hora de Guatemala (UTC-6)**
-Entrega: **martes 27 de octubre, 17:45** (límite duro). Meta interna: **martes 27, 12:00**.
+Version 2 · Friday, October 23, 2026 (split adjusted to the team's machines) · times in **Guatemala time (UTC-6)**
+Submission: **Tuesday, October 27, 17:45** (hard deadline). Internal target: **Tuesday 27, 12:00**.
 
-> El documento vivo del proyecto es `AGENTS.md` en el repo. Este plan es la referencia de fases y reparto; si algo cambia, se anota primero en `AGENTS.md` (sección "Registro de decisiones").
-
----
-
-## 1. Qué vamos a construir
-
-**En una frase:** RESQ AI ayuda a un coordinador municipal de emergencias a decidir cómo distribuir ayuda durante una inundación. Combina datos de comunidades, albergues, carreteras, lluvia y reportes de campo contradictorios, prioriza con reglas de protocolo y entrega un plan de distribución que se replantea solo cuando cambia la realidad, explicando por qué cambió.
-
-| Pieza | Definición |
-| --- | --- |
-| Usuario | Coordinador de emergencias de un municipio (COE municipal) |
-| Decisión | Qué comunidades atender primero, con qué recursos, desde qué bodega o albergue, con qué vehículo y por qué ruta |
-| Salida | Plan versionado (v1, v2, …): asignaciones con prioridad, ruta, razón y evidencia; cuando hay replan, qué cambió y por qué |
-| Momento WOW | En vivo se bloquea una carretera (botón en la UI). Los agentes concilian reportes, replanifican, el crítico valida y el reporte explica el cambio |
-
-### Por qué Track 3
-
-| Lo que pide el track | Cómo lo cumple RESQ AI |
-| --- | --- |
-| Datos | Comunidades, albergues, bodegas, carreteras, vehículos, reportes y lluvia, consultados en Zetaris |
-| Conocimiento | Reglas de prioridad del protocolo (vulnerabilidad, niños y adultos mayores, capacidad) |
-| Memoria / estado | World Model (Meterless): estado compartido y eventos; plan anterior para comparar |
-| Razonamiento | Conciliador, analista, planificador y crítico que se revisan entre sí |
-| Decisiones y acciones confiables | Plan validado por reglas duras en código; replan ante eventos; escalamiento a humano |
-
-### Alcance
-
-**Sí:** 1 municipio ficticio · 12–15 comunidades · 3–4 albergues · 2 bodegas · ~20 tramos de carretera como grafo · 5–8 vehículos · ~30 reportes de campo (algunos contradictorios) · lluvia real de Open-Meteo para coordenadas de referencia · 3 escenarios de prueba.
-
-**No:** rutas GPS reales, datos reales de personas, modelos hidrológicos, app móvil, login o multiusuario.
+> The project's living document is `AGENTS.md` in the repo. This plan is the reference for phases and the work split; if something changes, record it first in `AGENTS.md` ("Decision log" section).
 
 ---
 
-## 2. Arquitectura
+## 1. What we are building
+
+**In one sentence:** RESQ AI helps a municipal emergency coordinator decide how to distribute aid during a flood. It combines data on communities, shelters, roads, rainfall and contradictory field reports, prioritizes using protocol rules, and delivers a distribution plan that re-plans itself when reality changes, explaining why it changed.
+
+| Piece | Definition |
+| --- | --- |
+| User | A municipality's emergency coordinator (municipal emergency operations center) |
+| Decision | Which communities to serve first, with which resources, from which warehouse or shelter, with which vehicle and along which route |
+| Output | Versioned plan (v1, v2, …): assignments with priority, route, reason and evidence; on a re-plan, what changed and why |
+| WOW moment | A road gets blocked live (a button in the UI). The agents reconcile reports, re-plan, the critic validates and the report explains the change |
+
+### Why Track 3
+
+| What the track asks for | How RESQ AI delivers it |
+| --- | --- |
+| Data | Communities, shelters, warehouses, roads, vehicles, reports and rainfall, queried in Zetaris |
+| Knowledge | Protocol priority rules (vulnerability, children and elderly, capacity) |
+| Memory / state | World Model (Meterless): shared state and events; previous plan to compare against |
+| Reasoning | Reconciler, risk analyst, planner and critic that check each other |
+| Reliable decisions and actions | Plan validated by hard rules in code; re-plan on events; escalation to a human |
+
+### Scope
+
+**In:** 1 fictional municipality · 12–15 communities · 3–4 shelters · 2 warehouses · ~20 road segments as a graph · 5–8 vehicles · ~30 field reports (some contradictory) · real Open-Meteo rainfall for reference coordinates · 3 test scenarios.
+
+**Out:** real GPS routes, real personal data, hydrological models, mobile app, login or multi-user.
+
+---
+
+## 2. Architecture
 
 ```text
-Coordinador (UI Streamlit)
-   │  pregunta  /  evento: "bloquear tramo T7"
+Coordinator (Streamlit UI)
+   │  question  /  event: "block segment T7"
    ▼
-[Intake] ── clasifica la solicitud: situación · plan · evento · "¿por qué?"
+[Intake] ── classifies the request: situation · plan · event · "why?"
    ▼
-[Conciliador] ── reportes oficiales vs. brigadas vs. redes ──► hechos + confianza ──► World Model
+[Reconciler] ── official reports vs. brigades vs. social media ──► facts + confidence ──► World Model
    ▼
-[Analista de riesgo] ── SQL en Zetaris ──► índice de riesgo por comunidad ──► World Model
+[Risk Analyst] ── SQL in Zetaris ──► risk index per community ──► World Model
    ▼
-[Planificador] ── reglas + herramienta de rutas + capacidades ──► plan vN
+[Planner] ── rules + routing tool + capacities ──► plan vN
    ▼
-[Crítico] ── valida reglas duras (código) y razones (LLM)
-   │   ✗ ──► devuelve al Planificador con observaciones (máx. 3 vueltas)
-   │   ✗✗ sin solución o baja confianza ──► ESCALAR: "requiere decisión humana"
+[Critic] ── validates hard rules (code) and reasons (LLM)
+   │   ✗ ──► back to the Planner with feedback (max. 3 rounds)
+   │   ✗✗ no solution or low confidence ──► ESCALATE: "requires a human decision"
    ✓
-[Explicador] ── plan final + diferencias con la versión anterior y su causa (eventos del World Model)
+[Explainer] ── final plan + differences vs. the previous version and their cause (World Model events)
 
-Servicios compartidos: Zetaris (datos) · World Model (estado + eventos) · Nightshift → Nemotron (modelos) · traza JSONL
+Shared services: Zetaris (data) · World Model (state + events) · Nightshift → Nemotron (models) · JSONL trace
 ```
 
-**Principio de diseño: el LLM decide y explica; el código calcula.** Rutas más cortas, capacidades, inventario y validaciones duras son funciones deterministas. Los agentes razonan sobre sus resultados. Así el sistema es reproducible y no inventa rutas ni números.
+**Design principle: the LLM decides and explains; the code computes.** Shortest routes, capacities, inventory and hard validations are deterministic functions. Agents reason over their results. This keeps the system reproducible and stops it from inventing routes or numbers.
 
-### Agentes
+### Agents
 
-| Agente | Qué hace | Modelo (lane) | Herramientas | Escribe en |
+| Agent | What it does | Model (lane) | Tools | Writes to |
 | --- | --- | --- | --- | --- |
-| Intake | Clasifica la solicitud y elige el flujo | Rápido | Reglas o Scout Intent (opcional) | Traza |
-| Conciliador | Decide el estado real de tramos y albergues cuando los reportes se contradicen, con confianza y justificación | Rápido | `run_sql` | World Model |
-| Analista de riesgo | Calcula riesgo por comunidad: lluvia, elevación, vulnerabilidad, accesibilidad | Rápido | `run_sql` | World Model |
-| Planificador | Asigna recursos, vehículos y rutas según reglas de prioridad | Profundo | `best_route`, inventario, capacidades | Plan |
-| Crítico | Revisa reglas duras (capacidad, tramos bloqueados, comunidades críticas sin atender, vehículo apto) y que cada razón tenga evidencia | Profundo | Validadores en código | Observaciones / escalamiento |
-| Explicador | Redacta el plan final y el "qué cambió y por qué" | Rápido | World Model (historial de eventos) | Reporte |
+| Intake | Classifies the request and picks the flow | Fast | Rules or Scout Intent (optional) | Trace |
+| Reconciler | Decides the real status of road segments and shelters when reports contradict each other, with confidence and justification | Fast | `run_sql` | World Model |
+| Risk Analyst | Computes risk per community: rainfall, elevation, vulnerability, accessibility | Fast | `run_sql` | World Model |
+| Planner | Assigns resources, vehicles and routes according to priority rules | Deep | `best_route`, inventory, capacities | Plan |
+| Critic | Checks hard rules (capacity, blocked segments, critical communities left unserved, suitable vehicle) and that every reason has evidence | Deep | Code validators | Feedback / escalation |
+| Explainer | Writes the final plan and the "what changed and why" | Fast | World Model (event history) | Report |
 
-Lanes de Nightshift (corre en la máquina de Harry): **rápido** = `nvidia/nemotron-3.5-lightning-30b-a3b` (verificado) · **profundo** = un Nemotron super (por confirmar cuál responde con nuestra cuenta).
+Nightshift lanes (running on Harry's machine): **fast** = `nvidia/nemotron-3.5-lightning-30b-a3b` (verified) · **deep** = a Nemotron super (to confirm which one responds with our account).
 
-### Tecnología de sponsors
+### Sponsor technology
 
-| Sponsor | Papel en RESQ AI | Obligatorio |
+| Sponsor | Role in RESQ AI | Mandatory |
 | --- | --- | --- |
-| Zetaris | Única fuente de datos: Postgres del escenario registrado en Zetaris + API de Open-Meteo como tabla REST, todo vía SQL | Sí |
-| Meterless World Model | Estado compartido de comunidades, tramos y albergues; cada cambio es un evento; el historial explica los replanes | Sí (engine) |
-| Meterless Nightshift | Proveedor principal de IA de la app (API compatible con OpenAI) | Sí |
-| Cursor | Entorno de desarrollo de los 3 | Sí |
-| NVIDIA Nemotron | Modelos de los lanes, servidos por Nightshift. Opta al premio DGX Spark | Recomendado |
-| H-MEM / Scout Intent | Lecciones de emergencias anteriores / clasificación de solicitudes | Opcional, solo si sobra tiempo |
+| Zetaris | Only data source: scenario Postgres registered in Zetaris + Open-Meteo API as a REST table, all via SQL | Yes |
+| Meterless World Model | Shared state of communities, road segments and shelters; every change is an event; the history explains the re-plans | Yes (engine) |
+| Meterless Nightshift | The app's primary AI provider (OpenAI-compatible API) | Yes |
+| Cursor | Development environment for all 3 | Yes |
+| NVIDIA Nemotron | Lane models, served by Nightshift. Eligible for the DGX Spark prize | Recommended |
+| H-MEM / Scout Intent | Lessons from previous emergencies / request classification | Optional, only if time allows |
 
-### Datos del escenario
+### Scenario data
 
-Viven en un **Postgres propio** (contenedor Docker en la máquina de Juan) registrado como fuente en Zetaris, porque Zetaris no lee CSV de la laptop. Se generan con `scripts/generate_data.py` (semilla fija) y se guarda una copia en `data/sample/` para el modo sin servicios (`SAMPLE_MODE`).
+Lives in **our own Postgres** (Docker container on Juan's machine) registered as a data source in Zetaris, because Zetaris does not read CSVs from the laptop. Generated with `scripts/generate_data.py` (fixed seed), with a copy saved in `data/sample/` for the no-services mode (`SAMPLE_MODE`).
 
-| Tabla | Columnas principales |
+| Table | Main columns |
 | --- | --- |
-| `comunidades` | id, nombre, poblacion, pct_ninos, pct_adultos_mayores, vulnerabilidad (1–5), elevacion_m, lat, lon, nodo_vial |
-| `albergues` | id, nombre, capacidad, ocupacion_actual, nodo_vial |
-| `bodegas` / `inventario` | id, nombre, nodo_vial / bodega_id, recurso, cantidad |
-| `tramos` | id, origen, destino, distancia_km, superficie, estado_oficial |
-| `vehiculos` | id, tipo, capacidad_kg, puede_vadear, bodega_id |
-| `reportes_campo` | id, timestamp, fuente (oficial · brigada · redes), objeto_tipo, objeto_id, estado_reportado, detalle |
-| `lluvia` (REST, Open-Meteo) | fecha_hora, precipitacion_mm |
-| `docs/protocolo.md` | Reglas de prioridad (conocimiento del dominio) |
+| `communities` | id, name, population, pct_children, pct_elderly, vulnerability (1–5), elevation_m, lat, lon, road_node |
+| `shelters` | id, name, capacity, current_occupancy, road_node |
+| `warehouses` / `inventory` | id, name, road_node / warehouse_id, resource, quantity |
+| `road_segments` | id, origin, destination, distance_km, surface, official_status |
+| `vehicles` | id, type, capacity_kg, can_ford, warehouse_id |
+| `field_reports` | id, timestamp, source (official · brigade · social_media), object_type, object_id, reported_status, detail |
+| `rainfall` (REST, Open-Meteo) | datetime, precipitation_mm |
+| `docs/protocol.md` | Priority rules (domain knowledge) |
 
-Las contradicciones se **siembran a propósito** (ej.: el reporte oficial dice "T7 abierto", dos brigadas dicen "T7 inundado"). El agente debe descubrirlas; nunca se escriben resultados en el código.
-
----
-
-## 3. Equipo y responsabilidades
-
-El reparto sigue las máquinas de cada uno:
-
-- **Juan** usa Linux, así que no puede correr Nightshift. Desarrolla con NVIDIA directo.
-- **Harry** tiene Windows y el mejor equipo. Es host de Nightshift, se encarga de las pruebas pesadas y de la demo.
-- **Chema** Le tocan piezas deterministas, pequeñas y bien definidas, que se prueban con `pytest` y `SAMPLE_MODE`, sin Docker, sin Zetaris local y sin Nightshift local.
-
-| Integrante | Máquina | Rol | Dueño de |
-| --- | --- | --- | --- |
-| **Juan** | EndeavourOS (Linux) · host de **Zetaris** | Datos, estado e integración (líder técnico) | Zetaris encendido en las sesiones · Postgres del escenario · `scripts/generate_data.py` · `data/sample/` · tabla Open-Meteo · `run_sql` · `SAMPLE_MODE` · **World Model** (servicio + cliente Python + conformance) · agentes **Conciliador** y **Analista de riesgo** · `config.py` · revisión de PRs · `AGENTS.md` · README final · **sube la entrega a HackOS** |
-| **Harry** | Windows, equipo potente · host de **Nightshift** | Agentes, modelos y pruebas pesadas | Nightshift, sus lanes y su exposición por Tailscale · `resq/llm.py` · `schemas.py` · grafo LangGraph · `run.py` · agentes **Planificador**, **Crítico** y **Explicador** · ciclo crítico y escalamiento · traza JSONL · **batería de pruebas de punta a punta con Nightshift** · instalación desde cero en Windows · evidencia de Nemotron · `output_examples/` · máquina de la demo · **grabación del video** |
-| **Chema** | Windows | Herramientas deterministas, UI y comunicación | `docs/protocolo.md` · `resq/tools/routing.py` (`best_route`) + pruebas · `resq/tools/validators.py` + pruebas · agente **Intake** (por reglas) · UI Streamlit sobre datos de ejemplo · `input_examples/` · prueba de instalación en `SAMPLE_MODE` en su equipo · guion del video · slide deck · borrador del README de uso |
-
-Todos: probar escenarios, revisar el guion de la demo y actualizar `AGENTS.md` al cerrar cada sesión.
-
-**Por qué este reparto:**
-
-- Chema trabaja casi todo en local con funciones puras y datos de `data/sample/`, así que su máquina nunca carga Docker, Zetaris ni modelos. Sus piezas son críticas (rutas y validadores), pero tienen especificación cerrada y pruebas, y Juan las revisa.
-- Harry concentra lo que necesita Nightshift cerca: prompts, ciclo del crítico, pruebas repetidas, medición de latencia y la demo en vivo, que obligatoriamente usa Nightshift.
-- Juan concentra lo que vive junto a Zetaris (datos y agentes basados en SQL) y el World Model. El World Model corre en Node, que en Linux no tiene problemas, y no necesita Nightshift.
-
-### Disponibilidad de hosts
-
-| Servicio | Host | Cuándo debe estar encendido | Acceso del resto |
-| --- | --- | --- | --- |
-| Zetaris (UI `:3000`, REST `:8888`) | Juan | Bloques de trabajo acordados en el chat + toda la Fase 3–4 | Tailscale (IP de Juan) |
-| Nightshift (`:8088/v1`) | Harry | Bloques de trabajo + pruebas + demo; laptop con corriente y sin suspensión | Tailscale. TODO(verificar): si Nightshift solo escucha en `127.0.0.1`, exponerlo con `tailscale serve` o `netsh interface portproxy` |
-| World Model (servicio Node) | Quien ejecuta el agente (cada uno local) | Siempre que se corra el grafo | `WORLD_MODEL_URL=http://127.0.0.1:<puerto>` |
-
-Si Nightshift no está disponible, todos desarrollan con NVIDIA directo, que solo se permite en desarrollo y se configura en `.env`.
+Contradictions are **seeded on purpose** (e.g. the official report says "T7 open", two brigades say "T7 flooded"). The agent must discover them; results are never written in the code.
 
 ---
 
-## 4. Fases
+## 3. Team and responsibilities
 
-**Regla de trabajo en paralelo:** nadie espera a nadie. Cada dueño publica **primero un stub** con el contrato de §5 (datos de ejemplo, World Model en memoria, `chat()` falso) y después lo reemplaza por la versión real sin cambiar la firma.
+The split follows each person's machine:
 
-### Fase 0 — Arranque · viernes 23, hasta las 14:00
+- **Juan** uses Linux, so he cannot run Nightshift. He develops with direct NVIDIA.
+- **Harry** has Windows and the best machine. He hosts Nightshift and handles heavy testing and the demo.
+- **Chema** gets deterministic, small, well-defined pieces that are tested with `pytest` and `SAMPLE_MODE`, with no Docker, no local Zetaris and no local Nightshift.
 
-Objetivo: los tres con entorno funcionando, contratos acordados y R1 decidido.
+| Member | Machine | Role | Owns |
+| --- | --- | --- | --- |
+| **Juan** | EndeavourOS (Linux) · **Zetaris** host | Data, state and integration (tech lead) | Zetaris up during sessions · scenario Postgres · `scripts/generate_data.py` · `data/sample/` · Open-Meteo table · `run_sql` · `SAMPLE_MODE` · **World Model** (service + Python client + conformance) · **Reconciler** and **Risk Analyst** agents · `config.py` · PR reviews · `AGENTS.md` · final README · **uploads the submission to HackOS** |
+| **Harry** | Windows, powerful machine · **Nightshift** host | Agents, models and heavy testing | Nightshift, its lanes and its Tailscale exposure · `resq/llm.py` · `schemas.py` · LangGraph graph · `run.py` · **Planner**, **Critic** and **Explainer** agents · critic loop and escalation · JSONL trace · **end-to-end test battery with Nightshift** · from-scratch install on Windows · Nemotron evidence · `output_examples/` · demo machine · **video recording** |
+| **Chema** | Windows | Deterministic tools, UI and communication | `docs/protocol.md` · `resq/tools/routing.py` (`best_route`) + tests · `resq/tools/validators.py` + tests · **Intake** agent (rule-based) · Streamlit UI on sample data · `input_examples/` · `SAMPLE_MODE` install test on his machine · video script · slide deck · draft of the usage README |
 
-- [ ] **Juan:** invitar colaboradores en GitHub · crear `docs/SETUP_EQUIPO.md`, que hoy se referencia pero **no existe** · Tailscale + exponer Zetaris · esqueleto de carpetas de §5 de `AGENTS.md` + `resq/config.py`
-- [ ] **Juan:** correr *IMPLEMENT → Run the 90-second proof* del World Model en Linux y cerrar la decisión de R1 (ver §7)
-- [ ] **Harry:** instalar Nightshift + proveedor NVIDIA · confirmar qué Nemotron *super* responde para el lane profundo · exponer por Tailscale · pasar URL y token **por privado** · desactivar suspensión
-- [ ] **Chema:** Python 3.12 + venv + `requirements.txt` · `smoke_test.py` (Zetaris de Juan por Tailscale + modelo) · leer `AGENTS.md` · empezar `docs/protocolo.md`
-- [ ] **Llamada de 45 min (~12:00):** confirmar esquema de datos y contratos de §5 y anotarlos en `AGENTS.md`
+Everyone: test scenarios, review the demo script and update `AGENTS.md` at the end of each session.
 
-**Gate:** smoke test con 3 PASS en las 3 máquinas (Juan con NVIDIA directo; Harry y Chema con Nightshift), contratos escritos y R1 decidido.
+**Why this split:**
 
-### Fase 1 — MVP de punta a punta · viernes 23, 14:00 → sábado 24, 12:00
+- Chema works almost entirely locally with pure functions and data from `data/sample/`, so his machine never loads Docker, Zetaris or models. His pieces are critical (routing and validators), but they have a closed spec and tests, and Juan reviews them.
+- Harry concentrates what needs Nightshift close by: prompts, the critic loop, repeated tests, latency measurement and the live demo, which must use Nightshift.
+- Juan concentrates what lives next to Zetaris (data and SQL-based agents) and the World Model. The World Model runs on Node, which works fine on Linux, and does not need Nightshift.
 
-Objetivo: entra una pregunta, sale un plan v1 (feo pero real) con datos de Zetaris y Nemotron vía Nightshift.
+### Host availability
 
-| Quién | Tarea | Hito |
+| Service | Host | When it must be up | Access for the others |
+| --- | --- | --- | --- |
+| Zetaris (UI `:3000`, REST `:8888`) | Juan | Work blocks agreed in chat + all of Phases 3–4 | Tailscale (Juan's IP) |
+| Nightshift (`:8088/v1`) | Harry | Work blocks + tests + demo; laptop plugged in and without sleep | Tailscale. TODO(verify): if Nightshift only listens on `127.0.0.1`, expose it with `tailscale serve` or `netsh interface portproxy` |
+| World Model (Node service) | Whoever runs the agent (each one locally) | Whenever the graph runs | `WORLD_MODEL_URL=http://127.0.0.1:<port>` |
+
+If Nightshift is unavailable, everyone develops with direct NVIDIA, which is only allowed in development and is configured in `.env`.
+
+---
+
+## 4. Phases
+
+**Parallel work rule:** nobody waits for anybody. Each owner first publishes **a stub** with the §5 contract (sample data, in-memory World Model, fake `chat()`) and then replaces it with the real version without changing the signature.
+
+### Phase 0 — Kickoff · Friday 23, until 14:00
+
+Goal: all three with a working environment, contracts agreed and R1 decided.
+
+- [ ] **Juan:** invite collaborators on GitHub · create `docs/TEAM_SETUP.md`, which is referenced today but **does not exist** · Tailscale + expose Zetaris · folder skeleton from §5 of `AGENTS.md` + `resq/config.py`
+- [ ] **Juan:** run the World Model *IMPLEMENT → Run the 90-second proof* on Linux and close the R1 decision (see §7)
+- [ ] **Harry:** install Nightshift + NVIDIA provider · confirm which Nemotron *super* responds for the deep lane · expose it over Tailscale · share URL and token **privately** · disable sleep
+- [ ] **Chema:** Python 3.12 + venv + `requirements.txt` · `smoke_test.py` (Juan's Zetaris over Tailscale + model) · read `AGENTS.md` · start `docs/protocol.md`
+- [ ] **45-minute call (~12:00):** confirm the data schema and the §5 contracts and record them in `AGENTS.md`
+
+**Gate:** smoke test with 3 PASS on all 3 machines (Juan with direct NVIDIA; Harry and Chema with Nightshift), contracts written and R1 decided.
+
+### Phase 1 — End-to-end MVP · Friday 23, 14:00 → Saturday 24, 12:00
+
+Goal: a question goes in, a v1 plan (ugly but real) comes out, with data from Zetaris and Nemotron via Nightshift.
+
+| Who | Task | Milestone |
 | --- | --- | --- |
-| Juan | `generate_data.py` (semilla fija) → **`data/sample/` publicado primero**, porque desbloquea a todos | **vie 18:00** |
-| Juan | Stub de `resq/world/` en memoria con el contrato real | vie 20:00 |
-| Juan | Postgres + registro en Zetaris + `run_sql` + 10 consultas clave probadas | sáb 10:00 |
-| Juan | World Model real (servicio Node) + cliente Python + **conformance en verde** | sáb 12:00 (puede pasar a sáb tarde) |
-| Harry | `schemas.py` (contrato compartido) | **vie 18:00** |
-| Harry | `llm.py`: lanes `fast`/`deep`, headers de Meterless, timeout de 90 s, máx. 2 reintentos | vie 22:00 |
-| Harry | `graph.py` mínimo Analista → Planificador → Explicador + `run.py` + traza JSONL | sáb 12:00 |
-| Chema | `docs/protocolo.md` cerrado (reglas de prioridad numeradas, para citarlas como evidencia) | vie 20:00 |
-| Chema | `best_route` (networkx sobre `tramos`; omite tramos bloqueados y tramos inundados para vehículos que no vadean) + `tests/test_routing.py` | sáb 12:00 |
+| Juan | `generate_data.py` (fixed seed) → **`data/sample/` published first**, because it unblocks everyone | **Fri 18:00** |
+| Juan | In-memory `resq/world/` stub with the real contract | Fri 20:00 |
+| Juan | Postgres + registration in Zetaris + `run_sql` + 10 key queries tested | Sat 10:00 |
+| Juan | Real World Model (Node service) + Python client + **conformance green** | Sat 12:00 (may slip to Sat afternoon) |
+| Harry | `schemas.py` (shared contract) | **Fri 18:00** |
+| Harry | `llm.py`: `fast`/`deep` lanes, Meterless headers, 90 s timeout, max. 2 retries | Fri 22:00 |
+| Harry | Minimal `graph.py` Risk Analyst → Planner → Explainer + `run.py` + JSONL trace | Sat 12:00 |
+| Chema | `docs/protocol.md` closed (numbered priority rules, so they can be cited as evidence) | Fri 20:00 |
+| Chema | `best_route` (networkx over `road_segments`; skips blocked segments and flooded segments for vehicles that cannot ford) + `tests/test_routing.py` | Sat 12:00 |
 
-**Gate (sáb 24, 12:00):** `python -m resq.run --pregunta "..."` imprime un plan v1 con rutas válidas, ya sea con datos de Zetaris o con `SAMPLE_MODE`.
+**Gate (Sat 24, 12:00):** `python -m resq.run --question "..."` prints a v1 plan with valid routes, using either Zetaris data or `SAMPLE_MODE`.
 
-### Fase 2 — Sistema multiagente real · sábado 24, 12:00 → domingo 25, 22:00
+### Phase 2 — Real multi-agent system · Saturday 24, 12:00 → Sunday 25, 22:00
 
-Objetivo: el comportamiento que premian los jueces.
+Goal: the behavior the judges reward.
 
-- [ ] **Chema:** `validators.py` + pruebas: capacidad del vehículo, inventario suficiente, ruta sin tramos bloqueados, vehículo apto para el tramo, comunidades críticas sin atender, IDs que existen. **Primeras 4 reglas antes del sáb 18:00**, porque el Crítico depende de ellas
-- [ ] **Chema:** agente Intake por reglas + pruebas · UI Streamlit v1 sobre `output_examples/` (mapa esquemático de nodos y tramos, tabla del plan, panel de traza)
-- [ ] **Harry:** Crítico (validadores de Chema + revisión LLM de razones y evidencia) · ciclo de máx. 3 vueltas · rama de escalamiento · replan disparado por evento · `cambios_vs_anterior` a partir de `world.history()`
-- [ ] **Harry:** publicar 2–3 planes reales en `output_examples/` para la UI de Chema (sáb 20:00)
-- [ ] **Juan:** Conciliador y Analista de riesgo con SQL real · reportes contradictorios sembrados · tabla Open-Meteo · 3 escenarios de prueba · `SAMPLE_MODE` completo · World Model como estado compartido de todos los agentes
-- [ ] **Check-in sáb 24, 20:00 (20 min):** "si entregáramos mañana, ¿qué fallaría?"
-- [ ] **Harry, dom 25 tarde, primera prueba pesada:** 3 escenarios × 5 corridas con Nightshift. Registrar latencia por agente, vueltas del crítico, fallos y escalamientos en `logs/`, y compartir un resumen
+- [ ] **Chema:** `validators.py` + tests: vehicle capacity, sufficient inventory, route without blocked segments, vehicle suitable for the segment, critical communities left unserved, IDs that exist. **First 4 rules before Sat 18:00**, because the Critic depends on them
+- [ ] **Chema:** rule-based Intake agent + tests · Streamlit UI v1 on `output_examples/` (schematic map of nodes and segments, plan table, trace panel)
+- [ ] **Harry:** Critic (Chema's validators + LLM review of reasons and evidence) · loop of max. 3 rounds · escalation branch · event-triggered re-plan · `changes_vs_previous` from `world.history()`
+- [ ] **Harry:** publish 2–3 real plans in `output_examples/` for Chema's UI (Sat 20:00)
+- [ ] **Juan:** Reconciler and Risk Analyst with real SQL · seeded contradictory reports · Open-Meteo table · 3 test scenarios · full `SAMPLE_MODE` · World Model as the shared state of all agents
+- [ ] **Check-in Sat 24, 20:00 (20 min):** "if we submitted tomorrow, what would fail?"
+- [ ] **Harry, Sun 25 afternoon, first heavy test:** 3 scenarios × 5 runs with Nightshift. Log latency per agent, critic rounds, failures and escalations in `logs/`, and share a summary
 
-**Gate (dom 25, 22:00):** bloquear 2 tramos distintos produce 2 replanes distintos y correctos, con la traza del ciclo del crítico, y la prueba pesada no muestra fallos sin explicación.
+**Gate (Sun 25, 22:00):** blocking 2 different segments produces 2 different and correct re-plans, with the critic loop trace, and the heavy test shows no unexplained failures.
 
-### Fase 3 — Producto y confiabilidad · lunes 26, hasta las 14:00
+### Phase 3 — Product and reliability · Monday 26, until 14:00
 
-- [ ] **Harry + Chema (en pareja, en la máquina de Harry):** conectar la UI al grafo real (botón "bloquear tramo", panel "¿por qué cambió?")
-- [ ] **Harry:** timeouts, reintentos acotados y errores honestos · lane Nemotron fijo y capturas de los logs de Nightshift · **segunda prueba pesada** (3 escenarios × 10 corridas + ambos eventos) · instalación desde cero en Windows en modo completo · generar `output_examples/` finales
-- [ ] **Chema:** pulir la UI · **instalación desde cero en `SAMPLE_MODE` en su equipo**, que prueba que un juez con windows puede correrlo · borrador del README (instalación y uso) · `input_examples/`
-- [ ] **Juan:** `data/README.md` · revisar que se cumplan las 8 reglas de §2 de `AGENTS.md` · buscar secretos en todo el historial de git (`git log -p | grep -E "nvapi-|Bearer "`) · arreglar errores e integrar PRs
-- [ ] Solo si sobra tiempo: H-MEM o Scout Intent
+- [ ] **Harry + Chema (pairing, on Harry's machine):** connect the UI to the real graph ("block segment" button, "why did it change?" panel)
+- [ ] **Harry:** timeouts, bounded retries and honest errors · fixed Nemotron lane and screenshots of the Nightshift logs · **second heavy test** (3 scenarios × 10 runs + both events) · from-scratch install on Windows in full mode · generate the final `output_examples/`
+- [ ] **Chema:** polish the UI · **from-scratch install in `SAMPLE_MODE` on his machine**, proving a judge on Windows can run it · README draft (install and usage) · `input_examples/`
+- [ ] **Juan:** `data/README.md` · check that the 9 rules of §2 of `AGENTS.md` are met · search the whole git history for secrets (`git log -p | grep -E "nvapi-|Bearer "`) · fix bugs and merge PRs
+- [ ] Only if time allows: H-MEM or Scout Intent
 
-**Lunes 26, 14:00: CONGELAR FUNCIONES.** Desde aquí solo se corrigen errores.
+**Monday 26, 14:00: FEATURE FREEZE.** From here on, only bug fixes.
 
-### Fase 4 — Empaquetar y entregar · lunes 26, 14:00 → martes 27, 12:00
+### Phase 4 — Package and submit · Monday 26, 14:00 → Tuesday 27, 12:00
 
-- [ ] **Lun 16:00, ensayo de demo completo** en la máquina de Harry (Nightshift local + Zetaris de Juan por Tailscale), siguiendo el guion de §8. Los 3 conectados
-- [ ] **Harry:** grabar el video el lunes en la noche (y una **grabación de respaldo** del flujo completo por si la red falla) · capturas para el deck · editar el video
-- [ ] **Chema:** slide deck (herramienta en el navegador, nada pesado) · guion final del video · revisar que el README se entienda sin contexto
-- [ ] **Juan:** README final, explicación de sponsors, declaración de componentes previos, `.env.example`, última revisión de la checklist de §9
-- [ ] **Martes 27, 12:00: Juan sube todo a HackOS.** De 12:00 a 17:45 es solo colchón para emergencias
+- [ ] **Mon 16:00, full demo rehearsal** on Harry's machine (local Nightshift + Juan's Zetaris over Tailscale), following the §8 script. All 3 connected
+- [ ] **Harry:** record the video Monday night (plus a **backup recording** of the full flow in case the network fails) · screenshots for the deck · edit the video
+- [ ] **Chema:** slide deck (browser-based tool, nothing heavy) · final video script · check that the README is understandable without context
+- [ ] **Juan:** final README, sponsor explanation, declaration of prior components, `.env.example`, last pass over the §9 checklist
+- [ ] **Tuesday 27, 12:00: Juan uploads everything to HackOS.** 12:00 to 17:45 is only an emergency buffer
 
 ---
 
-## 5. Contratos entre partes
+## 5. Contracts between parts
 
-Para trabajar en paralelo sin pisarse. Cambiar un contrato = avisar al grupo y anotarlo en `AGENTS.md`.
+So we can work in parallel without stepping on each other. Changing a contract = tell the group and record it in `AGENTS.md`.
 
 ```python
 # resq/tools/zetaris.py  (Juan)
-def run_sql(sql: str, limit: int = 500) -> list[dict]: ...   # una sentencia; lanza ZetarisError
+def run_sql(sql: str, limit: int = 500) -> list[dict]: ...   # one statement; raises ZetarisError
 
 # resq/llm.py  (Harry)
 def chat(messages: list[dict], lane: str = "fast", tools: list | None = None) -> dict: ...  # lane: "fast" | "deep"
 
 # resq/world/  (Juan)
-def get_state() -> dict: ...                 # comunidades, tramos, albergues con su estado actual
-def apply_event(event: dict) -> None: ...    # {"tipo": "tramo_bloqueado", "id": "T7", "fuente": ..., "ts": ...}
-def history() -> list[dict]: ...             # eventos en orden
+def get_state() -> dict: ...                 # communities, road segments, shelters with their current status
+def apply_event(event: dict) -> None: ...    # {"type": "segment_blocked", "id": "T7", "source": ..., "ts": ...}
+def history() -> list[dict]: ...             # events in order
 
 # resq/tools/routing.py  (Chema)
-def best_route(origen: str, destino: str, state: dict, vehiculo: str) -> Route | None: ...
+def best_route(origin: str, destination: str, state: dict, vehicle_id: str) -> Route | None: ...
 
 # resq/tools/validators.py  (Chema)
-def validar_plan(plan: Plan, state: dict) -> list[str]: ...  # lista vacía = sin violaciones; cada texto cita IDs
+def validate_plan(plan: Plan, state: dict) -> list[str]: ...  # empty list = no violations; each message cites IDs
 
-# resq/schemas.py  (todos; Harry lo crea)
-class Asignacion(BaseModel): comunidad_id; origen_id; recurso; cantidad; vehiculo_id; ruta: list[str]; prioridad: int; razon: str; evidencia: list[str]
-class Plan(BaseModel): version: int; asignaciones: list[Asignacion]; sin_atender: list[str]; riesgos: list[str]; confianza: float; escalado: bool; cambios_vs_anterior: list[str]
+# resq/schemas.py  (everyone; Harry creates it)
+class Assignment(BaseModel): community_id; origin_id; resource; quantity; vehicle_id; route: list[str]; priority: int; reason: str; evidence: list[str]
+class Plan(BaseModel): version: int; assignments: list[Assignment]; unserved: list[str]; risks: list[str]; confidence: float; escalated: bool; changes_vs_previous: list[str]
 
-# Nodos del grafo (cada dueño implementa el suyo)  (Harry define, todos usan)
-def nodo_<agente>(state: ResqState) -> dict: ...   # devuelve solo los campos que actualiza
+# Graph nodes (each owner implements theirs)  (Harry defines, everyone uses)
+def node_<agent>(state: ResqState) -> dict: ...   # returns only the fields it updates
 
-# resq/run.py  (Harry) — lo que llama la UI de Chema
-def ejecutar(pregunta: str, evento: dict | None = None) -> dict: ...  # {"plan": Plan, "traza": list[dict], "escalado": bool}
+# resq/run.py  (Harry) — what Chema's UI calls
+def execute(question: str, event: dict | None = None) -> dict: ...  # {"plan": Plan, "trace": list[dict], "escalated": bool}
 ```
 
 ---
 
-## 6. Forma de trabajo
+## 6. Way of working
 
-- **Ramas:** `feat/<area>-<tema>` → Pull Request a `main`; Juan revisa; se integra al menos una vez al día.
-- **Check-ins diarios cortos (15 min):** 10:00 y 21:00. Cada quien dice qué terminó, qué sigue y qué lo bloquea.
-- **Al cerrar cada sesión:** actualizar las secciones 8–10 de `AGENTS.md` (estado, próximos pasos y decisiones).
-- **Bloqueos:** si alguien lleva más de 45 min trabado, avisa al grupo; si sigue, se pregunta en HackOS (#help desk, canal del sponsor o mentores).
-- **Secretos:** nunca en el repo, chats públicos ni capturas. Tokens solo por mensaje privado.
-- **Agentes de IA** (Cursor, Claude Code, Codex): leen `AGENTS.md` primero; cambios pequeños; correr pruebas antes de cada commit.
-- **Máquinas host:** Zetaris (Juan) y Nightshift (Harry) encendidos en los bloques de trabajo acordados.
-- **Equipo de Chema:** trabaja con `SAMPLE_MODE=true` y `pytest`. Las pruebas pesadas o largas se le piden a Harry.
+- **Language:** everything that lands in the repo or the demo is in English (code, identifiers, docs, prompts, UI, commits). Team chat can stay in Spanish.
+- **Branches:** `feat/<area>-<topic>` → Pull Request to `main`; Juan reviews; merge at least once a day.
+- **Short daily check-ins (15 min):** 10:00 and 21:00. Everyone says what they finished, what is next and what blocks them.
+- **At the end of each session:** update sections 8–10 of `AGENTS.md` (status, next steps and decisions).
+- **Blockers:** if someone is stuck for more than 45 min, tell the group; if it continues, ask in HackOS (#help desk, sponsor channel or mentors).
+- **Secrets:** never in the repo, public chats or screenshots. Tokens only by private message.
+- **AI agents** (Cursor, Claude Code, Codex): read `AGENTS.md` first; small changes; run tests before every commit.
+- **Host machines:** Zetaris (Juan) and Nightshift (Harry) up during the agreed work blocks.
+- **Chema's machine:** works with `SAMPLE_MODE=true` and `pytest`. Heavy or long tests are requested from Harry.
 
 ---
 
-## 7. Riesgos y plan B
+## 7. Risks and plan B
 
-| # | Riesgo | Plan B |
+| # | Risk | Plan B |
 | --- | --- | --- |
-| R1 | Los engines de Meterless están en TypeScript y el agente en Python. La conformance se corre con `WORLD_MODEL_IMPL=<index.ts> npx tsx conformance/runner.ts`, así que necesita una implementación en TS | **Recomendado: (b)** el World Model como servicio Node pequeño (implementación TS que pasa la conformance + HTTP con `get_state`/`apply_event`/`history`), que `resq/world/` llama desde Python. La alternativa (a), implementar en Python, obliga a escribir un adaptador TS para la conformance y es más trabajo. TODO(verificar): si basta con envolver la implementación `reference/` o los jueces esperan una propia generada con el prompt *IMPLEMENT* |
-| R2 | Nightshift solo corre en la máquina de Harry, y Juan (Linux) no puede instalarlo | NVIDIA directo para desarrollo; la demo, la prueba pesada y el video se hacen en la máquina de Harry con Nightshift; laptop con corriente y sin suspensión |
-| R3 | Zetaris o Nightshift no alcanzables por Tailscale | Revisar puertos y `tailscale serve`; mientras tanto, `SAMPLE_MODE` o NVIDIA directo |
-| R4 | Zetaris no lee CSV locales | Postgres propio registrado como fuente |
-| R5 | Los jueces no pueden levantar Zetaris + Nightshift | README claro, `SAMPLE_MODE`, video, `output_examples/` y trazas |
-| R6 | El modelo inventa datos | Validaciones duras en código, crítico, toda asignación referencia IDs reales |
-| R7 | El alcance crece | Gates por fase; congelar el lunes 14:00 |
-| R8 | RAM de la máquina de Juan (Zetaris + Postgres + World Model) | Cerrar apps, zram activo, `docker compose stop` cuando no se use; el World Model es un proceso Node liviano |
-| R9 | El equipo de Chema es limitado | Nada de Docker ni modelos locales; `SAMPLE_MODE` + `pytest`; integración en pareja en la máquina de Harry |
-| R10 | La demo depende de 2 máquinas (Zetaris de Juan + Nightshift de Harry) y de la red | Ensayo el lun 16:00; grabación de respaldo; `SAMPLE_MODE` con Nightshift como plan C en vivo |
-| R11 | Fase 1 tiene 3 frentes que dependen entre sí | Stubs con el contrato real desde el viernes (`data/sample/`, World Model en memoria, `schemas.py` a las 18:00) |
+| R1 | The Meterless engines are in TypeScript and the agent is in Python. Conformance runs with `WORLD_MODEL_IMPL=<index.ts> npx tsx conformance/runner.ts`, so it needs a TS implementation | **Recommended: (b)** the World Model as a small Node service (TS implementation that passes conformance + HTTP with `get_state`/`apply_event`/`history`), called from Python by `resq/world/`. The alternative (a), implementing it in Python, requires writing a TS adapter for conformance and is more work. TODO(verify): whether wrapping the `reference/` implementation is enough or the judges expect our own, generated with the *IMPLEMENT* prompt |
+| R2 | Nightshift only runs on Harry's machine, and Juan (Linux) cannot install it | Direct NVIDIA for development; the demo, the heavy test and the video are done on Harry's machine with Nightshift; laptop plugged in and without sleep |
+| R3 | Zetaris or Nightshift not reachable over Tailscale | Check ports and `tailscale serve`; meanwhile, `SAMPLE_MODE` or direct NVIDIA |
+| R4 | Zetaris does not read local CSVs | Our own Postgres registered as a data source |
+| R5 | The judges cannot bring up Zetaris + Nightshift | Clear README, `SAMPLE_MODE`, video, `output_examples/` and traces |
+| R6 | The model invents data | Hard validations in code, critic, every assignment references real IDs |
+| R7 | Scope creep | Gates per phase; freeze on Monday 14:00 |
+| R8 | RAM on Juan's machine (Zetaris + Postgres + World Model) | Close apps, zram on, `docker compose stop` when unused; the World Model is a light Node process |
+| R9 | Chema's machine is limited | No Docker or local models; `SAMPLE_MODE` + `pytest`; integration by pairing on Harry's machine |
+| R10 | The demo depends on 2 machines (Juan's Zetaris + Harry's Nightshift) and on the network | Rehearsal on Mon 16:00; backup recording; `SAMPLE_MODE` with Nightshift as live plan C |
+| R11 | Phase 1 has 3 fronts that depend on each other | Stubs with the real contract from Friday (`data/sample/`, in-memory World Model, `schemas.py` at 18:00) |
 
 ---
 
-## 8. Guion del video (máx. 4 min)
+## 8. Video script (max. 4 min)
 
-Lo graba Harry en su máquina con Nightshift real. Chema escribe el guion final.
+Harry records it on his machine with real Nightshift. Chema writes the final script.
 
-1. **0:00–0:30** — El problema: en una inundación los reportes se contradicen y los planes quedan viejos en minutos. Usuario: coordinador municipal.
-2. **0:30–1:30** — Primer plan: riesgo por comunidad, asignaciones, rutas y la traza del crítico rechazando y corrigiendo algo.
-3. **1:30–2:30** — WOW: se bloquea un tramo en vivo → conciliación → replan → "qué cambió y por qué".
-4. **2:30–3:15** — Arquitectura y sponsors: Zetaris (SQL), World Model (eventos), Nightshift → Nemotron (logs del lane), Cursor.
-5. **3:15–3:45** — Resultado para el usuario, límites y próximos pasos.
+1. **0:00–0:30** — The problem: in a flood, reports contradict each other and plans go stale within minutes. User: municipal coordinator.
+2. **0:30–1:30** — First plan: risk per community, assignments, routes and the critic trace rejecting and correcting something.
+3. **1:30–2:30** — WOW: a segment gets blocked live → reconciliation → re-plan → "what changed and why".
+4. **2:30–3:15** — Architecture and sponsors: Zetaris (SQL), World Model (events), Nightshift → Nemotron (lane logs), Cursor.
+5. **3:15–3:45** — Outcome for the user, limitations and next steps.
 
 ---
 
-## 9. Checklist de entrega
+## 9. Submission checklist
 
-- [ ] Video de 1–4 min subido
-- [ ] Slide deck: problema y usuarios, solución, arquitectura de agentes, stack, uso de Zetaris y Meterless y qué tuvo de único, capturas, mejoras futuras
-- [ ] Repo público con README (instalación, uso, dependencias), `.env.example`, `data/README.md`, ejemplos y trazas
-- [ ] Explicación de sponsors: Zetaris, Meterless (engine + Nightshift), Cursor, NVIDIA
-- [ ] Componentes previos declarados (el smoke test viene de la guía oficial)
-- [ ] Cero secretos en el repo: ningún archivo ni commit con claves reales (`nvapi-…`, tokens de Zetaris o Nightshift)
-- [ ] Prueba de instalación desde cero hecha: Windows en modo completo (Harry) y `SAMPLE_MODE` en equipo limitado (Chema)
-- [ ] Subido antes del martes 27 a las 12:00
+- [ ] 1–4 min video uploaded
+- [ ] Slide deck: problem and users, solution, agent architecture, stack, use of Zetaris and Meterless and what was unique about it, screenshots, future improvements
+- [ ] Public repo with README (install, usage, dependencies), `.env.example`, `data/README.md`, examples and traces
+- [ ] Sponsor explanation: Zetaris, Meterless (engine + Nightshift), Cursor, NVIDIA
+- [ ] Prior components declared (the smoke test comes from the official guide)
+- [ ] Zero secrets in the repo: no file or commit with real keys (`nvapi-…`, Zetaris or Nightshift tokens)
+- [ ] From-scratch install test done: Windows in full mode (Harry) and `SAMPLE_MODE` on a limited machine (Chema)
+- [ ] Everything in English (code, docs, UI, prompts, commits)
+- [ ] Uploaded before Tuesday 27 at 12:00

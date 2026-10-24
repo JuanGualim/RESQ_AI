@@ -2,7 +2,7 @@
 
 > **Read this whole file before touching code.** It is the project's source of truth for people and AI agents (Cursor, Claude Code, Codex). At the end of every work session, update **§8 Current status**, **§9 Next steps** and, if you decided something, **§10 Decision log**.
 
-Last updated: 2026-10-24 (GT) · by: Juan (with Claude Code): switched the project language to English and renamed contracts
+Last updated: 2026-10-24 (GT) · by: Juan (with Claude Code): whole repo translated to English, contracts renamed
 
 ---
 
@@ -167,8 +167,6 @@ def execute(question: str, event: dict | None = None) -> dict: ...  # {"plan": P
 
 Size: 12–15 communities, 3–4 shelters, 2 warehouses, ~20 road segments, 5–8 vehicles, ~30 reports.
 
-> `docs/PLAN.md` is still in Spanish and uses the old Spanish names (`comunidades`, `Asignacion`, `validar_plan`, `ejecutar`…). **The English names in this file win**; PLAN.md will be translated.
-
 ## 7. Conventions for AI agents and people
 
 - **Language:** English for everything in the repo and the demo (rule 9 of §2). Identifiers in `snake_case`/`PascalCase` English; no Spanish names in new code.
@@ -221,10 +219,10 @@ Done:
 - [x] `smoke_test.py` → 3 PASS on Juan's Linux, with direct NVIDIA and `nvidia/nemotron-3.5-lightning-30b-a3b`
 - [x] Repo `JuanGualim/RESQ_AI` with initial commits (`smoke_test.py`, `.gitignore`, `.env.example`, `requirements.txt`, `AGENTS.md`, `docs/PLAN.md`)
 - [x] `docs/PLAN.md` v2: split by machine (Juan / Harry / Chema), timed milestones, stubs to avoid blocking, new contracts, risks R9–R11
-- [x] Project language switched to English: this file translated, contracts and table names renamed (§6)
+- [x] Project language switched to English: `AGENTS.md`, `docs/PLAN.md`, `.env.example` and `smoke_test.py` translated; contracts and table names renamed (§6)
+- [x] `smoke_test.py` still gives 3 PASS after the translation (2026-10-24)
 
 Pending / blocked:
-- [ ] `docs/PLAN.md`, `.env.example` comments and `smoke_test.py` messages are still in Spanish
 - [ ] `docs/TEAM_SETUP.md` is referenced but **does not exist**
 - [ ] No code yet: no `resq/` skeleton, no `config.py`, no `data/sample/`
 - [ ] Nightshift installed on Harry's Windows machine and exposed over Tailscale (blocked: Harry)
@@ -237,15 +235,14 @@ Pending / blocked:
 
 Juan, solo, while Harry and Chema are unavailable (all of this works with direct NVIDIA or no model at all):
 
-1. Translate `docs/PLAN.md` to English with the new names; translate `.env.example` comments and `smoke_test.py` messages.
-2. Repo skeleton from §5 + `resq/config.py` (`.env`, `SAMPLE_MODE`) + `docs/TEAM_SETUP.md`; invite collaborators on GitHub.
-3. **`scripts/generate_data.py` (fixed seed) → `data/sample/`** with the seeded contradictions. Top priority: it unblocks everyone.
-4. Unblocking stubs for Harry's contracts, telling him first: `resq/schemas.py` (§6) and a minimal `resq/llm.py` that already works with direct NVIDIA.
-5. World Model *90-second proof* on Linux → close R1 → in-memory stub of `resq/world/` with the real contract.
-6. Postgres in Docker + register it in Zetaris + `run_sql` + 10 key queries tested + Open-Meteo `rainfall` table.
-7. Real World Model (Node service) + Python client + **conformance green**.
-8. Reconciler and Risk Analyst agents on `SAMPLE_MODE` first, then on real SQL.
-9. Install Tailscale and expose Zetaris, ready for when the others join.
+1. Repo skeleton from §5 + `resq/config.py` (`.env`, `SAMPLE_MODE`) + `docs/TEAM_SETUP.md`; invite collaborators on GitHub.
+2. **`scripts/generate_data.py` (fixed seed) → `data/sample/`** with the seeded contradictions. Top priority: it unblocks everyone.
+3. Unblocking stubs for Harry's contracts, telling him first: `resq/schemas.py` (§6) and a minimal `resq/llm.py` that already works with direct NVIDIA.
+4. World Model *90-second proof* on Linux → close R1 → in-memory stub of `resq/world/` with the real contract.
+5. Postgres in Docker + register it in Zetaris + `run_sql` + 10 key queries tested + Open-Meteo `rainfall` table.
+6. Real World Model (Node service) + Python client + **conformance green**.
+7. Reconciler and Risk Analyst agents on `SAMPLE_MODE` first, then on real SQL.
+8. Install Tailscale and expose Zetaris, ready for when the others join.
 
 When Harry and Chema are back: 45-minute call to confirm the English contracts (§6), then pick up their Phase 1 items from `docs/PLAN.md` §4.
 
