@@ -1,0 +1,801 @@
+{
+  "version": 1,
+  "assignments": [
+    {
+      "community_id": "C07",
+      "origin_id": "W1",
+      "resource": "water_20l",
+      "quantity": 122,
+      "vehicle_id": "V2",
+      "route": [
+        "T3",
+        "T7",
+        "T9",
+        "T12"
+      ],
+      "priority": 1,
+      "reason": "Critical risk 0.72; isolated; P5.2 minimum first",
+      "evidence": [
+        "R006",
+        "R019",
+        "risk_score 0.72"
+      ]
+    },
+    {
+      "community_id": "C07",
+      "origin_id": "W1",
+      "resource": "food_kit",
+      "quantity": 122,
+      "vehicle_id": "V2",
+      "route": [
+        "T3",
+        "T7",
+        "T9",
+        "T12"
+      ],
+      "priority": 2,
+      "reason": "Critical risk 0.72; isolated; P5.2 minimum first",
+      "evidence": [
+        "R006",
+        "R019",
+        "risk_score 0.72"
+      ]
+    },
+    {
+      "community_id": "C07",
+      "origin_id": "W1",
+      "resource": "medical_kit",
+      "quantity": 25,
+      "vehicle_id": "V2",
+      "route": [
+        "T3",
+        "T7",
+        "T9",
+        "T12"
+      ],
+      "priority": 3,
+      "reason": "Critical risk 0.72; isolated; P5.2 minimum first",
+      "evidence": [
+        "R006",
+        "R019",
+        "risk_score 0.72"
+      ]
+    },
+    {
+      "community_id": "C12",
+      "origin_id": "W1",
+      "resource": "water_20l",
+      "quantity": 64,
+      "vehicle_id": "V1",
+      "route": [
+        "T3",
+        "T6",
+        "T10",
+        "T20"
+      ],
+      "priority": 4,
+      "reason": "Critical risk 0.699; reachable; P5.2 minimum first",
+      "evidence": [
+        "R025",
+        "risk_score 0.699"
+      ]
+    },
+    {
+      "community_id": "C12",
+      "origin_id": "W1",
+      "resource": "food_kit",
+      "quantity": 64,
+      "vehicle_id": "V1",
+      "route": [
+        "T3",
+        "T6",
+        "T10",
+        "T20"
+      ],
+      "priority": 5,
+      "reason": "Critical risk 0.699; reachable; P5.2 minimum first",
+      "evidence": [
+        "R025",
+        "risk_score 0.699"
+      ]
+    },
+    {
+      "community_id": "C12",
+      "origin_id": "W1",
+      "resource": "medical_kit",
+      "quantity": 13,
+      "vehicle_id": "V1",
+      "route": [
+        "T3",
+        "T6",
+        "T10",
+        "T20"
+      ],
+      "priority": 6,
+      "reason": "Critical risk 0.699; reachable; P5.2 minimum first",
+      "evidence": [
+        "R025",
+        "risk_score 0.699"
+      ]
+    },
+    {
+      "community_id": "C03",
+      "origin_id": "W1",
+      "resource": "water_20l",
+      "quantity": 40,
+      "vehicle_id": "V1",
+      "route": [
+        "T3",
+        "T6"
+      ],
+      "priority": 7,
+      "reason": "Critical risk 0.659; reachable; P5.2 minimum first",
+      "evidence": [
+        "R027",
+        "risk_score 0.659"
+      ]
+    },
+    {
+      "community_id": "C03",
+      "origin_id": "W1",
+      "resource": "food_kit",
+      "quantity": 40,
+      "vehicle_id": "V1",
+      "route": [
+        "T3",
+        "T6"
+      ],
+      "priority": 8,
+      "reason": "Critical risk 0.659; reachable; P5.2 minimum first",
+      "evidence": [
+        "R027",
+        "risk_score 0.659"
+      ]
+    },
+    {
+      "community_id": "C03",
+      "origin_id": "W1",
+      "resource": "medical_kit",
+      "quantity": 4,
+      "vehicle_id": "V1",
+      "route": [
+        "T3",
+        "T6"
+      ],
+      "priority": 9,
+      "reason": "Critical risk 0.659; reachable; P5.2 minimum first",
+      "evidence": [
+        "R027",
+        "risk_score 0.659"
+      ]
+    },
+    {
+      "community_id": "C05",
+      "origin_id": "W1",
+      "resource": "water_20l",
+      "quantity": 124,
+      "vehicle_id": "V2",
+      "route": [
+        "T3",
+        "T7",
+        "T9"
+      ],
+      "priority": 10,
+      "reason": "Critical risk 0.615; reachable; P5.2 minimum first",
+      "evidence": [
+        "R020",
+        "risk_score 0.615"
+      ]
+    },
+    {
+      "community_id": "C05",
+      "origin_id": "W1",
+      "resource": "food_kit",
+      "quantity": 124,
+      "vehicle_id": "V2",
+      "route": [
+        "T3",
+        "T7",
+        "T9"
+      ],
+      "priority": 11,
+      "reason": "Critical risk 0.615; reachable; P5.2 minimum first",
+      "evidence": [
+        "R020",
+        "risk_score 0.615"
+      ]
+    },
+    {
+      "community_id": "C05",
+      "origin_id": "W1",
+      "resource": "medical_kit",
+      "quantity": 13,
+      "vehicle_id": "V2",
+      "route": [
+        "T3",
+        "T7",
+        "T9"
+      ],
+      "priority": 12,
+      "reason": "Critical risk 0.615; reachable; P5.2 minimum first",
+      "evidence": [
+        "R020",
+        "risk_score 0.615"
+      ]
+    },
+    {
+      "community_id": "C07",
+      "origin_id": "W1",
+      "resource": "water_20l",
+      "quantity": 96,
+      "vehicle_id": "V2",
+      "route": [
+        "T3",
+        "T7",
+        "T9",
+        "T12"
+      ],
+      "priority": 13,
+      "reason": "Critical risk 0.72; isolated; P5.2 minimum first",
+      "evidence": [
+        "R006",
+        "R019",
+        "risk_score 0.72"
+      ]
+    },
+    {
+      "community_id": "C07",
+      "origin_id": "W1",
+      "resource": "water_20l",
+      "quantity": 26,
+      "vehicle_id": "V1",
+      "route": [
+        "T3",
+        "T6",
+        "T10",
+        "T11"
+      ],
+      "priority": 13,
+      "reason": "Critical risk 0.72; isolated; P5.2 minimum first",
+      "evidence": [
+        "R006",
+        "R019",
+        "risk_score 0.72"
+      ]
+    },
+    {
+      "community_id": "C07",
+      "origin_id": "W1",
+      "resource": "food_kit",
+      "quantity": 1,
+      "vehicle_id": "V2",
+      "route": [
+        "T3",
+        "T7",
+        "T9",
+        "T12"
+      ],
+      "priority": 14,
+      "reason": "Critical risk 0.72; isolated; P5.2 minimum first",
+      "evidence": [
+        "R006",
+        "R019",
+        "risk_score 0.72"
+      ]
+    },
+    {
+      "community_id": "C07",
+      "origin_id": "W1",
+      "resource": "food_kit",
+      "quantity": 121,
+      "vehicle_id": "V1",
+      "route": [
+        "T3",
+        "T6",
+        "T10",
+        "T11"
+      ],
+      "priority": 14,
+      "reason": "Critical risk 0.72; isolated; P5.2 minimum first",
+      "evidence": [
+        "R006",
+        "R019",
+        "risk_score 0.72"
+      ]
+    },
+    {
+      "community_id": "C07",
+      "origin_id": "W1",
+      "resource": "hygiene_kit",
+      "quantity": 2,
+      "vehicle_id": "V2",
+      "route": [
+        "T3",
+        "T7",
+        "T9",
+        "T12"
+      ],
+      "priority": 15,
+      "reason": "Critical risk 0.72; isolated; P5.2 minimum first",
+      "evidence": [
+        "R006",
+        "R019",
+        "risk_score 0.72"
+      ]
+    },
+    {
+      "community_id": "C07",
+      "origin_id": "W1",
+      "resource": "hygiene_kit",
+      "quantity": 59,
+      "vehicle_id": "V1",
+      "route": [
+        "T3",
+        "T6",
+        "T10",
+        "T11"
+      ],
+      "priority": 15,
+      "reason": "Critical risk 0.72; isolated; P5.2 minimum first",
+      "evidence": [
+        "R006",
+        "R019",
+        "risk_score 0.72"
+      ]
+    },
+    {
+      "community_id": "C07",
+      "origin_id": "W1",
+      "resource": "blanket",
+      "quantity": 122,
+      "vehicle_id": "V1",
+      "route": [
+        "T3",
+        "T6",
+        "T10",
+        "T11"
+      ],
+      "priority": 16,
+      "reason": "Critical risk 0.72; isolated; P5.2 minimum first",
+      "evidence": [
+        "R006",
+        "R019",
+        "risk_score 0.72"
+      ]
+    },
+    {
+      "community_id": "C12",
+      "origin_id": "W1",
+      "resource": "water_20l",
+      "quantity": 64,
+      "vehicle_id": "V1",
+      "route": [
+        "T3",
+        "T6",
+        "T10",
+        "T20"
+      ],
+      "priority": 17,
+      "reason": "Critical risk 0.699; reachable; P5.2 minimum first",
+      "evidence": [
+        "R025",
+        "risk_score 0.699"
+      ]
+    },
+    {
+      "community_id": "C12",
+      "origin_id": "W1",
+      "resource": "food_kit",
+      "quantity": 64,
+      "vehicle_id": "V1",
+      "route": [
+        "T3",
+        "T6",
+        "T10",
+        "T20"
+      ],
+      "priority": 18,
+      "reason": "Critical risk 0.699; reachable; P5.2 minimum first",
+      "evidence": [
+        "R025",
+        "risk_score 0.699"
+      ]
+    },
+    {
+      "community_id": "C12",
+      "origin_id": "W1",
+      "resource": "hygiene_kit",
+      "quantity": 32,
+      "vehicle_id": "V1",
+      "route": [
+        "T3",
+        "T6",
+        "T10",
+        "T20"
+      ],
+      "priority": 19,
+      "reason": "Critical risk 0.699; reachable; P5.2 minimum first",
+      "evidence": [
+        "R025",
+        "risk_score 0.699"
+      ]
+    },
+    {
+      "community_id": "C12",
+      "origin_id": "W1",
+      "resource": "blanket",
+      "quantity": 64,
+      "vehicle_id": "V1",
+      "route": [
+        "T3",
+        "T6",
+        "T10",
+        "T20"
+      ],
+      "priority": 20,
+      "reason": "Critical risk 0.699; reachable; P5.2 minimum first",
+      "evidence": [
+        "R025",
+        "risk_score 0.699"
+      ]
+    },
+    {
+      "community_id": "C03",
+      "origin_id": "W1",
+      "resource": "water_20l",
+      "quantity": 40,
+      "vehicle_id": "V1",
+      "route": [
+        "T3",
+        "T6"
+      ],
+      "priority": 21,
+      "reason": "Critical risk 0.659; reachable; P5.2 minimum first",
+      "evidence": [
+        "R027",
+        "risk_score 0.659"
+      ]
+    },
+    {
+      "community_id": "C03",
+      "origin_id": "W1",
+      "resource": "food_kit",
+      "quantity": 40,
+      "vehicle_id": "V1",
+      "route": [
+        "T3",
+        "T6"
+      ],
+      "priority": 22,
+      "reason": "Critical risk 0.659; reachable; P5.2 minimum first",
+      "evidence": [
+        "R027",
+        "risk_score 0.659"
+      ]
+    },
+    {
+      "community_id": "C03",
+      "origin_id": "W1",
+      "resource": "hygiene_kit",
+      "quantity": 20,
+      "vehicle_id": "V1",
+      "route": [
+        "T3",
+        "T6"
+      ],
+      "priority": 23,
+      "reason": "Critical risk 0.659; reachable; P5.2 minimum first",
+      "evidence": [
+        "R027",
+        "risk_score 0.659"
+      ]
+    },
+    {
+      "community_id": "C03",
+      "origin_id": "W1",
+      "resource": "blanket",
+      "quantity": 40,
+      "vehicle_id": "V1",
+      "route": [
+        "T3",
+        "T6"
+      ],
+      "priority": 24,
+      "reason": "Critical risk 0.659; reachable; P5.2 minimum first",
+      "evidence": [
+        "R027",
+        "risk_score 0.659"
+      ]
+    },
+    {
+      "community_id": "C05",
+      "origin_id": "W2",
+      "resource": "water_20l",
+      "quantity": 50,
+      "vehicle_id": "V4",
+      "route": [
+        "T1",
+        "T3",
+        "T7",
+        "T9"
+      ],
+      "priority": 25,
+      "reason": "Critical risk 0.615; reachable; P5.2 minimum first",
+      "evidence": [
+        "R020",
+        "risk_score 0.615"
+      ]
+    },
+    {
+      "community_id": "C05",
+      "origin_id": "W2",
+      "resource": "water_20l",
+      "quantity": 50,
+      "vehicle_id": "V4",
+      "route": [
+        "T1",
+        "T3",
+        "T7",
+        "T9"
+      ],
+      "priority": 25,
+      "reason": "Critical risk 0.615; reachable; P5.2 minimum first",
+      "evidence": [
+        "R020",
+        "risk_score 0.615"
+      ]
+    },
+    {
+      "community_id": "C05",
+      "origin_id": "W2",
+      "resource": "water_20l",
+      "quantity": 24,
+      "vehicle_id": "V6",
+      "route": [
+        "T1",
+        "T3",
+        "T7",
+        "T9"
+      ],
+      "priority": 25,
+      "reason": "Critical risk 0.615; reachable; P5.2 minimum first",
+      "evidence": [
+        "R020",
+        "risk_score 0.615"
+      ]
+    },
+    {
+      "community_id": "C05",
+      "origin_id": "W2",
+      "resource": "food_kit",
+      "quantity": 75,
+      "vehicle_id": "V6",
+      "route": [
+        "T1",
+        "T3",
+        "T7",
+        "T9"
+      ],
+      "priority": 26,
+      "reason": "Critical risk 0.615; reachable; P5.2 minimum first",
+      "evidence": [
+        "R020",
+        "risk_score 0.615"
+      ]
+    },
+    {
+      "community_id": "C05",
+      "origin_id": "W2",
+      "resource": "food_kit",
+      "quantity": 35,
+      "vehicle_id": "V6",
+      "route": [
+        "T1",
+        "T3",
+        "T7",
+        "T9"
+      ],
+      "priority": 26,
+      "reason": "Critical risk 0.615; reachable; P5.2 minimum first",
+      "evidence": [
+        "R020",
+        "risk_score 0.615"
+      ]
+    },
+    {
+      "community_id": "C05",
+      "origin_id": "W1",
+      "resource": "food_kit",
+      "quantity": 14,
+      "vehicle_id": "V1",
+      "route": [
+        "T3",
+        "T6",
+        "T10",
+        "T11",
+        "T12"
+      ],
+      "priority": 26,
+      "reason": "Critical risk 0.615; reachable; P5.2 minimum first",
+      "evidence": [
+        "R020",
+        "risk_score 0.615"
+      ]
+    },
+    {
+      "community_id": "C05",
+      "origin_id": "W1",
+      "resource": "hygiene_kit",
+      "quantity": 62,
+      "vehicle_id": "V1",
+      "route": [
+        "T3",
+        "T6",
+        "T10",
+        "T11",
+        "T12"
+      ],
+      "priority": 27,
+      "reason": "Critical risk 0.615; reachable; P5.2 minimum first",
+      "evidence": [
+        "R020",
+        "risk_score 0.615"
+      ]
+    },
+    {
+      "community_id": "C05",
+      "origin_id": "W1",
+      "resource": "blanket",
+      "quantity": 124,
+      "vehicle_id": "V1",
+      "route": [
+        "T3",
+        "T6",
+        "T10",
+        "T11",
+        "T12"
+      ],
+      "priority": 28,
+      "reason": "Critical risk 0.615; reachable; P5.2 minimum first",
+      "evidence": [
+        "R020",
+        "risk_score 0.615"
+      ]
+    },
+    {
+      "community_id": "C04",
+      "origin_id": "W1",
+      "resource": "water_20l",
+      "quantity": 106,
+      "vehicle_id": "V1",
+      "route": [
+        "T3",
+        "T6",
+        "T8"
+      ],
+      "priority": 29,
+      "reason": "High risk 0.574; stock exhausted for water_20l/food_kit; P5.2 best effort",
+      "evidence": [
+        "R012",
+        "risk_score 0.574",
+        "packing shortfall C04"
+      ]
+    },
+    {
+      "community_id": "C04",
+      "origin_id": "W2",
+      "resource": "water_20l",
+      "quantity": 21,
+      "vehicle_id": "V5",
+      "route": [
+        "T1",
+        "T3",
+        "T6",
+        "T8"
+      ],
+      "priority": 29,
+      "reason": "High risk 0.574; stock exhausted for water_20l/food_kit; P5.2 best effort",
+      "evidence": [
+        "R012",
+        "risk_score 0.574",
+        "packing shortfall C04"
+      ]
+    },
+    {
+      "community_id": "C04",
+      "origin_id": "W1",
+      "resource": "food_kit",
+      "quantity": 23,
+      "vehicle_id": "V1",
+      "route": [
+        "T3",
+        "T6",
+        "T8"
+      ],
+      "priority": 30,
+      "reason": "High risk 0.574; stock exhausted for water_20l/food_kit; P5.2 best effort",
+      "evidence": [
+        "R012",
+        "risk_score 0.574",
+        "packing shortfall C04"
+      ]
+    },
+    {
+      "community_id": "C04",
+      "origin_id": "W2",
+      "resource": "food_kit",
+      "quantity": 104,
+      "vehicle_id": "V5",
+      "route": [
+        "T1",
+        "T3",
+        "T6",
+        "T8"
+      ],
+      "priority": 30,
+      "reason": "High risk 0.574; stock exhausted for water_20l/food_kit; P5.2 best effort",
+      "evidence": [
+        "R012",
+        "risk_score 0.574",
+        "packing shortfall C04"
+      ]
+    },
+    {
+      "community_id": "C04",
+      "origin_id": "W1",
+      "resource": "medical_kit",
+      "quantity": 8,
+      "vehicle_id": "V1",
+      "route": [
+        "T3",
+        "T6",
+        "T8"
+      ],
+      "priority": 31,
+      "reason": "High risk 0.574; stock exhausted for water_20l/food_kit; P5.2 best effort",
+      "evidence": [
+        "R012",
+        "risk_score 0.574",
+        "packing shortfall C04"
+      ]
+    },
+    {
+      "community_id": "C04",
+      "origin_id": "W2",
+      "resource": "medical_kit",
+      "quantity": 5,
+      "vehicle_id": "V5",
+      "route": [
+        "T1",
+        "T3",
+        "T6",
+        "T8"
+      ],
+      "priority": 31,
+      "reason": "High risk 0.574; stock exhausted for water_20l/food_kit; P5.2 best effort",
+      "evidence": [
+        "R012",
+        "risk_score 0.574",
+        "packing shortfall C04"
+      ]
+    }
+  ],
+  "unserved": [
+    "C01",
+    "C08",
+    "C11"
+  ],
+  "risks": [
+    "P7.1: shelter S2 Salon Comunal Loma Alta cannot receive people (full)",
+    "P7.2: C05 Playitas is evacuating; nearest shelter with room: S4 Centro Deportivo Los Amates (4.8 km)",
+    "P7.2: C07 El Zapotal is isolated; nearest shelter with room: S4 Centro Deportivo Los Amates (8.8 km)",
+    "critical C07 0.72",
+    "critical C12 0.699",
+    "critical C03 0.659",
+    "critical C05 0.615",
+    "high C04 0.574"
+  ],
+  "confidence": 0.85,
+  "escalated": false,
+  "changes_vs_previous": []
+}

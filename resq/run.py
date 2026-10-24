@@ -39,13 +39,14 @@ def execute(question: str = DEFAULT_QUESTION, event: dict | None = None) -> dict
     )
     final = build_graph().invoke(initial, config={"recursion_limit": 40})
     plan = final.get("plan")
+    plan = plan if isinstance(plan, Plan) or plan is None else Plan(**plan)
     return {
         "run_id": initial.run_id,
         "request_type": final.get("request_type"),
-        "plan": plan if isinstance(plan, Plan) or plan is None else Plan(**plan),
+        "plan": plan,
         "report": final.get("report", ""),
         "trace": final.get("trace", []),
-        "escalated": bool(final.get("escalated")),
+        "escalated": bool(final.get("escalated")) or bool(plan and plan.escalated),
         "reviews": final.get("reviews", []),
     }
 

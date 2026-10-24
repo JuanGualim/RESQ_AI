@@ -65,6 +65,7 @@ def test_why_question_explains_latest_plan():
     result = run.execute("Why did the plan change?")
     assert result["request_type"] == "why"
     assert [step["agent"] for step in result["trace"]] == ["intake", "explainer"]
+    assert result["plan"].version == 1
 
 
 def test_parse_event():

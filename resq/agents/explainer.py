@@ -123,6 +123,7 @@ def node_explainer(state: ResqState) -> dict:
     elif state.request_type == "why":
         latest = world.latest_plan()
         plan = Plan(**latest) if latest else None
+        update["plan"] = plan
         facts = {"question": state.question, "latest_plan": plan.model_dump() if plan else None,
                  "changes_vs_previous": plan.changes_vs_previous if plan else [],
                  "events": events_since_previous_plan(None)[-10:]}
