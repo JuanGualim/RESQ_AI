@@ -1,0 +1,15 @@
+{
+  "name": "resq-world-service",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "RESQ AI shared state: HTTP service over the Meterless World Model reference implementation",
+  "license": "Apache-2.0",
+  "scripts": {
+    "start": "tsx server.ts",
+    "conformance": "tsx conformance.ts"
+  },
+  "dependencies": {
+    "tsx": "4.20.6"
+  }
+}
