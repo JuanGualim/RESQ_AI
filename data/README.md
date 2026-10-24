@@ -1,0 +1,47 @@
+# RESQ AI scenario data
+
+All data is **synthetic** except rainfall. The municipality, communities, people counts, roads, vehicles and field reports are fictional. Rainfall is a real public snapshot from the [Open-Meteo archive](https://open-meteo.com/en/docs/historical-weather-api) (no API key).
+
+- Generator: `scripts/generate_data.py` (fixed seed `20201105`, so every run gives identical CSVs)
+- Sample copy: `data/sample/*.csv`, used when `SAMPLE_MODE=true`. In normal mode the same tables live in our Postgres, registered in Zetaris
+- Times are local (America/Guatemala, UTC-6)
+
+```bash
+python scripts/generate_data.py                   # rebuild the scenario CSVs
+python scripts/generate_data.py --fetch-rainfall  # also refresh rainfall.csv (needs internet)
+```
+
+## Scenario
+
+A fictional riverside municipality during **Hurricane Eta**, replaying the real rainfall of November 2020 at the reference point (15.47, -88.84). The coordinator asks for a plan at the **decision time 2020-11-05 10:00**, near the rainfall peak. The east of the municipality is a low river valley (nodes `N07`–`N11`, `N16`, elevation under 25 m); the north is high ground.
+
+## Tables
+
+| Table | Rows | Columns |
+| --- | --- | --- |
+| `communities` | 14 | id, name, population, pct_children, pct_elderly (percent), vulnerability (1–5), elevation_m, lat, lon, road_node |
+| `shelters` | 4 | id, name, capacity, current_occupancy, road_node |
+| `warehouses` | 2 | id, name, road_node |
+| `inventory` | 10 | warehouse_id, resource, quantity, unit_weight_kg |
+| `road_segments` | 21 | id, origin, destination, distance_km, surface (paved · gravel · dirt), official_status (open · flooded · closed) |
+| `vehicles` | 6 | id, type, capacity_kg, can_ford (true · false), warehouse_id |
+| `field_reports` | 30 | id, timestamp, source (official · brigade · social_media), object_type (road_segment · shelter · community), object_id, reported_status, detail |
+| `rainfall` | 107 | datetime, precipitation_mm (hourly, 2020-11-01 00:00 → 2020-11-05 10:00) |
+
+- Road segments are **undirected** edges between road nodes `N01`–`N16`; every community, shelter and warehouse sits on one node.
+- Resources: `water_20l`, `food_kit`, `hygiene_kit`, `medical_kit`, `blanket`. `unit_weight_kg` lets the critic check vehicle capacity.
+- `reported_status` values: road segments `open · flooded · closed · damaged · passable_4x4`; shelters `operational · full · flooded`; communities `isolated · needs_aid · evacuating · stable`.
+
+## Seeded contradictions
+
+These are in the data on purpose, for the Reconciler to resolve. No agent code may reference them.
+
+| Object | Conflict |
+| --- | --- |
+| `T7` | Official bulletin (05:30) says open; two brigades (07:10, 08:15) say flooded 60 cm, high-clearance only; social media says closed |
+| `T11` | Official says flooded; a newer brigade report (08:20) says the water receded; social media (08:30) says still flooded |
+| `T14` | Social media says the bridge collapsed; a brigade (08:35) says minor damage, open |
+| `T20` | Brigade says open; a later single social media post says flooded |
+| `S4` | Official says operational twice (05:45, 09:10); a brigade (07:40) says the ground floor is flooded and it cannot take more people |
+| `S2` | Table occupancy is lower than a brigade report of ~95% capacity |
+| `T18` | Consistent: official and brigade both report the landslide (control case) |

@@ -1,0 +1,7 @@
+id,type,capacity_kg,can_ford,warehouse_id
+V1,truck,8000,false,W1
+V2,all_terrain_truck,5000,true,W1
+V3,pickup,1200,false,W1
+V4,pickup_4x4,1000,true,W2
+V5,truck,6000,false,W2
+V6,pickup_4x4,900,true,W2

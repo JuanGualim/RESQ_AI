@@ -1,0 +1,31 @@
+id,timestamp,source,object_type,object_id,reported_status,detail
+R001,2020-11-05T05:30:00,official,road_segment,T7,open,Road bulletin: T7 open to all traffic.
+R002,2020-11-05T05:30:00,official,road_segment,T11,flooded,Road bulletin: T11 under water near the river crossing.
+R003,2020-11-05T05:30:00,official,road_segment,T18,closed,"Road bulletin: landslide on T18, road closed."
+R004,2020-11-05T05:45:00,official,shelter,S4,operational,Shelter S4 operating normally.
+R005,2020-11-05T06:20:00,brigade,road_segment,T3,open,Brigade 2 crossed T3 without problems.
+R006,2020-11-05T06:40:00,social_media,community,C07,isolated,"Post: families on rooftops in El Zapotal, water rising."
+R007,2020-11-05T06:55:00,social_media,road_segment,T14,closed,Post: the bridge on T14 collapsed.
+R008,2020-11-05T07:10:00,brigade,road_segment,T7,flooded,Brigade 1: water 60 cm deep over T7 at km 2; only high-clearance vehicles can pass.
+R009,2020-11-05T07:25:00,social_media,road_segment,T7,closed,"Post: road to Las Pozas closed, cars stuck."
+R010,2020-11-05T07:40:00,brigade,shelter,S4,flooded,"Brigade 3: ground floor of S4 flooded, people moved upstairs; cannot receive more people."
+R011,2020-11-05T07:50:00,brigade,road_segment,T9,passable_4x4,"Brigade 1: deep mud on T9, 4x4 vehicles only."
+R012,2020-11-05T08:05:00,brigade,community,C04,needs_aid,Brigade 1: Las Pozas needs drinking water and food for about 120 families.
+R013,2020-11-05T08:15:00,brigade,road_segment,T7,flooded,"Brigade 4: confirms T7 flooded, water level still rising."
+R014,2020-11-05T08:20:00,brigade,road_segment,T11,open,"Brigade 5: water receded on T11, passable with care."
+R015,2020-11-05T08:30:00,social_media,road_segment,T11,flooded,"Post: T11 still flooded, do not cross."
+R016,2020-11-05T08:35:00,brigade,road_segment,T14,damaged,"Brigade 6: T14 bridge has minor damage, open to traffic."
+R017,2020-11-05T08:40:00,brigade,shelter,S2,full,Brigade 2: S2 at about 95% of its capacity.
+R018,2020-11-05T08:50:00,official,road_segment,T1,open,Road bulletin update: T1 open.
+R019,2020-11-05T08:55:00,brigade,community,C07,isolated,"Brigade 5: El Zapotal isolated, about 40 families need water and medical care; 3 elderly people with chronic illness."
+R020,2020-11-05T09:00:00,social_media,community,C05,evacuating,Post: Playitas is evacuating to the hill.
+R021,2020-11-05T09:05:00,brigade,road_segment,T18,closed,Brigade 6: T18 still blocked by the landslide.
+R022,2020-11-05T09:10:00,official,shelter,S4,operational,Bulletin update: shelter S4 remains available.
+R023,2020-11-05T09:15:00,brigade,road_segment,T20,open,Brigade 5: T20 open.
+R024,2020-11-05T09:20:00,social_media,road_segment,T20,flooded,Post: T20 under water.
+R025,2020-11-05T09:25:00,brigade,community,C12,needs_aid,Brigade 5: El Paraiso needs food kits and blankets.
+R026,2020-11-05T09:30:00,brigade,road_segment,T8,open,"Brigade 3: T8 open, some debris on the road."
+R027,2020-11-05T09:35:00,social_media,community,C03,needs_aid,Post: Los Amates has no drinking water.
+R028,2020-11-05T09:40:00,brigade,road_segment,T10,open,Brigade 3: T10 open.
+R029,2020-11-05T09:45:00,official,road_segment,T6,open,Road bulletin: T6 open.
+R030,2020-11-05T09:50:00,brigade,community,C06,stable,"Brigade 4: Rio Blanco families stable, supplies for 24 hours."

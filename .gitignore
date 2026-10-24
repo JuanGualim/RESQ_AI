@@ -19,3 +19,6 @@ logs/*.log
 
 # Agents
 CLAUDE.md
+
+# Context
+/docs/informacion_evento

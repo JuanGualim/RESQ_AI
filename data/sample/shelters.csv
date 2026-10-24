@@ -1,0 +1,5 @@
+id,name,capacity,current_occupancy,road_node
+S1,Escuela Central,400,234,N01
+S2,Salon Comunal Loma Alta,250,213,N02
+S3,Iglesia San Marcos,150,65,N14
+S4,Centro Deportivo Los Amates,300,120,N07

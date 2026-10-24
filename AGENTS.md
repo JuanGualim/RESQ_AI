@@ -2,7 +2,7 @@
 
 > **Read this whole file before touching code.** It is the project's source of truth for people and AI agents (Cursor, Claude Code, Codex). At the end of every work session, update **§8 Current status**, **§9 Next steps** and, if you decided something, **§10 Decision log**.
 
-Last updated: 2026-10-24 (GT) · by: Juan (with Claude Code): whole repo translated to English, contracts renamed
+Last updated: 2026-10-24 (GT) · by: Juan (with Claude Code): repo skeleton, `resq/config.py`, data generator and `data/sample/`
 
 ---
 
@@ -163,9 +163,9 @@ def execute(question: str, event: dict | None = None) -> dict: ...  # {"plan": P
 
 ### Scenario data (tables in Zetaris)
 
-`communities`(id, name, population, pct_children, pct_elderly, vulnerability 1–5, elevation_m, lat, lon, road_node) · `shelters`(id, name, capacity, current_occupancy, road_node) · `warehouses`(id, name, road_node) · `inventory`(warehouse_id, resource, quantity) · `road_segments`(id, origin, destination, distance_km, surface, official_status) · `vehicles`(id, type, capacity_kg, can_ford, warehouse_id) · `field_reports`(id, timestamp, source: official|brigade|social_media, object_type, object_id, reported_status, detail) · `rainfall` (Open-Meteo REST: datetime, precipitation_mm).
+`communities`(id, name, population, pct_children, pct_elderly, vulnerability 1–5, elevation_m, lat, lon, road_node) · `shelters`(id, name, capacity, current_occupancy, road_node) · `warehouses`(id, name, road_node) · `inventory`(warehouse_id, resource, quantity, unit_weight_kg) · `road_segments`(id, origin, destination, distance_km, surface, official_status) · `vehicles`(id, type, capacity_kg, can_ford, warehouse_id) · `field_reports`(id, timestamp, source: official|brigade|social_media, object_type, object_id, reported_status, detail) · `rainfall` (Open-Meteo REST: datetime, precipitation_mm).
 
-Size: 12–15 communities, 3–4 shelters, 2 warehouses, ~20 road segments, 5–8 vehicles, ~30 reports.
+Size: 12–15 communities, 3–4 shelters, 2 warehouses, ~20 road segments, 5–8 vehicles, ~30 reports. Current sample: 14 · 4 · 2 · 21 · 6 · 30, plus 107 hourly rainfall rows. Status vocabularies, scenario story and the list of seeded contradictions: `data/README.md`.
 
 ## 7. Conventions for AI agents and people
 
@@ -189,6 +189,8 @@ python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env        # then fill in real values
 python smoke_test.py        # 3 PASS expected
+python scripts/generate_data.py   # rebuild data/sample/ (add --fetch-rainfall to refresh rainfall.csv)
+pytest                      # unit tests
 # (once they exist)
 python -m resq.run --question "How should we distribute aid right now?"
 streamlit run app/streamlit_app.py
@@ -221,10 +223,15 @@ Done:
 - [x] `docs/PLAN.md` v2: split by machine (Juan / Harry / Chema), timed milestones, stubs to avoid blocking, new contracts, risks R9–R11
 - [x] Project language switched to English: `AGENTS.md`, `docs/PLAN.md`, `.env.example` and `smoke_test.py` translated; contracts and table names renamed (§6)
 - [x] `smoke_test.py` still gives 3 PASS after the translation (2026-10-24)
+- [x] Repo skeleton from §5 (`resq/` packages, `app/`, `logs/`, examples folders, `pytest.ini`)
+- [x] `resq/config.py`: typed settings from `.env`, `SAMPLE_MODE`, lane fallbacks, secrets hidden from `repr` + `tests/test_config.py`
+- [x] `scripts/generate_data.py` (seed `20201105`) → `data/sample/` (8 CSVs) + `data/README.md` + `tests/test_generate_data.py`; rainfall = real Open-Meteo archive of Hurricane Eta up to the decision time 2020-11-05 10:00
+- [x] `pytest`: 25 passed (2026-10-24)
 
 Pending / blocked:
 - [ ] `docs/TEAM_SETUP.md` is referenced but **does not exist**
-- [ ] No code yet: no `resq/` skeleton, no `config.py`, no `data/sample/`
+- [ ] No agent code yet: `schemas.py`, `llm.py`, `zetaris.py`, `world/`, routing, validators and agents are still missing
+- [ ] Scenario data not yet in Postgres / Zetaris (only `data/sample/` CSVs)
 - [ ] Nightshift installed on Harry's Windows machine and exposed over Tailscale (blocked: Harry)
 - [ ] Tailscale between the 3 machines; Zetaris and Nightshift reachable
 - [ ] Harry and Chema setup (smoke test on their machines) (blocked: Harry, Chema)
@@ -235,8 +242,8 @@ Pending / blocked:
 
 Juan, solo, while Harry and Chema are unavailable (all of this works with direct NVIDIA or no model at all):
 
-1. Repo skeleton from §5 + `resq/config.py` (`.env`, `SAMPLE_MODE`) + `docs/TEAM_SETUP.md`; invite collaborators on GitHub.
-2. **`scripts/generate_data.py` (fixed seed) → `data/sample/`** with the seeded contradictions. Top priority: it unblocks everyone.
+1. Share `data/sample/` and `data/README.md` with the team (push) so Chema can start `best_route` and validators on it.
+2. `docs/TEAM_SETUP.md`; invite collaborators on GitHub.
 3. Unblocking stubs for Harry's contracts, telling him first: `resq/schemas.py` (§6) and a minimal `resq/llm.py` that already works with direct NVIDIA.
 4. World Model *90-second proof* on Linux → close R1 → in-memory stub of `resq/world/` with the real contract.
 5. Postgres in Docker + register it in Zetaris + `run_sql` + 10 key queries tested + Open-Meteo `rainfall` table.
@@ -259,4 +266,7 @@ When Harry and Chema are back: 45-minute call to confirm the English contracts (
 | 2026-10-23 | Split by machine: Juan = data + World Model + Reconciler/Risk Analyst; Harry = Nightshift + `llm.py`/graph/Planner/Critic/Explainer + heavy testing + demo; Chema = routing, validators, Intake, UI, protocol, deck | Juan cannot run Nightshift; Chema's machine is modest; Harry has a powerful Windows machine |
 | 2026-10-23 | New contracts: `validate_plan(plan, state) -> list[str]`, `node_<agent>(state) -> dict`, `run.execute(question, event) -> dict` | The UI and the Critic needed a fixed interface to work in parallel |
 | 2026-10-23 | Each owner publishes a stub with the contract before the real version | Avoid blocking in Phase 1 |
+| 2026-10-24 | `inventory` gets a `unit_weight_kg` column | The critic must check vehicle `capacity_kg`, which needs the weight per unit of each resource |
+| 2026-10-24 | Scenario replays Hurricane Eta: rainfall from the Open-Meteo archive (Nov 1–5, 2020, at 15.47, -88.84), decision time 2020-11-05 10:00 local; field reports dated that morning | Real public rainfall that is reproducible (archive, not forecast) and heavy enough to justify the flood |
+| 2026-10-24 | Segment ids keep the `T` prefix (`T1`–`T21`); nodes `N01`–`N16`; segments are undirected | Matches the "block segment T7" demo wording already in the docs |
 | 2026-10-24 | **Everything in the repo and demo is in English** (code, identifiers, docs, prompts, UI, commits). Contracts and tables renamed: `Asignacion`→`Assignment`, `validar_plan`→`validate_plan`, `ejecutar`→`execute`, `comunidades`→`communities`, `tramos`→`road_segments`, etc. (§6) | International event with international judges; renaming now costs nothing because no code exists yet |

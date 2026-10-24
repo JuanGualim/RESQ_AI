@@ -1,0 +1,11 @@
+warehouse_id,resource,quantity,unit_weight_kg
+W1,water_20l,682,20.0
+W1,food_kit,613,12.0
+W1,hygiene_kit,330,3.0
+W1,medical_kit,63,5.0
+W1,blanket,532,1.5
+W2,water_20l,214,20.0
+W2,food_kit,284,12.0
+W2,hygiene_kit,143,3.0
+W2,medical_kit,27,5.0
+W2,blanket,221,1.5

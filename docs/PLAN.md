@@ -94,7 +94,7 @@ Lives in **our own Postgres** (Docker container on Juan's machine) registered as
 | --- | --- |
 | `communities` | id, name, population, pct_children, pct_elderly, vulnerability (1–5), elevation_m, lat, lon, road_node |
 | `shelters` | id, name, capacity, current_occupancy, road_node |
-| `warehouses` / `inventory` | id, name, road_node / warehouse_id, resource, quantity |
+| `warehouses` / `inventory` | id, name, road_node / warehouse_id, resource, quantity, unit_weight_kg |
 | `road_segments` | id, origin, destination, distance_km, surface, official_status |
 | `vehicles` | id, type, capacity_kg, can_ford, warehouse_id |
 | `field_reports` | id, timestamp, source (official · brigade · social_media), object_type, object_id, reported_status, detail |
