@@ -20,7 +20,7 @@ from resq.config import get_settings
 
 TABLES = (
     "communities", "shelters", "warehouses", "inventory",
-    "road_segments", "vehicles", "field_reports", "rainfall",
+    "road_nodes", "road_segments", "vehicles", "field_reports", "rainfall",
 )
 _INT = re.compile(r"-?\d+")
 _FLOAT = re.compile(r"-?\d+\.\d*([eE]-?\d+)?")

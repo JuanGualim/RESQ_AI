@@ -11,6 +11,8 @@ def test_seed_is_idempotent(state):
 def test_state_has_every_table(state):
     assert len(state["communities"]) == 14
     assert len(state["road_segments"]) == 21
+    assert len(state["road_nodes"]) == 16
+    assert state["road_nodes"]["N01"] == {"id": "N01", "lat": 15.47, "lon": -88.84}
     assert state["inventory"]["W1"]["water_20l"]["unit_weight_kg"] == 20.0
     assert state["road_segments"]["T7"]["official_status"] == "open"
     assert "status" not in state["road_segments"]["T7"]

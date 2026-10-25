@@ -177,6 +177,7 @@ COLUMNS = {
     "shelters": ["id", "name", "capacity", "current_occupancy", "road_node"],
     "warehouses": ["id", "name", "road_node"],
     "inventory": ["warehouse_id", "resource", "quantity", "unit_weight_kg"],
+    "road_nodes": ["id", "lat", "lon"],
     "road_segments": ["id", "origin", "destination", "distance_km", "surface", "official_status"],
     "vehicles": ["id", "type", "capacity_kg", "can_ford", "warehouse_id"],
     "field_reports": ["id", "timestamp", "source", "object_type", "object_id", "reported_status", "detail"],
@@ -220,6 +221,8 @@ def build_scenario(seed: int = SEED) -> dict[str, list[dict]]:
         for resource, (low, high) in ranges.items()
     ]
 
+    road_nodes = [{"id": node, "lat": lat, "lon": lon} for node, (lat, lon, _) in NODES.items()]
+
     road_segments = [
         {"id": sid, "origin": origin, "destination": destination, "distance_km": km,
          "surface": surface, "official_status": status}
@@ -245,6 +248,7 @@ def build_scenario(seed: int = SEED) -> dict[str, list[dict]]:
         "shelters": shelters,
         "warehouses": warehouses,
         "inventory": inventory,
+        "road_nodes": road_nodes,
         "road_segments": road_segments,
         "vehicles": vehicles,
         "field_reports": field_reports,

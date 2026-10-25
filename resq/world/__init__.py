@@ -27,7 +27,7 @@ log = logging.getLogger(__name__)
 
 TABLE_TYPES = {
     "communities": "community", "shelters": "shelter", "warehouses": "warehouse",
-    "road_segments": "road_segment", "vehicles": "vehicle", "inventory": "stock",
+    "road_nodes": "road_node", "road_segments": "road_segment", "vehicles": "vehicle", "inventory": "stock",
 }
 TYPE_TABLES = {v: k for k, v in TABLE_TYPES.items()}
 

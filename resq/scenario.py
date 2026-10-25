@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from resq import world
 from resq.tools.zetaris import run_sql, table
 
-SEED_TABLES = ("communities", "shelters", "warehouses", "inventory", "road_segments", "vehicles")
+SEED_TABLES = ("communities", "shelters", "warehouses", "inventory", "road_nodes", "road_segments", "vehicles")
 COORDINATOR_STEP_MIN = 5
 
 

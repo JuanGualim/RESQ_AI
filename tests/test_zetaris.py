@@ -4,7 +4,7 @@ from resq.tools.zetaris import ZetarisError, coerce, run_sql, table
 
 
 def test_sample_mode_reads_every_table():
-    for name in ("communities", "shelters", "warehouses", "inventory", "road_segments", "vehicles", "field_reports", "rainfall"):
+    for name in ("communities", "shelters", "warehouses", "inventory", "road_nodes", "road_segments", "vehicles", "field_reports", "rainfall"):
         assert run_sql(f"SELECT COUNT(*) AS n FROM {table(name)}")[0]["n"] > 0
 
 

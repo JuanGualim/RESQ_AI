@@ -133,7 +133,7 @@ RESQ_AI/
 ├── data/  README.md · sample/*.csv
 ├── input_examples/README.md · output_examples/ (reports, plans, traces of a real run)
 ├── logs/                      # traces (gitignored)
-└── tests/                     # 111 tests, all offline
+└── tests/                     # 112 tests, all offline
 ```
 
 ## 6. Contracts between modules
@@ -182,9 +182,9 @@ def execute(question: str, event: dict | None = None) -> dict: ...
 
 ### Scenario data (tables in Zetaris)
 
-`communities`(id, name, population, pct_children, pct_elderly, vulnerability 1–5, elevation_m, lat, lon, road_node) · `shelters`(id, name, capacity, current_occupancy, road_node) · `warehouses`(id, name, road_node) · `inventory`(warehouse_id, resource, quantity, unit_weight_kg) · `road_segments`(id, origin, destination, distance_km, surface, official_status) · `vehicles`(id, type, capacity_kg, can_ford, warehouse_id) · `field_reports`(id, timestamp, source: official|brigade|social_media, object_type, object_id, reported_status, detail) · `rainfall` (Open-Meteo: datetime, precipitation_mm).
+`communities`(id, name, population, pct_children, pct_elderly, vulnerability 1–5, elevation_m, lat, lon, road_node) · `shelters`(id, name, capacity, current_occupancy, road_node) · `warehouses`(id, name, road_node) · `inventory`(warehouse_id, resource, quantity, unit_weight_kg) · `road_nodes`(id, lat, lon) · `road_segments`(id, origin, destination, distance_km, surface, official_status) · `vehicles`(id, type, capacity_kg, can_ford, warehouse_id) · `field_reports`(id, timestamp, source: official|brigade|social_media, object_type, object_id, reported_status, detail) · `rainfall` (Open-Meteo: datetime, precipitation_mm).
 
-Current sample: 14 communities · 4 shelters · 2 warehouses · 21 segments · 6 vehicles · 30 reports · 107 hourly rainfall rows. Status vocabularies, scenario story and seeded contradictions: `data/README.md`.
+Current sample: 14 communities · 4 shelters · 2 warehouses · 16 road nodes · 21 segments · 6 vehicles · 30 reports · 107 hourly rainfall rows. Status vocabularies, scenario story and seeded contradictions: `data/README.md`.
 
 ## 7. Conventions for AI agents and people
 
@@ -207,7 +207,7 @@ python -m venv .venv && source .venv/bin/activate      # Windows: py -3.12 -m ve
 pip install -r requirements.txt
 cp .env.example .env                                   # then fill in real values
 python smoke_test.py                                   # 3 PASS expected
-pytest                                                 # 111 passed
+pytest                                                 # 112 passed
 python scripts/generate_data.py                        # rebuild data/sample/ (add --fetch-rainfall to refresh rainfall)
 
 cd world_service && npm install && npm run conformance && npm start   # World Model service on :4380 (own terminal)
@@ -251,7 +251,8 @@ Done:
 - [x] **R1 closed:** World Model service over the vendored Meterless reference, conformance **8/8**, Python client + in-memory fallback
 - [x] Six agents + LangGraph graph + CLI: critic loop (max 3), one model review, escalation with exact gap, re-plan on events, "why" answers
 - [x] Real run saved in `output_examples/` (baseline v1 approved after a critic round; block T6 → v2 escalated: critical minimum needs 18,337 kg, fording vehicles carry 13,800 kg)
-- [x] `pytest`: **111 passed** (offline, scripted model)
+- [x] `road_nodes` table for the UI map (in the generator, `data/sample/`, `run_sql` and `get_state()`)
+- [x] `pytest`: **112 passed** (offline, scripted model)
 
 Pending / known issues:
 - [ ] Scenario data not yet in Postgres / Zetaris (`CREATE DATASOURCE resq_pg` + `REGISTER DATASOURCE TABLES`); Open-Meteo REST table in Zetaris
@@ -272,7 +273,7 @@ Juan:
 
 Harry (when available): Nightshift + lanes; run `python scripts/run_demo.py` on Nightshift; confirm `chat_template_kwargs`; tune Planner/Critic/Explainer prompts; heavy test (3 scenarios × 5 runs).
 
-Chema (when available): review `routing.py` / `validators.py` and their tests; Streamlit UI calling `resq.run.execute()` (plan table, schematic map, trace panel, "block segment" button); `input_examples/`.
+Chema (branch `feat/ui-streamlit`): Streamlit UI in `app/streamlit_app.py`, first offline on `output_examples/`, then calling `resq.run.execute()` (plan table, map from `road_nodes` + `road_segments` colored by status, trace panel, escalation banner, "block segment" and "why" buttons); review `routing.py` / `validators.py` and add tests. Juan works in `feat/data-zetaris` on other files; only Juan edits `AGENTS.md` (Chema's notes go in the PR description).
 
 Everyone: 45-minute call to walk through the code and confirm the contracts in §6.
 
@@ -301,3 +302,4 @@ Everyone: 45-minute call to walk through the code and confirm the contracts in �
 | 2026-10-24 | Planner chooses discrete **tiers** (P4.1); code orders by risk (P5.1), gives the P5.2 minimum first and packs vehicles (`packing.py`) | The fast model failed at quantity arithmetic and vehicle packing; decisions stay with the model, math in code |
 | 2026-10-24 | New rules: P1 support factor + uncertain only when reports disagree (threshold 0.65); P5.1 order check in code; P8.2 model review can send a plan back once; P8.2.1 infeasible P5.2 escalates instead of looping | Calibrated on the seeded reports and real runs (a lone old "open" report made the main road uncertain; the Critic's model review looped on wording) |
 | 2026-10-24 | `SAMPLE_MODE` runs the same SQL on SQLite loaded from `data/sample/` | Identical agent code with and without Zetaris |
+| 2026-10-24 | New table `road_nodes(id, lat, lon)`, seeded into the World Model; `get_state()` now includes `road_nodes` | The UI map needs node positions; added on `main` before Chema branches off for the UI |

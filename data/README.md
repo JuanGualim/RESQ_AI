@@ -23,6 +23,7 @@ A fictional riverside municipality during **Hurricane Eta**, replaying the real 
 | `shelters` | 4 | id, name, capacity, current_occupancy, road_node |
 | `warehouses` | 2 | id, name, road_node |
 | `inventory` | 10 | warehouse_id, resource, quantity, unit_weight_kg |
+| `road_nodes` | 16 | id, lat, lon (approximate position of each road node, for maps) |
 | `road_segments` | 21 | id, origin, destination, distance_km, surface (paved · gravel · dirt), official_status (open · flooded · closed) |
 | `vehicles` | 6 | id, type, capacity_kg, can_ford (true · false), warehouse_id |
 | `field_reports` | 30 | id, timestamp, source (official · brigade · social_media), object_type (road_segment · shelter · community), object_id, reported_status, detail |

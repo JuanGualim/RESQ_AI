@@ -116,3 +116,12 @@ def test_rainfall_snapshot_is_valid():
     assert rows[-1]["datetime"] <= generate_data.SCENARIO_TIME
     assert all(float(row["precipitation_mm"]) >= 0 for row in rows)
     assert sum(float(row["precipitation_mm"]) for row in rows) > 100  # Eta was a heavy rain event
+
+
+def test_every_road_node_has_coordinates():
+    tables = generate_data.build_scenario()
+    nodes = {row["id"]: row for row in tables["road_nodes"]}
+    used = {s["origin"] for s in tables["road_segments"]} | {s["destination"] for s in tables["road_segments"]}
+    assert used == set(nodes)
+    for row in nodes.values():
+        assert 15.0 < row["lat"] < 16.0 and -89.5 < row["lon"] < -88.0
