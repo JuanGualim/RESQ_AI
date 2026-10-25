@@ -3,7 +3,10 @@
 Talks to an OpenAI-compatible API: Meterless Nightshift by default, direct
 NVIDIA only in development (both are set in .env). Two lanes:
 
-- fast: thinking off, short answers (Reconciler, Risk Analyst, Explainer)
+- fast: thinking off, short answers, temperature 0 (Reconciler, Risk Analyst, Explainer).
+  At 0.2 the Reconciler decided contested objects differently between runs (T11 open vs
+  uncertain), which changed the plan downstream; these are classifications, not prose,
+  so the lane is deterministic.
 - deep: larger budget (Planner, Critic); thinking only if LANE_DEEP_THINKING=true,
   because with thinking a plan takes longer than the 90 s timeout on direct NVIDIA
 
@@ -23,7 +26,7 @@ from openai import APIError, APITimeoutError, OpenAI
 from resq.config import get_settings
 
 LANES = {
-    "fast": {"thinking": False, "max_tokens": 2000, "temperature": 0.2},
+    "fast": {"thinking": False, "max_tokens": 2000, "temperature": 0.0},
     "deep": {"thinking": False, "max_tokens": 8000, "temperature": 0.2},
 }
 METERLESS_HEADERS = {"meterless-app": "resq-ai", "meterless-scope": "user"}

@@ -3,7 +3,7 @@ import pytest
 
 from resq import llm, scenario, world
 from resq.agents import explainer, intake, planner, reconciler, risk_analyst
-from resq.agents.critic import route_after_critic
+from resq.agents.critic import route_after_critic, stock_cuts
 from resq.schemas import Assignment, Plan, ResqState
 from resq.tools.packing import pack
 from resq.tools.validators import critical_minimum_gaps, validate_plan
@@ -119,6 +119,17 @@ def test_blocking_t6_makes_the_critical_minimum_infeasible(assessed, no_model):
     risk_analyst.node_risk_analyst(ResqState(run_id="test", as_of=scenario.now()))
     gaps = critical_minimum_gaps(world.get_state())
     assert any("fording vehicles carry 13,800 kg" in gap for gap in gaps)
+
+
+def test_critic_tells_stock_cuts_apart_from_other_risks():
+    # Coverage lost to an empty warehouse is scarcity, not a ranking mistake, so the
+    # reason review gets it as its own field instead of buried in the risk list.
+    plan = Plan(risks=["P6.2: C07 water_20l: stock ran out, 10 of 50 units",
+                       "P1.2: T6 blocked by the coordinator",
+                       "P6.2: C12 food_kit: stock ran out, 0 of 30 units"])
+    assert stock_cuts(plan) == ["P6.2: C07 water_20l: stock ran out, 10 of 50 units",
+                                "P6.2: C12 food_kit: stock ran out, 0 of 30 units"]
+    assert stock_cuts(Plan(risks=["P1.2: T6 blocked by the coordinator"])) == []
 
 
 def test_route_after_critic():
