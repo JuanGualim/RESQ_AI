@@ -46,9 +46,24 @@ def build_graph(state: dict, can_ford: bool) -> nx.Graph:
     graph = nx.Graph()
     for segment_id, segment in state.get("road_segments", {}).items():
         if can_pass(segment, can_ford):
-            graph.add_edge(segment["origin"], segment["destination"],
-                           segment_id=segment_id, weight=float(segment["distance_km"]))
+            origin, destination = segment["origin"], segment["destination"]
+            weight = float(segment["distance_km"])
+            current = graph.get_edge_data(origin, destination)
+            # A simple graph keeps the route contract compact. When the road
+            # data contains parallel segments, retain the shortest passable one
+            # instead of whichever row happened to be read last.
+            if current is None or weight < current["weight"]:
+                graph.add_edge(origin, destination, segment_id=segment_id, weight=weight)
     return graph
+
+
+def _known_road_nodes(state: dict) -> set[str]:
+    nodes = set(state.get("road_nodes", {}))
+    for segment in state.get("road_segments", {}).values():
+        nodes.update((segment["origin"], segment["destination"]))
+    for table in PLACE_TABLES:
+        nodes.update(place["road_node"] for place in state.get(table, {}).values())
+    return nodes
 
 
 def best_route(origin: str, destination: str, state: dict, vehicle_id: str) -> Route | None:
@@ -57,6 +72,9 @@ def best_route(origin: str, destination: str, state: dict, vehicle_id: str) -> R
     if vehicle is None:
         raise KeyError(f"unknown vehicle: {vehicle_id}")
     start, end = road_node(origin, state), road_node(destination, state)
+    known_nodes = _known_road_nodes(state)
+    if start not in known_nodes or end not in known_nodes:
+        return None
     if start == end:
         return Route(origin=start, destination=end, nodes=[start], segments=[], distance_km=0.0)
     graph = build_graph(state, as_bool(vehicle.get("can_ford")))

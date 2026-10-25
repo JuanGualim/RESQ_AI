@@ -1,7 +1,7 @@
 import pytest
 
 from resq.schemas import Assignment, Plan
-from resq.tools.validators import validate_plan
+from resq.tools.validators import critical_minimum_gaps, validate_plan
 
 
 def assignment(**overrides):
@@ -61,6 +61,11 @@ def test_disconnected_or_wrong_route(state):
     assert any(v.startswith("P6.3") for v in validate_plan(plan(assignment(route=[])), state))
 
 
+def test_connected_but_non_shortest_route_is_rejected(state):
+    violations = validate_plan(plan(assignment(route=["T3", "T6", "T8"])), state)
+    assert any(v.startswith("P6.3") and "shortest" in v for v in violations)
+
+
 def test_unserved_community_with_assignments(state):
     assert rules(validate_plan(plan(assignment(), unserved=["C04"]), state)) == ["P5.4"]
 
@@ -74,6 +79,14 @@ def test_critical_community_short_of_essentials(state):
     assert any("C14" in v and "served while critical" in v for v in violations)
 
 
+def test_reachable_critical_community_cannot_bypass_minimum_as_unserved(state):
+    state["communities"]["C04"].update(
+        risk_level="critical", reachability="all", needs={"water_20l": 100, "food_kit": 100}
+    )
+    violations = validate_plan(plan(unserved=["C04"]), state)
+    assert any("critical C04 gets 0 water_20l" in v for v in violations)
+
+
 def test_critical_community_with_enough_essentials(state):
     state["communities"]["C04"].update(risk_level="critical", needs={"water_20l": 100, "food_kit": 100})
     plan_ok = plan(assignment(quantity=50), assignment(resource="food_kit", quantity=50, vehicle_id="V2"))
@@ -83,3 +96,13 @@ def test_critical_community_with_enough_essentials(state):
 def test_quantity_must_be_positive():
     with pytest.raises(ValueError):
         assignment(quantity=0)
+
+
+def test_critical_minimum_capacity_only_counts_p5_2_essentials(state):
+    for community in state["communities"].values():
+        community.update(risk_level="low", reachability="all", needs={})
+    state["communities"]["C04"].update(
+        risk_level="critical",
+        needs={"water_20l": 1, "food_kit": 1, "medical_kit": 100_000},
+    )
+    assert critical_minimum_gaps(state) == []
