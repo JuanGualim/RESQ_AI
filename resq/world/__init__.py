@@ -1,9 +1,12 @@
 """World Model integration: the agents' shared, event-sourced domain state.
 
 Contract (AGENTS.md section 6):
-    get_state() -> dict          current scenario state with every verified fact applied
-    apply_event(event) -> None   record a domain event (coordinator action or agent conclusion)
-    history() -> list[dict]      every domain event, in order
+    get_state(as_of=None) -> dict   scenario state with every verified fact applied; with as_of, only
+                                    what had been observed by then ("what did we believe at 09:00?")
+    apply_event(event) -> None      record a domain event (coordinator action or agent conclusion)
+    history() -> list[dict]         every domain event, in order
+    timeline(object_id) -> list     how the belief about one object evolved, with evidence
+    audit() -> list[dict]           the engine's own audit log (every mutation, in order)
 
 Scenario rows are stored as World Model entities; agent conclusions and
 coordinator actions are facts about them, each with provenance (source kind,
@@ -13,14 +16,15 @@ agent, observation time). For a predicate, the most recent observation wins
 from __future__ import annotations
 
 import logging
+from datetime import datetime
 from functools import lru_cache
 
 from resq.config import get_settings
 from resq.world.backends import HttpWorld, MemoryWorld, WorldBackend, WorldError
 
 __all__ = [
-    "WorldError", "apply_event", "backend", "get_state", "history", "latest_plan",
-    "reset", "save_plan", "seed",
+    "WorldError", "apply_event", "audit", "backend", "get_state", "history", "latest_plan",
+    "reset", "save_plan", "seed", "timeline",
 ]
 
 log = logging.getLogger(__name__)
@@ -95,9 +99,11 @@ def history() -> list[dict]:
     return [{**fact["value"], "seq": fact["seq"]} for fact in backend().facts()]
 
 
-def _current_facts() -> dict[tuple[str, str], dict[str, dict]]:
+def _current_facts(as_of: str | None = None) -> dict[tuple[str, str], dict[str, dict]]:
     current: dict[tuple[str, str], dict[str, dict]] = {}
     for fact in backend().facts():
+        if as_of is not None and fact["at"] > as_of:
+            continue  # not observed yet at that moment
         slot = current.setdefault((fact["type"], fact["id"]), {})
         previous = slot.get(fact["predicate"])
         if previous is None or (fact["at"], fact["seq"]) >= (previous["at"], previous["seq"]):
@@ -105,8 +111,14 @@ def _current_facts() -> dict[tuple[str, str], dict[str, dict]]:
     return current
 
 
-def get_state() -> dict:
-    """Scenario state with verified facts applied (the input of routing, validators and agents)."""
+def get_state(as_of: str | None = None) -> dict:
+    """Scenario state with verified facts applied (the input of routing, validators and agents).
+
+    With `as_of` (ISO scenario time), only facts observed up to that moment are applied, so the
+    state is what the system believed then. Scenario rows themselves are not versioned.
+    """
+    if as_of is not None:
+        as_of = datetime.fromisoformat(as_of.replace(" ", "T")).strftime("%Y-%m-%dT%H:%M:%S")
     state: dict = {table: {} for table in TABLE_TYPES}
     for entity in backend().entities():
         table = TYPE_TABLES.get(entity["type"])
@@ -118,7 +130,7 @@ def get_state() -> dict:
             "quantity": row["quantity"], "unit_weight_kg": row["unit_weight_kg"]}
     state["inventory"] = inventory
 
-    for (entity_type, entity_id), predicates in _current_facts().items():
+    for (entity_type, entity_id), predicates in _current_facts(as_of).items():
         table = TYPE_TABLES.get(entity_type)
         record = state.get(table, {}).get(entity_id) if table else None
         if record is None:
@@ -145,3 +157,18 @@ def save_plan(plan: dict, ts: str, run_id: str | None = None) -> None:
 def latest_plan() -> dict | None:
     plans = [e for e in history() if e.get("type") == "plan_published"]
     return max(plans, key=lambda e: e["plan"]["version"])["plan"] if plans else None
+
+
+def timeline(object_id: str) -> list[dict]:
+    """Every fact recorded about one object (segment, shelter, community, plan), in observation order."""
+    facts = [f for f in backend().facts() if f["id"] == object_id]
+    facts.sort(key=lambda f: (f["at"], f["seq"]))
+    keep = ("type", "status", "risk_level", "risk_score", "confidence", "evidence", "reason", "by", "decided_by")
+    return [{"seq": f["seq"], "at": f["at"], "predicate": f["predicate"], "source": f["source"].get("kind"),
+             **{k: f["value"][k] for k in keep if isinstance(f["value"], dict) and k in f["value"]}}
+            for f in facts]
+
+
+def audit() -> list[dict]:
+    """The World Model's audit log: one entry per mutation (seq, at, kind, actor, summary)."""
+    return backend().audit()
