@@ -24,14 +24,14 @@ from resq.run import execute  # noqa: E402
 OUT_DIR = ROOT_DIR / "output_examples"
 
 
-def save(step: str, result: dict) -> None:
-    OUT_DIR.mkdir(exist_ok=True)
-    (OUT_DIR / f"{step}_report.md").write_text(result["report"], encoding="utf-8")
+def save(step: str, result: dict, out_dir: Path = OUT_DIR) -> None:
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / f"{step}_report.md").write_text(result["report"], encoding="utf-8")
     plan = result["plan"].model_dump() if result["plan"] else None
-    (OUT_DIR / f"{step}_plan.json").write_text(json.dumps(plan, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    (out_dir / f"{step}_plan.json").write_text(json.dumps(plan, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     trace_file = get_settings().logs_dir / f"trace_{result['run_id']}.jsonl"
     if trace_file.exists():
-        shutil.copy(trace_file, OUT_DIR / f"{step}_trace.jsonl")
+        shutil.copy(trace_file, out_dir / f"{step}_trace.jsonl")
     print(f"{step}: plan v{plan['version'] if plan else '-'} · {len(plan['assignments']) if plan else 0} assignments · "
           f"escalated={result['escalated']} · {len(result['trace'])} trace steps")
 
@@ -39,15 +39,16 @@ def save(step: str, result: dict) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--segment", default="T6", help="road segment the coordinator blocks (default T6)")
+    parser.add_argument("--out", type=Path, default=OUT_DIR, help="output folder (default output_examples/)")
     args = parser.parse_args()
 
     settings = get_settings()
     print(f"data={'SAMPLE_MODE' if settings.sample_mode else 'Zetaris'} · world={world.backend().name} · "
           f"model={settings.lane_model('fast')} @ {settings.model_base_url.split('/')[2] if settings.model_base_url else '-'}")
     world.reset()
-    save("01_baseline", execute("How should we distribute aid right now?"))
-    save(f"02_block_{args.segment}", execute("", {"type": "segment_blocked", "id": args.segment, "source": "coordinator"}))
-    save("03_why", execute("Why did the plan change?"))
+    save("01_baseline", execute("How should we distribute aid right now?"), args.out)
+    save(f"02_block_{args.segment}", execute("", {"type": "segment_blocked", "id": args.segment, "source": "coordinator"}), args.out)
+    save("03_why", execute("Why did the plan change?"), args.out)
     return 0
 
 

@@ -2,7 +2,7 @@
 
 > **Read this whole file before touching code.** It is the project's source of truth for people and AI agents (Cursor, Claude Code, Codex). At the end of every work session, update **§8 Current status**, **§9 Next steps** and, if you decided something, **§10 Decision log**.
 
-Last updated: 2026-10-24 (GT) · by: Juan (with Claude Code): first end-to-end version (tools, World Model service, six agents, graph, CLI, examples)
+Last updated: 2026-10-25 (GT) · by: Juan (with Claude Code): scenario in Postgres, registered in Zetaris as `resq_pg`; demo runs on Zetaris data; Tailscale
 
 ---
 
@@ -94,7 +94,9 @@ Framework: **LangGraph** (`resq/graph.py`). Graph state = `ResqState` (pydantic)
 - Headers: `Authorization: Bearer {ZETARIS_API_KEY}`, `X-Org-ID: {ZETARIS_ORG_ID}`, `X-Request-ID: <new uuid4>`
 - Body: `{"queryId": "<uuid4>", "sql": "<ONE statement>", "source": "SqlEditor", "limit": N}`
 - **Lightning SQL** dialect. **One statement per request**, no trailing `;`, qualified names `<datasource>.<table>` (use `table("communities")`). Reference: http://localhost:8888/redoc/index.html and https://github.com/zetaris/getting-started (its `AGENTS.md`)
-- Register our Postgres: `CREATE DATASOURCE resq_pg DESCRIBE BY "PostgreSQL" OPTIONS (jdbcdriver "org.postgresql.Driver", jdbcurl "jdbc:postgresql://…", …)` then `REGISTER DATASOURCE TABLES FROM resq_pg` (see the Zetaris guide `docs/guides/zetaris-lightning-sql-commands.md` §4). Not done yet.
+- Our Postgres is registered: `scripts/register_zetaris.py` runs `CREATE DATASOURCE resq_pg DESCRIBE BY "…" OPTIONS (jdbcdriver, jdbcurl "jdbc:postgresql://resq-postgres:5432/resq", username, password, fetchsize)` and `REGISTER DATASOURCE TABLES FROM resq_pg`. The description only accepts letters, digits and `_ . - ,` (no spaces). Tables are queried as `resq_pg.<table>`; reserved-word columns (`timestamp`, `datetime`) work unquoted.
+- Postgres runs in `docker-compose.yml` as `resq-postgres` on the **`zetaris_default` Docker network** (Zetaris reaches it by container name) and on `127.0.0.1:5433` for the loader. Credentials `RESQ_PG_*` live in `.env`.
+- Over Tailscale: Juan's IP is `100.85.62.9`; the UI (`:3000`) listens on all interfaces, the REST API is published with `tailscale serve --tcp 8888` because it only binds to `127.0.0.1`.
 - Zetaris **does not read files from the laptop**. Never use port 8889 (internal).
 
 ### Talking to Nightshift
@@ -129,11 +131,12 @@ RESQ_AI/
 │   └── run.py                 # CLI + execute()
 ├── world_service/             # Node service over the vendored Meterless World Model reference
 ├── app/                       # Streamlit UI (to do)
-├── scripts/  generate_data.py · run_demo.py
+├── docker-compose.yml         # scenario Postgres (resq-postgres) for Zetaris
+├── scripts/  generate_data.py · load_postgres.py · register_zetaris.py · run_demo.py
 ├── data/  README.md · sample/*.csv
 ├── input_examples/README.md · output_examples/ (reports, plans, traces of a real run)
 ├── logs/                      # traces (gitignored)
-└── tests/                     # 112 tests, all offline
+└── tests/                     # 116 tests, all offline
 ```
 
 ## 6. Contracts between modules
@@ -207,8 +210,9 @@ python -m venv .venv && source .venv/bin/activate      # Windows: py -3.12 -m ve
 pip install -r requirements.txt
 cp .env.example .env                                   # then fill in real values
 python smoke_test.py                                   # 3 PASS expected
-pytest                                                 # 112 passed
+pytest                                                 # 116 passed
 python scripts/generate_data.py                        # rebuild data/sample/ (add --fetch-rainfall to refresh rainfall)
+docker compose up -d && python scripts/load_postgres.py && python scripts/register_zetaris.py   # Zetaris host only
 
 cd world_service && npm install && npm run conformance && npm start   # World Model service on :4380 (own terminal)
 
@@ -216,7 +220,7 @@ python -m resq.run --reset
 python -m resq.run --question "How should we distribute aid right now?"
 python -m resq.run --event block:T6
 python -m resq.run --question "Why did the plan change?"
-python scripts/run_demo.py                             # baseline + block T6 + why → output_examples/
+python scripts/run_demo.py                             # baseline + block T6 + why → output_examples/ (--out <dir> elsewhere)
 ```
 
 ### Environment variables
@@ -227,6 +231,7 @@ python scripts/run_demo.py                             # baseline + block T6 + w
 | `ZETARIS_REST_URL`, `ZETARIS_ORG_ID`, `ZETARIS_API_KEY` | Zetaris REST API |
 | `ZETARIS_DATASOURCE` | Datasource of our tables in Zetaris (default `resq_pg`) |
 | `ZETARIS_RAINFALL_TABLE` | Qualified Open-Meteo REST table, if not `<datasource>.rainfall` |
+| `RESQ_PG_DB`, `RESQ_PG_USER`, `RESQ_PG_PASSWORD`, `RESQ_PG_PORT` | Scenario Postgres (Zetaris host only); `RESQ_PG_HOST_FOR_ZETARIS` = how Zetaris reaches it (default `resq-postgres:5432`) |
 | `METERLESS_BASE_URL`, `METERLESS_RUNTIME_TOKEN`, `METERLESS_MODEL` | Nightshift (primary provider) |
 | `MODEL_BASE_URL`, `MODEL_API_KEY`, `NEMOTRON_MODEL` | Active model (Nightshift by default; direct NVIDIA only in development) |
 | `LANE_FAST_MODEL`, `LANE_DEEP_MODEL` | Model per lane (both default to `NEMOTRON_MODEL`) |
@@ -239,7 +244,7 @@ python scripts/run_demo.py                             # baseline + block T6 + w
 
 ## 8. Current status
 
-**Current phase: 1→2.** The Phase 1 gate is met (`python -m resq.run` prints a real plan) and most of Phase 2 works end to end, on `SAMPLE_MODE` + direct NVIDIA + the real World Model service. Not yet on Zetaris data or Nightshift.
+**Current phase: 2.** The system runs end to end on **Zetaris data** (`SAMPLE_MODE=false`) + the real World Model service + direct NVIDIA. Not yet on Nightshift. Harry and Chema are working in parallel (branches `feat/llm-nightshift`, `feat/ui-streamlit`); Juan's data work is in `feat/data-zetaris`.
 
 Done:
 - [x] Track 3 chosen; RESQ AI idea defined; repo in English (code, docs, contracts)
@@ -252,13 +257,16 @@ Done:
 - [x] Six agents + LangGraph graph + CLI: critic loop (max 3), one model review, escalation with exact gap, re-plan on events, "why" answers
 - [x] Real run saved in `output_examples/` (baseline v1 approved after a critic round; block T6 → v2 escalated: critical minimum needs 18,337 kg, fording vehicles carry 13,800 kg)
 - [x] `road_nodes` table for the UI map (in the generator, `data/sample/`, `run_sql` and `get_state()`)
-- [x] `pytest`: **112 passed** (offline, scripted model)
+- [x] Tailscale up (Juan `100.85.62.9`); Zetaris REST published with `tailscale serve`; Harry and Chema invited
+- [x] Scenario in our own Postgres (`docker-compose.yml`, `scripts/load_postgres.py`), registered in Zetaris as `resq_pg` (`scripts/register_zetaris.py`); every agent query returns the same rows as `SAMPLE_MODE`
+- [x] Demo on Zetaris data: baseline v1 approved after 2 critic rounds; block T6 → v2 escalated with the same 18,337 kg vs 13,800 kg gap
+- [x] `pytest`: **116 passed** (offline, scripted model)
 
 Pending / known issues:
-- [ ] Scenario data not yet in Postgres / Zetaris (`CREATE DATASOURCE resq_pg` + `REGISTER DATASOURCE TABLES`); Open-Meteo REST table in Zetaris
+- [ ] Optional: Open-Meteo as a live Zetaris REST table (today rainfall is a snapshot in Postgres)
+- [ ] Give Harry (and Chema) a separate Zetaris API token, by private message
 - [ ] Nightshift not tested (Harry): lanes, `chat_template_kwargs` forwarding, deep model choice
 - [ ] Streamlit UI not started (Chema)
-- [ ] Tailscale not installed; Zetaris not exposed to the team
 - [ ] Model quality: the Explainer sometimes mixes up facts (e.g. "fording" vs "non-fording"); the Critic's model review sometimes flags non-issues (it can only send a plan back once). Prompt tuning = Harry
 - [ ] Reconciler model decisions vary between runs (T11 open vs uncertain), so plans vary slightly; consider temperature 0 for the fast lane
 - [ ] `README.md` for judges is a first version; final pass in Phase 4
@@ -267,9 +275,10 @@ Pending / known issues:
 ## 9. Next steps (in order)
 
 Juan:
-1. Put the scenario in our own Postgres (Docker), register it in Zetaris as `resq_pg`, run the demo with `SAMPLE_MODE=false` and compare with `output_examples/`.
-2. Open-Meteo as a Zetaris REST table (archive URL in `scripts/generate_data.py`), or keep `rainfall` in Postgres if the REST table is not reproducible.
-3. Install Tailscale and expose Zetaris for Harry and Chema.
+1. Merge `feat/data-zetaris` into `main`; send Harry a separate Zetaris API token by private message.
+2. Make the Reconciler more stable between runs (temperature 0 or more code-decided objects) and review the Risk Analyst summary.
+3. Ask in HackOS whether the vendored World Model reference counts as a working engine (§10, R1).
+4. Optional: Open-Meteo as a live Zetaris REST table, if time allows.
 
 Harry (when available): Nightshift + lanes; run `python scripts/run_demo.py` on Nightshift; confirm `chat_template_kwargs`; tune Planner/Critic/Explainer prompts; heavy test (3 scenarios × 5 runs).
 
@@ -303,3 +312,6 @@ Everyone: 45-minute call to walk through the code and confirm the contracts in �
 | 2026-10-24 | New rules: P1 support factor + uncertain only when reports disagree (threshold 0.65); P5.1 order check in code; P8.2 model review can send a plan back once; P8.2.1 infeasible P5.2 escalates instead of looping | Calibrated on the seeded reports and real runs (a lone old "open" report made the main road uncertain; the Critic's model review looped on wording) |
 | 2026-10-24 | `SAMPLE_MODE` runs the same SQL on SQLite loaded from `data/sample/` | Identical agent code with and without Zetaris |
 | 2026-10-24 | New table `road_nodes(id, lat, lon)`, seeded into the World Model; `get_state()` now includes `road_nodes` | The UI map needs node positions; added on `main` before Chema branches off for the UI |
+| 2026-10-25 | Scenario Postgres = `resq-postgres` container on the `zetaris_default` network, host port `127.0.0.1:5433`; tables recreated from `data/sample/` with explicit types; timestamps kept as ISO text | Zetaris (in Docker) reaches it by name; 5432 is taken by Zetaris' own Postgres; text timestamps keep the same string comparisons in Zetaris and SQLite |
+| 2026-10-25 | Rainfall lives in Postgres (archive snapshot) instead of a live Open-Meteo REST table | Reproducible runs; the REST table stays optional |
+| 2026-10-25 | Zetaris REST published on the tailnet with `tailscale serve --tcp 8888` (UI on `:3000` already listens on all interfaces) | The API container binds to `127.0.0.1` only; no change to the Zetaris bundle |

@@ -3,7 +3,7 @@
 All data is **synthetic** except rainfall. The municipality, communities, people counts, roads, vehicles and field reports are fictional. Rainfall is a real public snapshot from the [Open-Meteo archive](https://open-meteo.com/en/docs/historical-weather-api) (no API key).
 
 - Generator: `scripts/generate_data.py` (fixed seed `20201105`, so every run gives identical CSVs)
-- Sample copy: `data/sample/*.csv`, used when `SAMPLE_MODE=true`. In normal mode the same tables live in our Postgres, registered in Zetaris
+- Sample copy: `data/sample/*.csv`, used when `SAMPLE_MODE=true`. In normal mode the same tables live in our Postgres (`docker-compose.yml`, loaded by `scripts/load_postgres.py`), registered in Zetaris as `resq_pg` (`scripts/register_zetaris.py`). Rainfall is stored in Postgres too, so runs are reproducible
 - Times are local (America/Guatemala, UTC-6)
 
 ```bash
