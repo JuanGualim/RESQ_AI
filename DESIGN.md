@@ -137,8 +137,9 @@ The palette is a cool, low-glare night board with one warm action signal and tig
 
 ## Typography
 
-**Display Font:** Dispatch Condensed, the locally hosted Barlow Condensed family, with sans-serif fallback  
-**Body Font:** Sans-serif, inherited from the Streamlit dark theme  
+**Display Font:** Dispatch Condensed, the locally hosted Barlow Condensed family, with sans-serif fallback
+
+**Body Font:** Sans-serif, inherited from the Streamlit dark theme
 **Label Font:** Dispatch Condensed with sans-serif fallback
 
 **Character:** The pairing feels precise and time-sensitive without sacrificing reading comfort. Condensed type compresses operational identity and metadata; the body face carries reasons, reports, trace summaries, and longer risk language.
