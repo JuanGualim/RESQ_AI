@@ -32,6 +32,9 @@ def client(monkeypatch):
 
 @pytest.fixture(autouse=True)
 def model_env(monkeypatch):
+    # The fast lane falls back to NEMOTRON_MODEL only when LANE_FAST_MODEL is unset,
+    # so drop it: a developer's .env must not change what these tests see.
+    monkeypatch.delenv("LANE_FAST_MODEL", raising=False)
     monkeypatch.setenv("NEMOTRON_MODEL", "nvidia/nemotron-test")
     monkeypatch.setenv("LANE_DEEP_MODEL", "nvidia/nemotron-deep-test")
     monkeypatch.setenv("LANE_DEEP_THINKING", "true")
