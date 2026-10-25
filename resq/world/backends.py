@@ -23,6 +23,7 @@ class WorldBackend(Protocol):
     def assert_fact(self, fact: dict) -> None: ...
     def entities(self) -> list[dict]: ...
     def facts(self) -> list[dict]: ...
+    def audit(self) -> list[dict]: ...
     def reset(self) -> None: ...
 
 
@@ -58,6 +59,9 @@ class HttpWorld:
     def facts(self) -> list[dict]:
         return self._call("GET", "/facts")
 
+    def audit(self) -> list[dict]:
+        return self._call("GET", "/audit")
+
     def reset(self) -> None:
         self._call("POST", "/reset")
 
@@ -71,7 +75,11 @@ class MemoryWorld:
     def reset(self) -> None:
         self._entities: dict[tuple[str, str], dict] = {}
         self._facts: list[dict] = []
+        self._audit: list[dict] = []
         self._seq = 0
+
+    def _log(self, kind: str, actor: str, summary: str, at: str) -> None:
+        self._audit.append({"seq": len(self._audit) + 1, "at": at, "kind": kind, "actor": actor, "summary": summary})
 
     def upsert_entities(self, entities: list[dict]) -> dict:
         written = 0
@@ -84,6 +92,7 @@ class MemoryWorld:
             self._entities[key] = {"type": item["type"], "id": item["id"], "attrs": merged, "updatedAt": item["at"]}
             self._seq += 1
             written += 1
+            self._log("upsertEntity", item.get("by", "loader"), f"{item['type']}:resq:{item['id']}", item["at"])
         return {"written": written, "skipped": len(entities) - written}
 
     def assert_fact(self, fact: dict) -> None:
@@ -99,9 +108,14 @@ class MemoryWorld:
             "predicate": fact["predicate"], "value": fact["value"], "confidence": fact.get("confidence", 0.5),
             "source": fact["source"], "at": fact["source"]["at"], "_signature": signature,
         })
+        self._log("assertFact", fact["source"].get("by") or fact["source"]["kind"],
+                  f"{fact['about_type']}:resq:{fact['about_id']}.{fact['predicate']}", fact["source"]["at"])
 
     def entities(self) -> list[dict]:
         return [dict(e) for e in self._entities.values()]
 
     def facts(self) -> list[dict]:
         return [{k: v for k, v in f.items() if k != "_signature"} for f in self._facts]
+
+    def audit(self) -> list[dict]:
+        return [dict(entry) for entry in self._audit]

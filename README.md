@@ -19,14 +19,14 @@ question / event ─► Intake ─► Reconciler ─► Risk Analyst ─► Plan
 - **Escalation:** if the protocol minimum is infeasible (e.g. after blocking segment T6, critical communities need 17,952 kg of water and food but the fording vehicles carry 13,800 kg), the plan is marked `escalated` with the reason.
 - **Traceability:** every step writes a JSONL trace line; every fact in the World Model carries its provenance and evidence (report ids).
 
-Domain rules: [`docs/protocol.md`](docs/protocol.md) · Scenario data: [`data/README.md`](data/README.md) · Example outputs: [`output_examples/`](output_examples/)
+Architecture: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) · Domain rules: [`docs/protocol.md`](docs/protocol.md) · Scenario data: [`data/README.md`](data/README.md) · Example outputs: [`output_examples/`](output_examples/)
 
 ## Sponsor technology: where it is used
 
 | Sponsor | Where | How |
 | --- | --- | --- |
 | **Zetaris** | `resq/tools/zetaris.py` | The agents' only data source: every scenario table is read with Lightning SQL over Zetaris' REST API |
-| **Meterless World Model** | `world_service/`, `resq/world/` | Shared, event-sourced state of all agents: scenario entities, verified facts, risk assessments, coordinator events and published plans. The Explainer reads its history to explain re-plans. Conformance suite: 8/8 |
+| **Meterless World Model** | `world_service/`, `resq/world/` | Shared, event-sourced state of all agents: scenario entities, verified facts, risk assessments, coordinator events and published plans. The Explainer reads its history to explain re-plans; `python -m resq.world` shows timelines, point-in-time state and the audit log. Conformance suite: 8/8 |
 | **Meterless Nightshift** | `resq/llm.py` | Primary model provider (OpenAI-compatible API, `meterless-app` headers) |
 | **NVIDIA Nemotron** | `resq/llm.py` lanes | `nvidia/nemotron-3.5-lightning-30b-a3b` on the fast lane; deep lane configurable |
 | **Cursor** | development | IDE used by the team (with Claude Code and Codex) |
@@ -40,7 +40,7 @@ python -m venv .venv
 source .venv/bin/activate              # Windows: .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 cp .env.example .env                   # set MODEL_* and SAMPLE_MODE=true
-pytest                                 # 137 tests, offline
+pytest                                 # 142 tests, offline
 ```
 
 Start the World Model service in its own terminal:
