@@ -121,6 +121,9 @@ def main() -> int:
                         help="run only this scenario (repeatable; default: all)")
     args = parser.parse_args()
     chosen = args.scenario or sorted(SCENARIOS)
+    # A battery runs for tens of minutes, often with its output redirected to a file;
+    # without this, progress sits in the buffer until the very end.
+    sys.stdout.reconfigure(line_buffering=True)
 
     settings = get_settings()
     header = {
