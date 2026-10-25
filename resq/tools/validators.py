@@ -10,7 +10,7 @@ from collections import defaultdict
 
 from resq.protocol import CRITICAL_ESSENTIALS, CRITICAL_MIN_SHARE, MAX_TRIPS_PER_VEHICLE, PRIORITY_GAP, TIERS
 from resq.schemas import Assignment, Plan
-from resq.tools.routing import as_bool, can_pass, road_node
+from resq.tools.routing import as_bool, best_route, can_pass, road_node
 
 
 def validate_plan(plan: Plan, state: dict) -> list[str]:
@@ -76,6 +76,13 @@ def _check_route(label: str, a: Assignment, vehicle: dict, state: dict) -> list[
         node = segment["destination"] if node == segment["origin"] else segment["origin"]
     if node != end:
         problems.append(f"P6.3: {label}: route ends at {node}, not at {a.community_id} ({end})")
+    if not problems:
+        expected = best_route(a.origin_id, a.community_id, state, a.vehicle_id)
+        if expected is None:
+            problems.append(f"P6.3: {label}: no passable route exists from {start} to {end}")
+        elif a.route != expected.segments:
+            expected_text = ", ".join(expected.segments) or "an empty route"
+            problems.append(f"P6.3: {label}: route is not the shortest passable route (expected {expected_text})")
     return problems
 
 
@@ -122,7 +129,7 @@ def _check_critical_first(plan: Plan, state: dict) -> list[str]:
     delivered = _delivered(plan)
     short = []
     for community_id, community in sorted(communities.items()):
-        if community.get("risk_level") != "critical" or community_id in plan.unserved:
+        if community.get("risk_level") != "critical" or community.get("reachability") == "none":
             continue
         needs = community.get("needs") or {}
         for resource in CRITICAL_ESSENTIALS:
@@ -176,9 +183,8 @@ def _check_priority_order(plan: Plan, state: dict) -> list[str]:
 
 
 def critical_minimum_gaps(state: dict) -> list[str]:
-    """Can P5.2 be met at all? Compares the 'minimum' tier of every reachable critical community
-    with total stock and with the capacity of the vehicles that can reach them."""
-    minimum = TIERS["minimum"]
+    """Can P5.2 be met at all for water and food at their minimum shares?"""
+    minimum = {resource: TIERS["minimum"][resource] for resource in CRITICAL_ESSENTIALS}
     critical = {cid: c for cid, c in state.get("communities", {}).items()
                 if c.get("risk_level") == "critical" and c.get("reachability") in ("all", "ford_only")}
     weights: dict[str, float] = {}
@@ -195,7 +201,7 @@ def critical_minimum_gaps(state: dict) -> list[str]:
         if required > stock[resource]:
             gaps.append(f"P5.2 infeasible: critical communities need at least {required} {resource}, stock is {stock[resource]}")
     def minimum_kg(communities) -> float:
-        return sum(int(c.get("needs", {}).get(r, 0)) * share * weights.get(r, 0)
+        return sum(math.ceil(int(c.get("needs", {}).get(r, 0)) * share) * weights.get(r, 0)
                    for c in communities for r, share in minimum.items())
     vehicles = state.get("vehicles", {}).values()
     fording_kg = sum(MAX_TRIPS_PER_VEHICLE * float(v["capacity_kg"]) for v in vehicles if as_bool(v.get("can_ford")))

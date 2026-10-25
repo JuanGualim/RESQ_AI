@@ -50,6 +50,18 @@ def test_same_node_is_an_empty_route(state):
     assert best_route("W1", "N01", state, "V1").segments == []
 
 
+def test_unknown_same_node_does_not_create_a_route(state):
+    assert best_route("missing", "missing", state, "V1") is None
+
+
+def test_parallel_segments_keep_the_shortest_passable_edge(state):
+    state["road_segments"]["T99"] = {
+        "id": "T99", "origin": "N01", "destination": "N04",
+        "distance_km": 99.0, "official_status": "open", "status": "open",
+    }
+    assert best_route("W1", "C04", state, "V1").segments == ["T3", "T7"]
+
+
 def test_unknown_vehicle_raises(state):
     with pytest.raises(KeyError):
         best_route("W1", "C04", state, "V99")
