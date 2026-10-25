@@ -118,7 +118,8 @@ RESQ_AI/
 ├── AGENTS.md · CLAUDE.md (local only) · README.md · requirements.txt · .env.example · pytest.ini
 ├── smoke_test.py              # checks Zetaris + model (from the official guide)
 ├── DESIGN.md · PRODUCT.md · .streamlit/ · .impeccable/   # UI design notes and theme (Chema)
-├── docs/  PLAN.md · TEAM_SETUP.md · protocol.md (rules P1–P8) · VIDEO_SCRIPT.md · DECK_OUTLINE.md
+├── .github/workflows/tests.yml   # CI: offline pytest (Python 3.12) + World Model conformance (Node 22)
+├── docs/  ARCHITECTURE.md · PLAN.md · TEAM_SETUP.md · protocol.md (rules P1–P8) · VIDEO_SCRIPT.md · DECK_OUTLINE.md
 ├── resq/
 │   ├── config.py              # Settings from .env (get_settings)
 │   ├── protocol.py            # constants of docs/protocol.md
@@ -126,7 +127,7 @@ RESQ_AI/
 │   ├── llm.py                 # chat / chat_json → Nightshift (or NVIDIA in dev)
 │   ├── trace.py               # JSONL trace → logs/trace_<run_id>.jsonl
 │   ├── scenario.py            # seed the World Model from SQL; scenario clock
-│   ├── world/                 # World Model client (HttpWorld, MemoryWorld)
+│   ├── world/                 # World Model client (HttpWorld, MemoryWorld) + `python -m resq.world` inspector
 │   ├── tools/  zetaris.py · routing.py · validators.py · packing.py
 │   ├── agents/ intake · reconciler · risk_analyst · planner · critic · explainer · common
 │   ├── graph.py               # LangGraph graph
@@ -138,7 +139,7 @@ RESQ_AI/
 ├── data/  README.md · sample/*.csv
 ├── input_examples/README.md · output_examples/ (reports, plans, traces of a real run)
 ├── logs/                      # traces (gitignored)
-└── tests/                     # 137 tests, all offline
+└── tests/                     # 142 tests, all offline
 ```
 
 ## 6. Contracts between modules
@@ -158,6 +159,8 @@ def chat_json(messages, lane="fast", max_tokens=None) -> tuple[object, dict]: ..
 def get_state() -> dict: ...                 # tables keyed by id + verified facts (status, risk_level, needs, …)
 def apply_event(event: dict) -> None: ...    # {"type": "segment_blocked", "id": "T6", "source": "coordinator", "ts": "2020-11-05T10:05:00"}
 def history() -> list[dict]: ...             # domain events in write order, each with "seq"
+def get_state(as_of="2020-11-05T10:00")       # optional: only facts observed by then
+def timeline(object_id) -> list[dict] / audit() -> list[dict]   # belief history of one object / engine audit log
 def seed(tables, at) / save_plan(plan, ts) / latest_plan() / reset()
 # event types: segment_blocked · segment_reopened · segment_status_verified · shelter_status_verified ·
 #              community_status_verified · community_risk_assessed · plan_published
@@ -212,7 +215,7 @@ python -m venv .venv && source .venv/bin/activate      # Windows: py -3.12 -m ve
 pip install -r requirements.txt
 cp .env.example .env                                   # then fill in real values
 python smoke_test.py                                   # 3 PASS expected
-pytest                                                 # 137 passed
+pytest                                                 # 142 passed
 python scripts/generate_data.py                        # rebuild data/sample/ (add --fetch-rainfall to refresh rainfall)
 docker compose up -d && python scripts/load_postgres.py && python scripts/register_zetaris.py   # Zetaris host only
 
@@ -225,6 +228,7 @@ python -m resq.run --question "Why did the plan change?"
 python scripts/run_demo.py                             # baseline + block T6 + why → output_examples/ (--out <dir> elsewhere)
 python scripts/heavy_test.py --runs 5                  # battery: block T6 / T3 / T20 × N runs → logs/heavy_test_<stamp>.json
 streamlit run app/streamlit_app.py                     # coordinator dashboard
+python -m resq.world summary                           # World Model: summary | timeline T7 | state --at <ts> | audit
 ```
 
 ### Environment variables
@@ -264,7 +268,8 @@ Done:
 - [x] **Chema (PR #3):** routing/validator hardening — shortest passable edge kept for parallel segments, unknown nodes return no route, `validate_plan` rejects non-shortest routes (P6.3), a reachable critical community cannot dodge P5.2 by being listed as unserved, `critical_minimum_gaps` counts only water + food (P5.2) → the T6 gap is now **17,952 kg vs 13,800 kg**
 - [x] **Chema (PR #3):** Streamlit dashboard (`app/streamlit_app.py` + tests), `docs/VIDEO_SCRIPT.md`, `docs/DECK_OUTLINE.md`, `DESIGN.md`, `PRODUCT.md`
 - [x] **Harry (PR #2):** `scripts/heavy_test.py` (block T6 / T3 / T20 × N runs: latency per agent, critic rounds, escalations, failures) + tests; fast lane at temperature 0; Critic gets packing `stock_cuts` separately so scarcity is not flagged as a priority inversion; Explainer must not swap domain terms (fording / non-fording, blocked / open)
-- [x] `pytest`: **137 passed** (offline, scripted model)
+- [x] **Juan (branch `feat/world-model-ci-docs`):** CI on GitHub Actions (offline pytest on Python 3.12 + World Model conformance); World Model point-in-time state, per-object timelines, audit and `python -m resq.world` inspector; judge-facing `docs/ARCHITECTURE.md`; full-history secret scan clean
+- [x] `pytest`: **142 passed** (offline, scripted model; also verified on Python 3.12 in a clean copy without `.env`)
 
 Pending / known issues:
 - [ ] **Nightshift not tested** (Harry): lanes, `chat_template_kwargs` forwarding, deep model choice, evidence screenshots. No heavy test results committed yet
@@ -300,7 +305,7 @@ Chema:
 Juan:
 1. Send Harry a separate Zetaris API token; ask HackOS about the vendored World Model reference.
 2. Keep Zetaris, Postgres and Tailscale up during work blocks; review and merge PRs (each with a description).
-3. Review the Risk Analyst summary and the Reconciler decisions on Nightshift output; `data/README.md` final pass; secret scan of the whole history before submission.
+3. Review the Risk Analyst summary and the Reconciler decisions on Nightshift output; `data/README.md` final pass; repeat the secret scan right before submission (last scan 2026-10-25: clean).
 
 Together: Monday 16:00 demo rehearsal on Harry's machine (Nightshift + Zetaris over Tailscale) following `docs/VIDEO_SCRIPT.md`. Feature freeze Monday 14:00.
 
@@ -338,3 +343,5 @@ Together: Monday 16:00 demo rehearsal on Harry's machine (Nightshift + Zetaris o
 | 2026-10-25 | `validate_plan` requires each route to equal `best_route`; `critical_minimum_gaps` counts only water + food (Chema) | Routes are code-computed (P6.3), so any other route is an error; P5.2 is defined on water and food, so the T6 gap is 17,952 kg (was 18,337 kg with medical kits) |
 | 2026-10-25 | Streamlit dashboard with an offline example mode (Chema) | Judges can see the product without Zetaris, Nightshift or a model key |
 | 2026-10-25 | Every PR description states what changed and what it was run against (Nightshift/NVIDIA, Zetaris/SAMPLE_MODE) | PRs #2 and #3 had no description, so the Nightshift status could not be verified |
+| 2026-10-25 | CI runs the offline suite and the World Model conformance on every PR | Three people merging in parallel; the tests need no secrets or services |
+| 2026-10-25 | World Model exposes point-in-time state, per-object timelines and its audit log (additive: `get_state()` unchanged by default) | Makes the engine's value visible to judges and to the coordinator ("what did we believe at 10:00?") |
