@@ -23,6 +23,14 @@ def test_scenarios_start_with_a_plan_turn():
         assert "event" not in steps[0]
 
 
+def test_the_three_scenarios_block_their_own_segment():
+    assert set(heavy_test.SCENARIOS) == {"block_T3", "block_T6", "block_T20"}
+    for segment in ("T3", "T6", "T20"):
+        steps = heavy_test.SCENARIOS[f"block_{segment}"]
+        assert [step["name"] for step in steps] == ["plan", "block", "why"]
+        assert steps[1]["event"] == {"type": "segment_blocked", "id": segment, "source": "coordinator"}
+
+
 def test_critic_rounds_counts_one_per_review():
     trace = [{"agent": "planner"}, {"agent": "critic"}, {"agent": "planner"}, {"agent": "critic"}]
     assert heavy_test.critic_rounds(trace) == 2

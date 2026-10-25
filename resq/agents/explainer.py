@@ -22,7 +22,12 @@ Write a short report in English Markdown with these sections:
    (e.g. a blocked segment) to the changes (the exact list is appended by code, do not repeat it).
 ## Risks and decisions for you: facts to verify; if "escalated" is true, say clearly that a human decision is
    needed and why, using "escalation_reasons".
-Use only the facts provided; never invent numbers, routes or ids. Under 250 words. No word count."""
+Use only the facts provided; never invent numbers, routes or ids.
+Quote every string in "escalation_reasons" and "risks" as it is given, without rewording it. Do not swap or
+negate domain terms: "fording" and "non-fording" vehicles are opposites, and so are "reachable" / "unreachable",
+"blocked" / "open" and "served" / "unserved". If a reason says fording vehicles carry a weight, it is the fording
+ones; never turn that into the non-fording ones. When unsure which side a term refers to, copy the sentence
+verbatim instead of paraphrasing it. Under 250 words. No word count."""
 
 
 def _key(assignment: dict) -> tuple[str, str]:

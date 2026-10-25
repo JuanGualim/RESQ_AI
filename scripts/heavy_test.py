@@ -31,20 +31,19 @@ WHY_QUESTION = "Why did the plan change?"
 
 # A scenario is a sequence of coordinator turns. The agents keep the World Model
 # state between the turns of one run, which is what makes a re-plan a re-plan.
+def blocking(segment: str) -> list[dict]:
+    """Baseline plan, then the coordinator blocks one segment, then "why did it change?"."""
+    return [
+        {"name": "plan", "question": DEFAULT_QUESTION},
+        {"name": "block", "event": {"type": "segment_blocked", "id": segment, "source": "coordinator"}},
+        {"name": "why", "question": WHY_QUESTION},
+    ]
+
+
 SCENARIOS: dict[str, list[dict]] = {
-    "baseline": [
-        {"name": "plan", "question": DEFAULT_QUESTION},
-    ],
-    "block_T6": [
-        {"name": "plan", "question": DEFAULT_QUESTION},
-        {"name": "block", "event": {"type": "segment_blocked", "id": "T6", "source": "coordinator"}},
-        {"name": "why", "question": WHY_QUESTION},
-    ],
-    "block_T3": [
-        {"name": "plan", "question": DEFAULT_QUESTION},
-        {"name": "block", "event": {"type": "segment_blocked", "id": "T3", "source": "coordinator"}},
-        {"name": "why", "question": WHY_QUESTION},
-    ],
+    "block_T6": blocking("T6"),
+    "block_T3": blocking("T3"),
+    "block_T20": blocking("T20"),
 }
 
 

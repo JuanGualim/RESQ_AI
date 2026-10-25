@@ -24,13 +24,26 @@ Flag as "blocking" ONLY a wrong DECISION:
 - a reason built on a wrong fact (wrong risk level or wrong reported status for that community).
 Never block for wording, style, or because coverage is below 100%: stock is limited and tiers are partial
 on purpose. Splitting deliveries across vehicles, trips or warehouses is normal and never an issue.
+"stock_cuts" lists what ran out while delivering in protocol order. A community whose coverage is lower
+because its resource appears there was cut by scarcity, not by the Planner's ranking: that is NOT a priority
+inversion and is not an issue at all. Before flagging an inversion, check both communities against
+"stock_cuts", and only flag it when the lower-risk one was served ahead of the higher-risk one with stock
+still available.
 Risk scores and levels are computed by code (P3: critical >= 0.60, high >= 0.45, medium >= 0.30) and are
 correct by definition: never question them. Put any other remark as "minor".
 Reply with ONLY JSON: {"issues": [{"community_id": "C..", "severity": "blocking|minor", "problem": "..."}], "summary": "..."}"""
 
 
+def stock_cuts(plan) -> list[str]:
+    """What the packing ran out of (P6.2): lower coverage here is scarcity, not a ranking mistake."""
+    return [risk for risk in plan.risks if risk.startswith("P6.2")]
+
+
 def _review_reasons(plan, current: dict) -> tuple[list[str], list[str], dict | None]:
-    payload = {"communities": plan_by_community(plan, current), "risks": plan.risks[:10], "confidence": plan.confidence}
+    cuts = stock_cuts(plan)
+    payload = {"communities": plan_by_community(plan, current), "stock_cuts": cuts[:12],
+               "risks": [r for r in plan.risks if not r.startswith("P6.2")][:10],
+               "confidence": plan.confidence}
     data, reply = llm.chat_json([
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": json.dumps(payload, ensure_ascii=False)},
