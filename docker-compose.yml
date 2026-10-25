@@ -1,0 +1,35 @@
+# Scenario database: our own Postgres, registered in Zetaris as the datasource resq_pg.
+# It joins the Zetaris Docker network, so Zetaris reaches it as resq-postgres:5432.
+# On the host it only listens on 127.0.0.1 (the loader script uses it).
+#
+#   docker compose up -d                 # start (reads RESQ_PG_* from .env)
+#   python scripts/load_postgres.py      # create tables and load data/sample/
+#   python scripts/register_zetaris.py   # register resq_pg in Zetaris
+name: resq
+
+services:
+  resq-postgres:
+    image: postgres:16-alpine
+    container_name: resq-postgres
+    environment:
+      POSTGRES_DB: ${RESQ_PG_DB:-resq}
+      POSTGRES_USER: ${RESQ_PG_USER:-resq}
+      POSTGRES_PASSWORD: ${RESQ_PG_PASSWORD:?set RESQ_PG_PASSWORD in .env}
+    ports:
+      - "127.0.0.1:${RESQ_PG_PORT:-5433}:5432"
+    volumes:
+      - resq-pg-data:/var/lib/postgresql/data
+    networks: [zetaris]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      retries: 10
+    restart: unless-stopped
+
+networks:
+  zetaris:
+    external: true
+    name: ${ZETARIS_DOCKER_NETWORK:-zetaris_default}
+
+volumes:
+  resq-pg-data:

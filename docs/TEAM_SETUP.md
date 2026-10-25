@@ -36,7 +36,7 @@ Ask for real values **by private message**, never in a group chat or a screensho
 
 | Variable | Juan | Harry | Chema |
 | --- | --- | --- | --- |
-| `ZETARIS_REST_URL` | `http://localhost:8888/api/v1.0` | `http://<juan-tailscale-ip>:8888/api/v1.0` | not needed |
+| `ZETARIS_REST_URL` | `http://localhost:8888/api/v1.0` | `http://100.85.62.9:8888/api/v1.0` | not needed (or the same as Harry) |
 | `ZETARIS_API_KEY`, `ZETARIS_ORG_ID` | his own token | token from Juan | not needed |
 | `MODEL_BASE_URL` | direct NVIDIA (development only) | `http://127.0.0.1:8088/v1` | Harry's Nightshift over Tailscale, or direct NVIDIA |
 | `MODEL_API_KEY` | `nvapi-…` | Nightshift runtime token | Nightshift token or `nvapi-…` |
@@ -49,6 +49,26 @@ Ask for real values **by private message**, never in a group chat or a screensho
 python smoke_test.py     # Juan and Harry: 3 PASS. Chema: only the model check matters
 pytest                   # all tests pass on every machine
 ```
+
+## 4b. Zetaris host only (Juan): scenario Postgres and Tailscale
+
+```bash
+docker compose up -d                       # resq-postgres on the zetaris_default network (RESQ_PG_* in .env)
+python scripts/load_postgres.py            # create the 9 tables and load data/sample/ (prints row counts)
+python scripts/register_zetaris.py         # CREATE DATASOURCE resq_pg + REGISTER DATASOURCE TABLES, then verifies
+python scripts/register_zetaris.py --verify   # later: check every table through Zetaris
+```
+
+After regenerating the data, run `load_postgres.py` again; the datasource does not need to be registered again.
+
+The Zetaris REST API only listens on `127.0.0.1`, so it is published to the tailnet with Tailscale:
+
+```bash
+sudo tailscale serve --bg --tcp 8888 tcp://127.0.0.1:8888
+tailscale ip -4                            # Juan: 100.85.62.9
+```
+
+Harry and Chema then use `ZETARIS_BASE_URL=http://100.85.62.9:3000` and `ZETARIS_REST_URL=http://100.85.62.9:8888/api/v1.0`.
 
 ## 5. World Model service
 

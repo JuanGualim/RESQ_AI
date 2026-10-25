@@ -41,6 +41,13 @@ class Settings:
     zetaris_api_key: str = field(repr=False)
     zetaris_datasource: str = "resq_pg"  # Postgres datasource registered in Zetaris
     zetaris_rainfall_table: str = ""  # Open-Meteo REST table; empty = <datasource>.rainfall
+    # Scenario Postgres behind the Zetaris datasource (only the Zetaris host uses these)
+    pg_host: str = "127.0.0.1"
+    pg_port: int = 5433
+    pg_db: str = "resq"
+    pg_user: str = "resq"
+    pg_password: str = field(default="", repr=False)
+    pg_host_for_zetaris: str = "resq-postgres:5432"  # how Zetaris (inside Docker) reaches it
     # Power: model provider (Nightshift by default, direct NVIDIA only in development)
     model_base_url: str = ""
     model_api_key: str = field(default="", repr=False)
@@ -79,6 +86,12 @@ def load_settings() -> Settings:
         zetaris_api_key=_env("ZETARIS_API_KEY"),
         zetaris_datasource=_env("ZETARIS_DATASOURCE", "resq_pg"),
         zetaris_rainfall_table=_env("ZETARIS_RAINFALL_TABLE"),
+        pg_host=_env("RESQ_PG_HOST", "127.0.0.1"),
+        pg_port=int(_env("RESQ_PG_PORT", "5433")),
+        pg_db=_env("RESQ_PG_DB", "resq"),
+        pg_user=_env("RESQ_PG_USER", "resq"),
+        pg_password=_env("RESQ_PG_PASSWORD"),
+        pg_host_for_zetaris=_env("RESQ_PG_HOST_FOR_ZETARIS", "resq-postgres:5432"),
         model_base_url=_env("MODEL_BASE_URL").rstrip("/"),
         model_api_key=_env("MODEL_API_KEY"),
         model_name=model_name,

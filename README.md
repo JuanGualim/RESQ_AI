@@ -61,7 +61,7 @@ python -m resq.run --event block:T6
 python -m resq.run --question "Why did the plan change?"
 ```
 
-Full mode reads the same tables from Zetaris (`SAMPLE_MODE=false`, `ZETARIS_*` variables). See [`docs/TEAM_SETUP.md`](docs/TEAM_SETUP.md).
+Full mode reads the same tables from Zetaris (`SAMPLE_MODE=false`, `ZETARIS_*` variables): the scenario lives in our own Postgres (`docker compose up -d`, `python scripts/load_postgres.py`), registered in Zetaris as the datasource `resq_pg` (`python scripts/register_zetaris.py`). See [`docs/TEAM_SETUP.md`](docs/TEAM_SETUP.md).
 
 ## Data
 
