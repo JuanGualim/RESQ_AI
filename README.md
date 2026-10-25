@@ -16,7 +16,7 @@ question / event ─► Intake ─► Reconciler ─► Risk Analyst ─► Plan
 
 - **The model decides and explains; code computes.** Routes (networkx), risk arithmetic, vehicle packing and hard validations are deterministic and tested. The model decides which contradictory report to believe, how much each community receives, whether a plan's reasoning holds, and writes the report.
 - **Critique and revision:** the Critic runs the protocol's hard rules in code and a model review of the reasons; rejected plans go back to the Planner with concrete feedback.
-- **Escalation:** if the protocol minimum is infeasible (e.g. after blocking segment T6, critical communities need 18,337 kg but the fording vehicles carry 13,800 kg), the plan is marked `escalated` with the reason.
+- **Escalation:** if the protocol minimum is infeasible (e.g. after blocking segment T6, critical communities need 17,952 kg of water and food but the fording vehicles carry 13,800 kg), the plan is marked `escalated` with the reason.
 - **Traceability:** every step writes a JSONL trace line; every fact in the World Model carries its provenance and evidence (report ids).
 
 Domain rules: [`docs/protocol.md`](docs/protocol.md) · Scenario data: [`data/README.md`](data/README.md) · Example outputs: [`output_examples/`](output_examples/)
@@ -40,7 +40,7 @@ python -m venv .venv
 source .venv/bin/activate              # Windows: .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 cp .env.example .env                   # set MODEL_* and SAMPLE_MODE=true
-pytest                                 # 112 tests, offline
+pytest                                 # 137 tests, offline
 ```
 
 Start the World Model service in its own terminal:
@@ -59,6 +59,12 @@ python -m resq.run --reset
 python -m resq.run --question "How should we distribute aid right now?"
 python -m resq.run --event block:T6
 python -m resq.run --question "Why did the plan change?"
+```
+
+Coordinator dashboard (example mode works offline from `output_examples/`; live mode calls `resq.run.execute()`):
+
+```bash
+streamlit run app/streamlit_app.py
 ```
 
 Full mode reads the same tables from Zetaris (`SAMPLE_MODE=false`, `ZETARIS_*` variables): the scenario lives in our own Postgres (`docker compose up -d`, `python scripts/load_postgres.py`), registered in Zetaris as the datasource `resq_pg` (`python scripts/register_zetaris.py`). See [`docs/TEAM_SETUP.md`](docs/TEAM_SETUP.md).

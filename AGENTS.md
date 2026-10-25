@@ -2,7 +2,7 @@
 
 > **Read this whole file before touching code.** It is the project's source of truth for people and AI agents (Cursor, Claude Code, Codex). At the end of every work session, update **§8 Current status**, **§9 Next steps** and, if you decided something, **§10 Decision log**.
 
-Last updated: 2026-10-25 (GT) · by: Juan (with Claude Code): scenario in Postgres, registered in Zetaris as `resq_pg`; demo runs on Zetaris data; Tailscale
+Last updated: 2026-10-25 (GT) · by: Juan (with Claude Code): merged Chema's UI + validator hardening (PR #3) and Harry's heavy test + prompt fixes (PR #2); gap figure corrected to 17,952 kg
 
 ---
 
@@ -73,7 +73,8 @@ Framework: **LangGraph** (`resq/graph.py`). Graph state = `ResqState` (pydantic)
 
 - **Nemotron 3.5 thinks by default.** With thinking on, a plan request spends the whole token budget reasoning and returns empty content (seen with 16k tokens), or takes longer than the 90 s timeout. `llm.py` sends `chat_template_kwargs.enable_thinking=false` on the fast lane, and on the deep lane unless `LANE_DEEP_THINKING=true`. TODO(verify): that Nightshift forwards `chat_template_kwargs`.
 - The fast model is weak at arithmetic over continuous numbers (it invented decreasing coverages), so the Planner chooses **discrete tiers** and code does the math.
-- A full run takes ~40–60 s on direct NVIDIA (each model call 2–12 s).
+- The fast lane runs at **temperature 0** (Harry, PR #2): at 0.2 the Reconciler decided contested objects differently between runs.
+- A full run takes ~40–60 s on direct NVIDIA (each model call 2–12 s). Not measured on Nightshift yet.
 
 ## 4. Stack and services
 
@@ -82,7 +83,7 @@ Framework: **LangGraph** (`resq/graph.py`). Graph state = `ResqState` (pydantic)
 | Python | 3.12 recommended (Juan uses 3.14 on Linux; everything works there) |
 | Agents | LangGraph, `openai` (compatible client), pydantic |
 | Routing | networkx over `road_segments` (`tools/routing.py`) |
-| UI | Streamlit (not built yet) |
+| UI | Streamlit dashboard `app/streamlit_app.py` (Chema): example mode (offline, `output_examples/`) and live mode (`resq.run.execute()` + `world.get_state()`); SVG road map, plan table, trace, escalation banner, Plan / Block segment / Why buttons. Theme in `.streamlit/config.toml`, design notes in `DESIGN.md` / `PRODUCT.md` |
 | Zetaris | Runs on Juan's laptop (Docker). UI `:3000`, REST `:8888/api/v1.0`. The team connects through Tailscale. Responses: `{"headers": [...], "data": [[...]]}` with **every value as text** (`run_sql` parses numbers) |
 | Nightshift | Runs on Harry's Windows machine. Base URL `:8088/v1`. Lanes: fast = `nvidia/nemotron-3.5-lightning-30b-a3b`; deep = Nemotron super (to be confirmed) |
 | World Model | `world_service/`: Node HTTP service over the **vendored Meterless World Model reference** (`world_service/vendor/world-model`, Apache-2.0, commit `1742dec`). Conformance 8/8. Python client in `resq/world/`; in-memory fallback when `WORLD_MODEL_URL` is empty (tests and dev only) |
@@ -116,7 +117,8 @@ Framework: **LangGraph** (`resq/graph.py`). Graph state = `ResqState` (pydantic)
 RESQ_AI/
 ├── AGENTS.md · CLAUDE.md (local only) · README.md · requirements.txt · .env.example · pytest.ini
 ├── smoke_test.py              # checks Zetaris + model (from the official guide)
-├── docs/  PLAN.md · TEAM_SETUP.md · protocol.md (rules P1–P8)
+├── DESIGN.md · PRODUCT.md · .streamlit/ · .impeccable/   # UI design notes and theme (Chema)
+├── docs/  PLAN.md · TEAM_SETUP.md · protocol.md (rules P1–P8) · VIDEO_SCRIPT.md · DECK_OUTLINE.md
 ├── resq/
 │   ├── config.py              # Settings from .env (get_settings)
 │   ├── protocol.py            # constants of docs/protocol.md
@@ -130,13 +132,13 @@ RESQ_AI/
 │   ├── graph.py               # LangGraph graph
 │   └── run.py                 # CLI + execute()
 ├── world_service/             # Node service over the vendored Meterless World Model reference
-├── app/                       # Streamlit UI (to do)
+├── app/  streamlit_app.py · static/fonts/   # Streamlit dashboard
 ├── docker-compose.yml         # scenario Postgres (resq-postgres) for Zetaris
-├── scripts/  generate_data.py · load_postgres.py · register_zetaris.py · run_demo.py
+├── scripts/  generate_data.py · load_postgres.py · register_zetaris.py · run_demo.py · heavy_test.py
 ├── data/  README.md · sample/*.csv
 ├── input_examples/README.md · output_examples/ (reports, plans, traces of a real run)
 ├── logs/                      # traces (gitignored)
-└── tests/                     # 116 tests, all offline
+└── tests/                     # 137 tests, all offline
 ```
 
 ## 6. Contracts between modules
@@ -166,8 +168,8 @@ def best_route(origin: str, destination: str, state: dict, vehicle_id: str) -> R
 def reachability(community_id: str, state: dict) -> str: ...   # "all" | "ford_only" | "none"
 
 # resq/tools/validators.py  (Chema)
-def validate_plan(plan: Plan, state: dict) -> list[str]: ...  # empty = valid; each message starts with the rule (P2, P5.1, …)
-def critical_minimum_gaps(state: dict) -> list[str]: ...      # why P5.2 cannot be met at all (empty = feasible)
+def validate_plan(plan: Plan, state: dict) -> list[str]: ...  # empty = valid; each message starts with the rule (P2, P5.1, …); routes must equal best_route (P6.3)
+def critical_minimum_gaps(state: dict) -> list[str]: ...      # why P5.2 (water + food minimum) cannot be met at all (empty = feasible)
 
 # resq/tools/packing.py
 def pack(allocations: list[dict], state: dict) -> PackResult: ...  # assignments + shortfalls
@@ -210,7 +212,7 @@ python -m venv .venv && source .venv/bin/activate      # Windows: py -3.12 -m ve
 pip install -r requirements.txt
 cp .env.example .env                                   # then fill in real values
 python smoke_test.py                                   # 3 PASS expected
-pytest                                                 # 116 passed
+pytest                                                 # 137 passed
 python scripts/generate_data.py                        # rebuild data/sample/ (add --fetch-rainfall to refresh rainfall)
 docker compose up -d && python scripts/load_postgres.py && python scripts/register_zetaris.py   # Zetaris host only
 
@@ -221,6 +223,8 @@ python -m resq.run --question "How should we distribute aid right now?"
 python -m resq.run --event block:T6
 python -m resq.run --question "Why did the plan change?"
 python scripts/run_demo.py                             # baseline + block T6 + why → output_examples/ (--out <dir> elsewhere)
+python scripts/heavy_test.py --runs 5                  # battery: block T6 / T3 / T20 × N runs → logs/heavy_test_<stamp>.json
+streamlit run app/streamlit_app.py                     # coordinator dashboard
 ```
 
 ### Environment variables
@@ -244,47 +248,61 @@ python scripts/run_demo.py                             # baseline + block T6 + w
 
 ## 8. Current status
 
-**Current phase: 2.** The system runs end to end on **Zetaris data** (`SAMPLE_MODE=false`) + the real World Model service + direct NVIDIA. Not yet on Nightshift. Harry and Chema are working in parallel (branches `feat/llm-nightshift`, `feat/ui-streamlit`); Juan's data work is in `feat/data-zetaris`.
+**Current phase: 2→3.** The system runs end to end on **Zetaris data** + the real World Model service + direct NVIDIA, and it has a coordinator dashboard. **Not yet run on Nightshift** (rule 2): that is now the top risk. All three feature branches are merged into `main` (PRs #1 data/Zetaris, #2 heavy test + prompts, #3 UI + validators).
 
 Done:
 - [x] Track 3 chosen; RESQ AI idea defined; repo in English (code, docs, contracts)
 - [x] Zetaris running on Juan's laptop; `smoke_test.py` 3 PASS (direct NVIDIA)
 - [x] Skeleton, `config.py`, `docs/TEAM_SETUP.md`, `docs/protocol.md` (P1–P8)
-- [x] Synthetic scenario + Eta rainfall snapshot (`scripts/generate_data.py`, `data/sample/`)
+- [x] Synthetic scenario + Eta rainfall snapshot (`scripts/generate_data.py`, `data/sample/`), incl. `road_nodes` for the map
 - [x] `run_sql` (Zetaris REST + SAMPLE_MODE on SQLite), `best_route`, `reachability`, `validate_plan`, `critical_minimum_gaps`, `pack`
-- [x] `llm.py` with lanes, Meterless headers, retries, JSON repair; thinking off by default
+- [x] `llm.py` with lanes, Meterless headers, retries, JSON repair; thinking off by default; fast lane at temperature 0
 - [x] **R1 closed:** World Model service over the vendored Meterless reference, conformance **8/8**, Python client + in-memory fallback
 - [x] Six agents + LangGraph graph + CLI: critic loop (max 3), one model review, escalation with exact gap, re-plan on events, "why" answers
-- [x] Real run saved in `output_examples/` (baseline v1 approved after a critic round; block T6 → v2 escalated: critical minimum needs 18,337 kg, fording vehicles carry 13,800 kg)
-- [x] `road_nodes` table for the UI map (in the generator, `data/sample/`, `run_sql` and `get_state()`)
 - [x] Tailscale up (Juan `100.85.62.9`); Zetaris REST published with `tailscale serve`; Harry and Chema invited
-- [x] Scenario in our own Postgres (`docker-compose.yml`, `scripts/load_postgres.py`), registered in Zetaris as `resq_pg` (`scripts/register_zetaris.py`); every agent query returns the same rows as `SAMPLE_MODE`
-- [x] Demo on Zetaris data: baseline v1 approved after 2 critic rounds; block T6 → v2 escalated with the same 18,337 kg vs 13,800 kg gap
-- [x] `pytest`: **116 passed** (offline, scripted model)
+- [x] Scenario in our own Postgres, registered in Zetaris as `resq_pg`; every agent query returns the same rows as `SAMPLE_MODE`; demo on Zetaris data works (block T6 → v2 escalated)
+- [x] **Chema (PR #3):** routing/validator hardening — shortest passable edge kept for parallel segments, unknown nodes return no route, `validate_plan` rejects non-shortest routes (P6.3), a reachable critical community cannot dodge P5.2 by being listed as unserved, `critical_minimum_gaps` counts only water + food (P5.2) → the T6 gap is now **17,952 kg vs 13,800 kg**
+- [x] **Chema (PR #3):** Streamlit dashboard (`app/streamlit_app.py` + tests), `docs/VIDEO_SCRIPT.md`, `docs/DECK_OUTLINE.md`, `DESIGN.md`, `PRODUCT.md`
+- [x] **Harry (PR #2):** `scripts/heavy_test.py` (block T6 / T3 / T20 × N runs: latency per agent, critic rounds, escalations, failures) + tests; fast lane at temperature 0; Critic gets packing `stock_cuts` separately so scarcity is not flagged as a priority inversion; Explainer must not swap domain terms (fording / non-fording, blocked / open)
+- [x] `pytest`: **137 passed** (offline, scripted model)
 
 Pending / known issues:
-- [ ] Optional: Open-Meteo as a live Zetaris REST table (today rainfall is a snapshot in Postgres)
+- [ ] **Nightshift not tested** (Harry): lanes, `chat_template_kwargs` forwarding, deep model choice, evidence screenshots. No heavy test results committed yet
+- [ ] `output_examples/` were generated before PR #3, so they still show the old 18,337 kg gap: regenerate on Nightshift + Zetaris (Harry)
 - [ ] Give Harry (and Chema) a separate Zetaris API token, by private message
-- [ ] Nightshift not tested (Harry): lanes, `chat_template_kwargs` forwarding, deep model choice
-- [ ] Streamlit UI not started (Chema)
-- [ ] Model quality: the Explainer sometimes mixes up facts (e.g. "fording" vs "non-fording"); the Critic's model review sometimes flags non-issues (it can only send a plan back once). Prompt tuning = Harry
-- [ ] Reconciler model decisions vary between runs (T11 open vs uncertain), so plans vary slightly; consider temperature 0 for the fast lane
+- [ ] Ask in HackOS whether the vendored World Model reference counts as a working engine
+- [ ] PRs #2 and #3 had no description: from now on every PR says what changed and what it was run against
+- [ ] UI live mode not yet tested on Harry's machine with Nightshift + Zetaris
+- [ ] Optional: Open-Meteo as a live Zetaris REST table (today rainfall is a snapshot in Postgres)
 - [ ] `README.md` for judges is a first version; final pass in Phase 4
 - [ ] `CLAUDE.md` is gitignored although §5 lists it
 
 ## 9. Next steps (in order)
 
+Harry (branch `feat/nightshift-validation`, highest priority):
+1. Full environment on Nightshift + Juan's Zetaris over Tailscale (`SAMPLE_MODE=false`); `smoke_test.py` 3 PASS.
+2. `GET /v1/models`: pin `LANE_FAST_MODEL`, find the Nemotron super for `LANE_DEEP_MODEL`.
+3. Check that Nightshift forwards `chat_template_kwargs` (if "Return only JSON" comes back empty or slow, it does not); otherwise add another way to turn thinking off in `llm.py`, configurable in `.env`, with a test.
+4. Evidence screenshots of the Nightshift console (resq-ai requests on Nemotron) in `docs/evidence/`.
+5. Regenerate `output_examples/` with `python scripts/run_demo.py` (same file names).
+6. `heavy_test.py` 3 × 5 on Nightshift + Zetaris; summary in `docs/test_results/heavy_test_<date>.md`.
+7. Quality checks inside the heavy test: final plan passes `validate_plan` (except infeasible P5.2), blocked segment never used, `changes_vs_previous` not empty after a block, "why" mentions the segment, no unknown ids in the report. Add a block-then-reopen scenario; then the Phase 3 battery (3 × 10 + reopen).
+8. Planner stability on re-plans, Critic false positives (≤ 1 revision on baseline), latency < 45 s per turn, try `LANE_DEEP_THINKING=true` with the Nemotron super.
+9. Honest errors when Nightshift or Zetaris is down (escalated result, not an exception) + `tests/test_contract.py` for `execute()`.
+10. Expose Nightshift on the tailnet for Chema (`tailscale serve --tcp 8088 tcp://127.0.0.1:8088`); Windows full-mode install notes for Juan.
+
+Chema:
+1. Test the dashboard in live mode (with Harry's Nightshift over Tailscale, or direct NVIDIA); polish it after the new `output_examples/` land.
+2. `input_examples/`: the three heavy-test scenarios plus block-then-reopen, written as coordinator inputs.
+3. Fresh `SAMPLE_MODE` install on his Windows machine following the README, noting every problem.
+4. Deck and final video script once the Nightshift numbers are in.
+
 Juan:
-1. Merge `feat/data-zetaris` into `main`; send Harry a separate Zetaris API token by private message.
-2. Make the Reconciler more stable between runs (temperature 0 or more code-decided objects) and review the Risk Analyst summary.
-3. Ask in HackOS whether the vendored World Model reference counts as a working engine (§10, R1).
-4. Optional: Open-Meteo as a live Zetaris REST table, if time allows.
+1. Send Harry a separate Zetaris API token; ask HackOS about the vendored World Model reference.
+2. Keep Zetaris, Postgres and Tailscale up during work blocks; review and merge PRs (each with a description).
+3. Review the Risk Analyst summary and the Reconciler decisions on Nightshift output; `data/README.md` final pass; secret scan of the whole history before submission.
 
-Harry (when available): Nightshift + lanes; run `python scripts/run_demo.py` on Nightshift; confirm `chat_template_kwargs`; tune Planner/Critic/Explainer prompts; heavy test (3 scenarios × 5 runs).
-
-Chema (branch `feat/ui-streamlit`): Streamlit UI in `app/streamlit_app.py`, first offline on `output_examples/`, then calling `resq.run.execute()` (plan table, map from `road_nodes` + `road_segments` colored by status, trace panel, escalation banner, "block segment" and "why" buttons); review `routing.py` / `validators.py` and add tests. Juan works in `feat/data-zetaris` on other files; only Juan edits `AGENTS.md` (Chema's notes go in the PR description).
-
-Everyone: 45-minute call to walk through the code and confirm the contracts in §6.
+Together: Monday 16:00 demo rehearsal on Harry's machine (Nightshift + Zetaris over Tailscale) following `docs/VIDEO_SCRIPT.md`. Feature freeze Monday 14:00.
 
 ## 10. Decision log
 
@@ -315,3 +333,8 @@ Everyone: 45-minute call to walk through the code and confirm the contracts in �
 | 2026-10-25 | Scenario Postgres = `resq-postgres` container on the `zetaris_default` network, host port `127.0.0.1:5433`; tables recreated from `data/sample/` with explicit types; timestamps kept as ISO text | Zetaris (in Docker) reaches it by name; 5432 is taken by Zetaris' own Postgres; text timestamps keep the same string comparisons in Zetaris and SQLite |
 | 2026-10-25 | Rainfall lives in Postgres (archive snapshot) instead of a live Open-Meteo REST table | Reproducible runs; the REST table stays optional |
 | 2026-10-25 | Zetaris REST published on the tailnet with `tailscale serve --tcp 8888` (UI on `:3000` already listens on all interfaces) | The API container binds to `127.0.0.1` only; no change to the Zetaris bundle |
+| 2026-10-25 | Fast lane temperature 0 (Harry) | Classifications (contested reports, risk summary) must not change between runs |
+| 2026-10-25 | Critic's model review receives packing `stock_cuts` separately (Harry) | Lower coverage caused by scarcity was being flagged as a priority inversion |
+| 2026-10-25 | `validate_plan` requires each route to equal `best_route`; `critical_minimum_gaps` counts only water + food (Chema) | Routes are code-computed (P6.3), so any other route is an error; P5.2 is defined on water and food, so the T6 gap is 17,952 kg (was 18,337 kg with medical kits) |
+| 2026-10-25 | Streamlit dashboard with an offline example mode (Chema) | Judges can see the product without Zetaris, Nightshift or a model key |
+| 2026-10-25 | Every PR description states what changed and what it was run against (Nightshift/NVIDIA, Zetaris/SAMPLE_MODE) | PRs #2 and #3 had no description, so the Nightshift status could not be verified |
