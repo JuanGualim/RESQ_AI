@@ -1,0 +1,166 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-25T00:45:47.6735498-06:00",
+  "title": "Design System: RESQ AI",
+  "extensions": {
+    "colorMeta": {
+      "attention-amber": {
+        "role": "primary",
+        "displayName": "Dispatch Amber",
+        "tonalRamp": ["oklch(15% 0.055 78)", "oklch(26% 0.095 78)", "oklch(38% 0.135 78)", "oklch(50% 0.17 78)", "oklch(63% 0.19 78)", "oklch(74% 0.16 78)", "oklch(86% 0.09 78)", "oklch(95% 0.035 78)"]
+      },
+      "canvas-black": {
+        "role": "neutral",
+        "displayName": "Canvas Black",
+        "tonalRamp": ["oklch(15% 0.003 195)", "oklch(26% 0.003 195)", "oklch(38% 0.003 195)", "oklch(50% 0.003 195)", "oklch(63% 0.003 195)", "oklch(74% 0.003 195)", "oklch(86% 0.003 195)", "oklch(95% 0.003 195)"]
+      },
+      "inset-black": {
+        "role": "neutral",
+        "displayName": "Inset Black",
+        "tonalRamp": ["oklch(15% 0.006 195)", "oklch(26% 0.006 195)", "oklch(38% 0.006 195)", "oklch(50% 0.006 195)", "oklch(63% 0.006 195)", "oklch(74% 0.006 195)", "oklch(86% 0.006 195)", "oklch(95% 0.006 195)"]
+      },
+      "panel-black": {
+        "role": "neutral",
+        "displayName": "Panel Black",
+        "tonalRamp": ["oklch(15% 0.008 195)", "oklch(26% 0.008 195)", "oklch(38% 0.008 195)", "oklch(50% 0.008 195)", "oklch(63% 0.008 195)", "oklch(74% 0.008 195)", "oklch(86% 0.008 195)", "oklch(95% 0.008 195)"]
+      },
+      "control-steel": {
+        "role": "neutral",
+        "displayName": "Control Steel",
+        "tonalRamp": ["oklch(15% 0.01 195)", "oklch(26% 0.01 195)", "oklch(38% 0.01 195)", "oklch(50% 0.01 195)", "oklch(63% 0.01 195)", "oklch(74% 0.01 195)", "oklch(86% 0.01 195)", "oklch(95% 0.01 195)"]
+      },
+      "active-steel": {
+        "role": "neutral",
+        "displayName": "Active Steel",
+        "tonalRamp": ["oklch(15% 0.014 195)", "oklch(26% 0.014 195)", "oklch(38% 0.014 195)", "oklch(50% 0.014 195)", "oklch(63% 0.014 195)", "oklch(74% 0.014 195)", "oklch(86% 0.014 195)", "oklch(95% 0.014 195)"]
+      },
+      "header-steel": {
+        "role": "neutral",
+        "displayName": "Header Steel",
+        "tonalRamp": ["oklch(15% 0.015 195)", "oklch(26% 0.015 195)", "oklch(38% 0.015 195)", "oklch(50% 0.015 195)", "oklch(63% 0.015 195)", "oklch(74% 0.015 195)", "oklch(86% 0.015 195)", "oklch(95% 0.015 195)"]
+      },
+      "steel-divider": {
+        "role": "neutral",
+        "displayName": "Steel Divider",
+        "tonalRamp": ["oklch(15% 0.012 195)", "oklch(26% 0.012 195)", "oklch(38% 0.012 195)", "oklch(50% 0.012 195)", "oklch(63% 0.012 195)", "oklch(74% 0.012 195)", "oklch(86% 0.012 195)", "oklch(95% 0.012 195)"]
+      },
+      "warm-white": {
+        "role": "neutral",
+        "displayName": "Warm White",
+        "tonalRamp": ["oklch(15% 0.003 90)", "oklch(26% 0.003 90)", "oklch(38% 0.003 90)", "oklch(50% 0.003 90)", "oklch(63% 0.003 90)", "oklch(74% 0.003 90)", "oklch(86% 0.003 90)", "oklch(95% 0.003 90)"]
+      },
+      "secondary-text": {
+        "role": "neutral",
+        "displayName": "Secondary Text",
+        "tonalRamp": ["oklch(15% 0.008 195)", "oklch(26% 0.008 195)", "oklch(38% 0.008 195)", "oklch(50% 0.008 195)", "oklch(63% 0.008 195)", "oklch(74% 0.008 195)", "oklch(86% 0.008 195)", "oklch(95% 0.008 195)"]
+      },
+      "active-mint": {
+        "role": "secondary",
+        "displayName": "Clear-Route Mint",
+        "tonalRamp": ["oklch(15% 0.035 165)", "oklch(26% 0.06 165)", "oklch(38% 0.085 165)", "oklch(50% 0.105 165)", "oklch(63% 0.12 165)", "oklch(74% 0.105 165)", "oklch(86% 0.065 165)", "oklch(95% 0.025 165)"]
+      },
+      "blocked-red": {
+        "role": "tertiary",
+        "displayName": "Blocked Red",
+        "tonalRamp": ["oklch(15% 0.055 28)", "oklch(26% 0.1 28)", "oklch(38% 0.15 28)", "oklch(50% 0.19 28)", "oklch(63% 0.2 28)", "oklch(74% 0.16 28)", "oklch(86% 0.09 28)", "oklch(95% 0.035 28)"]
+      },
+      "escalated-wash": {
+        "role": "tertiary",
+        "displayName": "Escalation Wash",
+        "tonalRamp": ["oklch(15% 0.035 28)", "oklch(26% 0.06 28)", "oklch(38% 0.085 28)", "oklch(50% 0.1 28)", "oklch(63% 0.095 28)", "oklch(74% 0.075 28)", "oklch(86% 0.045 28)", "oklch(95% 0.02 28)"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Dispatch Display", "purpose": "Product identity in the command header." },
+      "headline": { "displayName": "Board Headline", "purpose": "Ruled operational section headings." },
+      "title": { "displayName": "Decision Title", "purpose": "Current decision and escalation state." },
+      "body": { "displayName": "Operational Body", "purpose": "Reports, reasons, risks, and trace summaries." },
+      "label": { "displayName": "Condensed Label", "purpose": "Tables, chips, tabs, and action controls." }
+    },
+    "shadows": [
+      { "name": "sticky-column-seam", "value": "1px 0 #596265", "purpose": "A structural divider after the sticky community column on compact screens; never use it as decorative elevation." }
+    ],
+    "motion": [
+      { "name": "row-signal", "value": "500ms cubic-bezier(0.2, 0.8, 0.2, 1)", "purpose": "Brief amber-to-rest signal when the selected plan fingerprint changes." },
+      { "name": "row-stagger", "value": "35ms per row, capped at row index 12", "purpose": "Orders the changed-plan signal through the dispatch list." },
+      { "name": "reduced-motion", "value": "animation: none", "purpose": "Removes the row signal when reduced motion is requested." }
+    ],
+    "breakpoints": [
+      { "name": "compact", "value": "760px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Action Button",
+      "kind": "button",
+      "refersTo": "button-action",
+      "description": "Conventional high-confidence action control for planning, explanation, and road events.",
+      "html": "<button class=\"ds-action-button\">PLAN NOW</button>",
+      "css": "@font-face { font-family: 'Dispatch Condensed'; src: url('/app/static/fonts/BarlowCondensed-Bold.ttf') format('truetype'); font-weight: 700; font-display: swap; } .ds-action-button { min-height: 42px; padding: 0 18px; border: 1px solid #ffb400; border-radius: 2px; background: #151a1b; color: #ffb400; font: 700 0.75rem/1 'Dispatch Condensed', sans-serif; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; } .ds-action-button:hover { background: #ffb400; color: #0d0f0f; } .ds-action-button:focus-visible { outline: 3px solid #f2f2f2; outline-offset: 2px; }"
+    },
+    {
+      "name": "Status Chip",
+      "kind": "chip",
+      "refersTo": "status-chip",
+      "description": "Compact command-header metadata with an amber operational value.",
+      "html": "<span class=\"ds-status-chip\">CONFIDENCE <strong>82%</strong></span>",
+      "css": "@font-face { font-family: 'Dispatch Condensed'; src: url('/app/static/fonts/BarlowCondensed-Bold.ttf') format('truetype'); font-weight: 700; font-display: swap; } .ds-status-chip { display: inline-flex; gap: 0.45em; padding: 7px 10px; border: 1px solid #697477; border-radius: 0; color: #d7dbdc; background: transparent; font: 700 0.78rem/1 'Dispatch Condensed', sans-serif; letter-spacing: 0.075em; text-transform: uppercase; } .ds-status-chip strong { color: #ffb400; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Current Decision Panel",
+      "kind": "card",
+      "refersTo": "decision-panel",
+      "description": "Primary operational state with a semantic state word and ruled metrics.",
+      "html": "<section class=\"ds-decision-panel\"><div class=\"ds-decision-state\">PLAN READY FOR DISPATCH<br><em>ACTIVE</em></div><div class=\"ds-metric\"><span>Assignments</span><strong>18</strong></div><div class=\"ds-metric\"><span>Communities served</span><strong>12</strong></div><div class=\"ds-metric\"><span>Unserved</span><strong>2</strong></div></section>",
+      "css": "@font-face { font-family: 'Dispatch Condensed'; src: url('/app/static/fonts/BarlowCondensed-Bold.ttf') format('truetype'); font-weight: 700; font-display: swap; } .ds-decision-panel { width: min(100%, 360px); padding: 18px; border: 1px solid #596265; border-radius: 0; background: #121617; color: #f2f2f2; font-family: sans-serif; } .ds-decision-state { margin-bottom: 16px; color: #f2f2f2; font: 700 1.7rem/1.1 'Dispatch Condensed', sans-serif; letter-spacing: 0.06em; text-transform: uppercase; } .ds-decision-state em { color: #70c1a5; font-style: normal; } .ds-metric { display: grid; grid-template-columns: 1fr auto; padding: 10px 0; border-top: 1px solid #394143; } .ds-metric span { color: #9fa8aa; } .ds-metric strong { color: #f2f2f2; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Dispatch Assignment Row and Table",
+      "kind": "custom",
+      "refersTo": "assignment-table",
+      "description": "Ordered, scrollable dispatch board with sticky context and a changed-plan row signal.",
+      "html": "<div class=\"ds-table-shell\"><div class=\"ds-scroll-hint\">Keep priority and community visible while scrolling routes</div><div class=\"ds-table-scroll\"><table class=\"ds-dispatch-table ds-signal\"><thead><tr><th>Priority</th><th>Community</th><th>Resource</th><th>Quantity</th><th>Route</th></tr></thead><tbody><tr style=\"--row-index:0\"><td class=\"ds-priority\">1</td><td><strong>C04</strong></td><td>Drinking Water</td><td class=\"ds-quantity\">620</td><td class=\"ds-route\">T2 · T6 · T9</td></tr><tr style=\"--row-index:1\"><td class=\"ds-priority\">2</td><td><strong>C11</strong></td><td>Food Kits</td><td class=\"ds-quantity\">410</td><td class=\"ds-route\">T3 · T8</td></tr></tbody></table></div></div>",
+      "css": "@font-face { font-family: 'Dispatch Condensed'; src: url('/app/static/fonts/BarlowCondensed-Bold.ttf') format('truetype'); font-weight: 700; font-display: swap; } .ds-scroll-hint { display: none; padding: 8px 10px; border: 1px solid #596265; border-bottom: 0; color: #ffb400; font: 0.78rem/1.3 sans-serif; } .ds-table-scroll { max-height: 540px; overflow: auto; border: 1px solid #596265; background: #101415; scrollbar-color: #ffb400 #171c1d; } .ds-dispatch-table { width: 100%; min-width: 720px; border-collapse: collapse; color: #f2f2f2; font-family: sans-serif; } .ds-dispatch-table th { position: sticky; top: 0; z-index: 1; padding: 10px 12px; border-bottom: 1px solid #6f7a7d; background: #252c2e; color: #ffb400; font: 700 0.75rem/1 'Dispatch Condensed', sans-serif; letter-spacing: 0.075em; text-align: left; text-transform: uppercase; } .ds-dispatch-table td { padding: 11px 12px; border-bottom: 1px solid #333a3c; vertical-align: top; } .ds-dispatch-table tbody tr { background: #111617; } .ds-dispatch-table tbody tr:nth-child(even) { background: #151b1c; } .ds-dispatch-table tbody tr:hover { background: #20292b; } .ds-priority, .ds-quantity { color: #ffb400; font-weight: 800; font-variant-numeric: tabular-nums; } .ds-route { white-space: nowrap; color: #d7dbdc; } .ds-signal tbody tr { animation: ds-row-signal 500ms cubic-bezier(0.2, 0.8, 0.2, 1) both; animation-delay: calc(var(--row-index, 0) * 35ms); } @keyframes ds-row-signal { from { background: #4b3905; filter: brightness(1.18); } to { filter: none; } } @media (prefers-reduced-motion: reduce) { .ds-signal tbody tr { animation: none; } } @media (max-width: 760px) { .ds-scroll-hint { display: block; } .ds-dispatch-table th:nth-child(1), .ds-dispatch-table td:nth-child(1) { position: sticky; left: 0; width: 76px; min-width: 76px; z-index: 2; } .ds-dispatch-table th:nth-child(2), .ds-dispatch-table td:nth-child(2) { position: sticky; left: 76px; width: 108px; min-width: 108px; z-index: 2; box-shadow: 1px 0 #596265; } .ds-dispatch-table tbody td:nth-child(-n+2) { background: #111617; } .ds-dispatch-table tbody tr:nth-child(even) td:nth-child(-n+2) { background: #151b1c; } .ds-dispatch-table tbody tr:hover td:nth-child(-n+2) { background: #20292b; } }"
+    },
+    {
+      "name": "Road Status Legend",
+      "kind": "custom",
+      "refersTo": "road-status-legend",
+      "description": "Text-labeled semantic road lines whose patterns remain distinguishable without color.",
+      "html": "<div class=\"ds-road-legend\"><span><i class=\"ds-road-open\"></i>Open</span><span><i class=\"ds-road-flooded\"></i>Flooded / limited</span><span><i class=\"ds-road-blocked\"></i>Blocked / closed</span></div>",
+      "css": ".ds-road-legend { display: flex; flex-wrap: wrap; gap: 18px; padding: 10px 5px 2px; border-top: 1px solid #3f4749; background: #101415; color: #cbd0d1; font: 0.82rem/1.3 sans-serif; } .ds-road-legend span { display: inline-flex; align-items: center; gap: 7px; } .ds-road-legend i { display: inline-block; width: 28px; height: 4px; } .ds-road-open { background: #70c1a5; } .ds-road-flooded { background: repeating-linear-gradient(90deg, #ffb400 0 8px, transparent 8px 13px); } .ds-road-blocked { background: repeating-linear-gradient(90deg, #d32f2f 0 3px, transparent 3px 7px); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Live Dispatch Board",
+    "overview": "RESQ AI is an operational surface with the urgency and legibility of a live transport dispatch board. Matte near-black planes, cool steel seams, condensed uppercase labels, and ordered rows make current state scannable without dressing the interface as a simulated control panel.\n\nExpression comes from disciplined semantics rather than decoration. Amber identifies attention and action, mint confirms open or active state, and red is reserved for blocked or escalated conditions. Dense decision data remains readable because labels and display moments use the self-hosted Dispatch Condensed face while reports, reasons, and explanatory copy stay in a readable sans-serif.\n\nThe interface is flat, square, and ruled. One-pixel dividers organize the board, line patterns keep road status understandable without color, and a brief staggered amber signal marks assignment rows only when the plan fingerprint changes.",
+    "keyCharacteristics": [
+      "Matte near-black tonal layers separated by cool steel one-pixel rules.",
+      "Condensed uppercase operational labels paired with readable long-form copy.",
+      "Amber attention, mint open or active state, and red blocked or escalated state.",
+      "Ordered dispatch rows and patterned route lines as the signature visual language.",
+      "Familiar controls, compact density, and restrained motion for an Operate surface."
+    ],
+    "rules": [
+      { "name": "The Signal Ownership Rule", "body": "Amber means attention or action, mint means open or active, and red is used only for blocked or escalated conditions; never exchange these roles for decoration.", "section": "colors" },
+      { "name": "The Condensed Role Rule", "body": "Use Dispatch Condensed for identity, labels, statuses, headings, and controls; never use it for long reports or multi-line reasoning.", "section": "typography" },
+      { "name": "The Decision-First Rule", "body": "On narrow screens, show the current decision before the map and keep the first two dispatch columns anchored during horizontal inspection.", "section": "layout" },
+      { "name": "The Flat Board Rule", "body": "Separate operational regions with tone and one-pixel rules; do not introduce floating cards, soft drop shadows, glass, or glow.", "section": "elevation" },
+      { "name": "The Changed Plan Rule", "body": "Animate dispatch rows only after the selected plan fingerprint changes; ordinary rerenders and static inspection remain still.", "section": "components" }
+    ],
+    "dos": [
+      "Do keep the current plan state, route network, and ordered assignments visually primary.",
+      "Do pair every road-status color with a distinct line pattern and a written label.",
+      "Do reserve amber, mint, and red for their named semantic roles.",
+      "Do use one-pixel rules and tonal layering to organize dense operational information.",
+      "Do preserve conventional control behavior, visible keyboard focus, and reduced-motion support."
+    ],
+    "donts": [
+      "Don't introduce rounded dashboard cards, decorative shadows, glass effects, or floating metric tiles.",
+      "Don't use red for warnings that are not blocked or escalated states.",
+      "Don't set reports, reasons, or other long-form copy in Dispatch Condensed.",
+      "Don't animate assignment rows unless the plan fingerprint actually changes.",
+      "Don't hide priority or community context while the mobile assignment table scrolls horizontally."
+    ]
+  }
+}
