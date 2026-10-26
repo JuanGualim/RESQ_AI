@@ -14,13 +14,13 @@ node_modules/
 
 # Varios
 .DS_Store
-logs/*.log
-logs/*.jsonl
+logs/
 world_service/.world/
 .cursor/
 
 # Agents
 CLAUDE.md
+.claude/
 
 # Context
 /docs/informacion_evento
