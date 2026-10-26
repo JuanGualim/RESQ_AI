@@ -40,7 +40,7 @@ python -m venv .venv
 source .venv/bin/activate              # Windows: .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 cp .env.example .env                   # set MODEL_* and SAMPLE_MODE=true
-pytest                                 # 142 tests, offline
+pytest                                 # 166 tests, offline
 ```
 
 Start the World Model service in its own terminal:
