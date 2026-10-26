@@ -111,6 +111,25 @@ def test_quality_check_catches_an_empty_diff_and_an_invented_community():
     assert not any("C07" in p for p in problems)
 
 
+def test_a_down_service_is_reported_as_such_not_as_a_missing_plan(monkeypatch):
+    # Zetaris went down mid-battery once; the turns were blamed on the agents.
+    monkeypatch.setattr(heavy_test, "execute", lambda *a, **k: {
+        "plan": None, "report": "Zetaris did not answer", "escalated": True, "reviews": [],
+        "run_id": "r", "request_type": "plan",
+        "trace": [{"agent": "run", "output_summary": '{"unavailable": "Zetaris"}', "duration_ms": 1,
+                   "iteration": 0}]})
+    monkeypatch.setattr(heavy_test.world, "get_state", lambda: {"communities": {}})
+    record = heavy_test.run_turn({"name": "plan", "question": "q"}, {})
+    assert record["ok"] is False
+    assert record["failure_kind"] == "service_unavailable"
+    assert "Zetaris" in record["error"]
+
+
+def test_unreachable_service_reads_the_run_trace_line():
+    assert heavy_test.unreachable_service([{"agent": "run", "output_summary": "Zetaris"}]) == "Zetaris"
+    assert heavy_test.unreachable_service([{"agent": "planner"}, {"agent": "critic"}]) == ""
+
+
 def test_a_planning_turn_without_a_plan_is_a_failure(monkeypatch):
     # Whatever the cause, a turn that should plan and comes back empty is not "clean".
     monkeypatch.setattr(heavy_test, "execute", lambda *a, **k: {

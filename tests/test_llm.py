@@ -51,14 +51,14 @@ def test_fast_lane_turns_thinking_off(client):
     assert fake.requests[0]["extra_body"]["chat_template_kwargs"]["enable_thinking"] is False
 
 
-def test_fast_lane_is_deterministic(client):
-    # The fast lane classifies (contested reports, risk); the same input must not
-    # decide differently between runs, so its temperature stays at 0.
+def test_both_lanes_are_deterministic(client):
+    # The demo has to be rehearsable: the same scenario must give the same plan.
+    # Both lanes decide (which report to believe, which tier), they do not write prose.
     fake = client("one", "two")
     llm.chat([{"role": "user", "content": "hi"}], lane="fast")
     llm.chat([{"role": "user", "content": "hi"}], lane="deep")
     assert fake.requests[0]["temperature"] == 0.0
-    assert fake.requests[1]["temperature"] > 0.0
+    assert fake.requests[1]["temperature"] == 0.0
 
 
 def test_deep_lane_uses_its_model_and_thinks(client):

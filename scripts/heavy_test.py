@@ -86,6 +86,14 @@ def classify_failure(error: str) -> str:
     return "other"
 
 
+def unreachable_service(trace: list[dict]) -> str:
+    """execute() reports an unreachable service as one trace line from "run" (see resq/run.py)."""
+    for step in trace:
+        if step.get("agent") == "run":
+            return str(step.get("output_summary", ""))[:200]
+    return ""
+
+
 def critic_rounds(trace: list[dict]) -> int:
     """How many times the Critic ran in this turn (one round = one plan review)."""
     return sum(1 for step in trace if step.get("agent") == "critic")
@@ -191,7 +199,12 @@ def run_turn(step: dict, plans: dict) -> dict:
             changes=len(plan.changes_vs_previous) if plan else 0,
             problems=problems,
         )
-        if plan is None and step["name"] != "why":
+        down = unreachable_service(result["trace"])
+        if down:
+            # Zetaris or the World Model is down: the battery says so instead of
+            # blaming the agents for the empty plan that follows.
+            record.update(ok=False, failure_kind="service_unavailable", error=down)
+        elif plan is None and step["name"] != "why":
             # A planning turn that ends without a plan is a failure, however it got there.
             kind = "rounds_exhausted" if record["critic_rounds"] >= MAX_CRITIC_ROUNDS else "no_plan"
             record.update(ok=False, failure_kind=kind, error="the turn produced no plan")

@@ -7,8 +7,12 @@ NVIDIA only in development (both are set in .env). Two lanes:
   At 0.2 the Reconciler decided contested objects differently between runs (T11 open vs
   uncertain), which changed the plan downstream; these are classifications, not prose,
   so the lane is deterministic.
-- deep: larger budget (Planner, Critic); thinking only if LANE_DEEP_THINKING=true,
-  because with thinking a plan takes longer than the 90 s timeout on direct NVIDIA
+- deep: larger budget (Planner, Critic), also temperature 0. At 0.2 the Planner
+  returned different tier decisions for the same scenario, so a demo could not be
+  rehearsed; measured on Nemotron 3 Ultra, temperature 0 was no slower.
+  Thinking only if LANE_DEEP_THINKING=true: measured on the same model it made the
+  decisions stable but took 53 s per call against 11 s, and one call in three
+  exceeded the 90 s timeout, so it stays off.
 
 Nemotron 3.5 thinks by default; with a small max_tokens budget the reasoning
 consumes every token and `content` comes back empty, so the fast lane turns it
@@ -27,7 +31,7 @@ from resq.config import get_settings
 
 LANES = {
     "fast": {"thinking": False, "max_tokens": 2000, "temperature": 0.0},
-    "deep": {"thinking": False, "max_tokens": 8000, "temperature": 0.2},
+    "deep": {"thinking": False, "max_tokens": 8000, "temperature": 0.0},
 }
 METERLESS_HEADERS = {"meterless-app": "resq-ai", "meterless-scope": "user"}
 _FENCE = re.compile(r"^```(?:json)?\s*|\s*```$", re.MULTILINE)
