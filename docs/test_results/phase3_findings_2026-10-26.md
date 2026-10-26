@@ -106,18 +106,42 @@ Nothing to fix in the agents. Two things worth knowing for the demo:
 - If a live demo turn stalls, `LANE_DEEP_MODEL=nvidia/nemotron-3.5-lightning-30b-a3b`
   in `.env` is a one-line fallback (see `deep_lane_decision_2026-10-26.md`).
 
-### 3. False critic blocks are back on the blocking scenarios
+### 3. False critic blocks — fixed
 
 `block_T3`, `block_T6` and `reopen_T6` each show 9–10 false blocks over 30 turns: the
 Critic rejected a plan that passed every hard rule. It costs nothing in rounds (P8.2
 lets the model review send a plan back only once, and the mean stayed at 1.0), but it
 is 9–10 extra deep-lane calls per 30 turns.
 
-These only appear on scenarios where a segment is blocked, never on the baseline, so
-the likely trigger is the Critic reading a coverage drop caused by the block itself as
-a ranking mistake — the same family of mistake as the stock cuts fixed earlier, with a
-different cause. Worth giving the Critic the blocking event the same way `stock_cuts`
-was given, and measuring again.
+They only appear on scenarios where a segment is blocked, never on the baseline. The
+cause was the same family as the stock cuts fixed the day before, with a different
+trigger: blocking a segment leaves some communities reachable **only by the fording
+vehicles**, which are a small part of the fleet, so they receive less than a
+lower-risk community every vehicle can reach. `validate_plan` already exempts those
+pairs in code — but `plan_by_community`, which builds the Critic's payload, never
+included `reachability`, so the model could not see it and read the gap as a ranking
+mistake.
+
+Fix: `reachability` is now in the review payload, and the prompt says that a
+higher-risk community which is harder to reach is never an inversion.
+
+**Result: 0 false blocks across all four scenarios**, down from 9–10 per 30 turns.
+
+## Validation battery, after the fixes
+
+Same four scenarios, 5 runs each, **60 turns, 60 clean, 0 failures**:
+
+| Scenario | Turns | Clean | Mean ms | Median ms | Max ms | Critic rounds | False blocks | Re-plan stability |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| block_T20 | 15 | 15 | 32,211 | 35,062 | 58,563 | 1.0 | **0** | - |
+| block_T3 | 15 | 15 | **28,798** | 26,718 | 53,812 | 1.0 | **0** | - |
+| block_T6 | 15 | 15 | **33,645** | 32,686 | 56,953 | 1.0 | **0** | - |
+| reopen_T6 | 15 | 15 | 49,515 | 45,436 | 75,811 | 1.0 | **0** | **64 %** |
+
+Three scenarios are inside the 45 s target; `reopen_T6` sits at 49.5 s mean with a
+45.4 s median, and it is the longest scenario by design (three full graph runs, the
+third carrying two previous plans). Re-plan stability rose from 48 % to 64 % with no
+agent change, which is consistent with finding 1b: the number moves on its own.
 
 ## Point 12, measured
 
