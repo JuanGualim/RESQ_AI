@@ -21,22 +21,44 @@ five automatic quality checks passed on 113 of 120 turns.
 
 ## What the battery found
 
-### 1. Re-plan stability after reopening — fixed
+### 1. Re-plan stability after reopening — the check was wrong, not the agent
 
 The seven failures are all the same one: after blocking T6 and reopening it, plan v3
-kept only **45–49 %** of v1's delivery lines. Reopening puts the world back where it
-started, so v3 should look like v1.
+kept only **45–49 %** of v1's delivery lines, and the battery called that a failure.
 
-Cause, in `resq/agents/planner.py`: the prompt said *"If previous_plan is present,
-keep what still works"*, and the previous plan at that point is v2 — the one cut down
-by the block. The Planner anchored on it and kept communities on the lower tier even
-though the restriction was gone. It had the `segment_reopened` event in its context
-all along; nothing told it what to do with it.
+The first hypothesis was that the Planner anchored on v2 — the plan cut down by the
+block — because its prompt says *"If previous_plan is present, keep what still works"*.
+Adding an instruction to re-decide from scratch after a `segment_reopened` changed
+nothing: the next run scored 48 %. That change was reverted.
 
-Fix: the prompt now says that a `segment_reopened` in `new_events` means the
-restriction is gone and every tier is decided again from scratch, and never kept low
-just because the previous plan had it there. `tests/test_agents.py` pins both halves:
-the event reaches the Planner's context, and the instruction is in the prompt.
+Diffing a real v1 against its v3 showed what actually happens:
+
+```
+T6 status: open -> blocked -> open      (the world does go back)
+
+C03 blanket     80 -> 40      C01 medical_kit  - -> 7
+C03 hygiene_kit 40 -> 20      C08 medical_kit  - -> 8
+C05 blanket    248 -> 124     C11 medical_kit  - -> 5
+C05 hygiene_kit 124 -> 62
+C07 blanket    244 -> 122     v1 unserved: C01, C08, C11
+C07 hygiene_kit 122 -> 61     v3 unserved: none
+C12 blanket    128 -> 64
+C12 hygiene_kit 64 -> 32
+```
+
+The world really does return to its starting state. What changed is the decision: v1
+gave four communities the **full** tier and left three unserved; v3 gave them
+**essential** — still 100 % of water, food and medical kits, half the blankets and
+hygiene kits — and spent what it saved reaching the three the baseline had abandoned.
+
+**v3 is the better plan**, and P5.2 agrees: no community should be left with nothing
+while others get blankets. Both are valid; the Planner is not anchoring on anything.
+
+The defect was the measurement. Comparing exact quantities line by line punishes a
+legitimate tier change. The check now looks for **regressions** instead: a community
+that was served and no longer is, or whose water or food dropped below half of the
+baseline. Tier changes that keep the essentials pass. `similarity` is still reported,
+as information about how much the plan moved, with no threshold attached.
 
 ### 2. Latency: two scenarios over target, and why
 
@@ -74,6 +96,11 @@ was given, and measuring again.
 
 ## Point 12, measured
 
-Re-plan stability now has a number: **49 %** before the fix. It is measured as the
-share of (community, resource) delivery lines whose quantity is identical between the
-baseline plan and the plan after reopening, and it is reported by every battery run.
+Re-plan stability has a number: **48–49 %** of delivery lines identical between the
+baseline and the plan after reopening. Every battery run reports it.
+
+The number is low and that is correct behaviour, not a defect — see finding 1. Raising
+it would mean telling the Planner to reproduce its previous answer rather than decide
+on the facts, which is the opposite of what this system is for. What the battery
+enforces instead is that no community loses its place: nobody served goes unserved, and
+nobody's water or food is halved, once the road is open again.

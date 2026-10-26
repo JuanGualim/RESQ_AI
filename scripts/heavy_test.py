@@ -30,12 +30,15 @@ sys.path.insert(0, str(ROOT_DIR))
 
 from resq import world  # noqa: E402
 from resq.config import get_settings  # noqa: E402
-from resq.protocol import MAX_CRITIC_ROUNDS  # noqa: E402
+from resq.protocol import CRITICAL_ESSENTIALS, MAX_CRITIC_ROUNDS  # noqa: E402
 from resq.run import DEFAULT_QUESTION, execute  # noqa: E402
 from resq.tools.validators import critical_minimum_gaps, validate_plan  # noqa: E402
 
 WHY_QUESTION = "Why did the plan change?"
 COMMUNITY_ID = re.compile(r"\bC\d{2}\b")
+# A re-plan may lower a tier, but halving someone's water or food once the road is open
+# again is a step backwards, not a trade-off.
+ESSENTIAL_FLOOR = 0.5
 
 
 def blocking(segment: str) -> list[dict]:
@@ -122,13 +125,40 @@ def delivered(plan) -> dict[tuple[str, str], int]:
 
 
 def similarity(first, second) -> float:
-    """Share of (community, resource) lines delivered in the same quantity in both plans (point 12)."""
+    """Share of (community, resource) lines delivered in the same quantity in both plans.
+
+    Reported as information, not as a pass/fail: a re-plan is allowed to change tiers.
+    After reopening T6 the Planner moved four communities from "full" to "essential"
+    and used what it saved to reach three that the baseline left unserved. That is a
+    better plan under P5.2 and it scores under 50% here, so `regressions` below is
+    what decides, not this number.
+    """
     before, after = delivered(first), delivered(second)
     keys = set(before) | set(after)
     if not keys:
         return 1.0
     same = sum(1 for key in keys if before.get(key) == after.get(key))
     return round(same / len(keys), 3)
+
+
+def regressions(baseline, current) -> list[str]:
+    """What a re-plan is never allowed to do once the restriction is lifted.
+
+    Dropping a community that was served, or cutting its water or food, means the plan
+    went backwards. Moving everyone from "full" to "essential" to reach more people does not.
+    """
+    before, after = delivered(baseline), delivered(current)
+    served_before = {community for community, _ in before}
+    served_after = {community for community, _ in after}
+    problems = [f"{community} was served in the baseline and is unserved now"
+                for community in sorted(served_before - served_after)]
+    for community, resource in sorted(before):
+        if resource not in CRITICAL_ESSENTIALS:
+            continue
+        was, now = before[(community, resource)], after.get((community, resource), 0)
+        if now < was * ESSENTIAL_FLOOR:
+            problems.append(f"{community} {resource}: {was} -> {now}, below {ESSENTIAL_FLOOR:.0%} of the baseline")
+    return problems
 
 
 def quality_problems(step: dict, result: dict, state: dict, plans: dict) -> list[str]:
@@ -163,9 +193,7 @@ def quality_problems(step: dict, result: dict, state: dict, plans: dict) -> list
 
     compare_with = step.get("compare_with")
     if compare_with and plan is not None and plans.get(compare_with) is not None:
-        score = similarity(plans[compare_with], plan)
-        if score < 0.5:
-            problems.append(f"after reopening, only {score:.0%} of the lines match the {compare_with} plan")
+        problems += [f"after reopening, {p}" for p in regressions(plans[compare_with], plan)]
     return problems
 
 

@@ -160,14 +160,38 @@ def test_quality_check_catches_a_why_answer_that_never_names_the_segment():
     assert heavy_test.quality_problems(step, result, state, {}) == []
 
 
-def test_quality_check_flags_a_reopen_that_does_not_look_like_v1():
-    state = {"communities": {"C07": {}}, "road_segments": {}, "vehicles": {}, "warehouses": {}, "inventory": {}}
-    baseline = plan_with(("C07", "water_20l", 100, []))
-    reopened = plan_with(("C07", "water_20l", 5, []), version=3, changes=["C07 water_20l: 100 -> 5"])
-    result = {"plan": reopened, "report": "ok", "trace": []}
+def test_a_reopen_may_change_tiers_without_going_backwards():
+    # Measured on the real scenario: after reopening T6 the Planner moved four
+    # communities from "full" to "essential" and reached three the baseline had left
+    # unserved. That is a better plan under P5.2 and must not be reported as a failure.
+    state = {"communities": {"C07": {}, "C01": {}}, "road_segments": {}, "vehicles": {},
+             "warehouses": {}, "inventory": {}}
+    baseline = plan_with(("C07", "water_20l", 100, []), ("C07", "blanket", 100, []))
+    reopened = plan_with(("C07", "water_20l", 100, []), ("C07", "blanket", 50, []),
+                         ("C01", "medical_kit", 7, []), version=3, changes=["C07 blanket: 100 -> 50"])
     step = {"name": "reopen", "expect_changes": True, "compare_with": "plan"}
+    result = {"plan": reopened, "report": "ok", "trace": []}
     problems = heavy_test.quality_problems(step, result, state, {"plan": baseline})
-    assert any("after reopening" in p for p in problems)
+    assert [p for p in problems if p.startswith("after reopening")] == []
+
+
+def test_a_reopen_that_drops_a_community_or_its_water_is_a_failure():
+    state = {"communities": {"C07": {}, "C12": {}}, "road_segments": {}, "vehicles": {},
+             "warehouses": {}, "inventory": {}}
+    baseline = plan_with(("C07", "water_20l", 100, []), ("C12", "food_kit", 40, []))
+    reopened = plan_with(("C07", "water_20l", 20, []), version=3, changes=["C07 water_20l: 100 -> 20"])
+    step = {"name": "reopen", "expect_changes": True, "compare_with": "plan"}
+    result = {"plan": reopened, "report": "ok", "trace": []}
+    problems = heavy_test.quality_problems(step, result, state, {"plan": baseline})
+    assert any("C12 was served in the baseline and is unserved now" in p for p in problems)
+    assert any("C07 water_20l: 100 -> 20" in p for p in problems)
+
+
+def test_regressions_ignores_a_tier_change_that_keeps_the_essentials():
+    baseline = plan_with(("C07", "water_20l", 100, []), ("C07", "hygiene_kit", 50, []))
+    gentler = plan_with(("C07", "water_20l", 100, []), ("C07", "hygiene_kit", 25, []))
+    assert heavy_test.regressions(baseline, gentler) == []
+    assert heavy_test.similarity(baseline, gentler) == 0.5, "similarity still reports the change"
 
 
 def test_summary_aggregates_latency_rounds_and_escalations():

@@ -113,10 +113,7 @@ def test_planner_plan_passes_hard_rules(assessed):
     assert plan.assignments and validate_plan(plan, assessed) == []
 
 
-def test_planner_sees_a_reopening_and_is_told_to_re_decide(assessed, no_model):
-    # The phase 3 battery showed v3 keeping only ~49% of v1 after reopening T6: the
-    # Planner was holding on to the tiers of the blocked plan. It needs both the event
-    # in its context and the instruction not to anchor on the previous plan.
+def test_planner_sees_the_coordinator_events_that_caused_the_replan(assessed, no_model):
     world.apply_event({"type": "segment_blocked", "id": "T6", "source": "coordinator",
                        "ts": scenario.next_coordinator_ts()})
     world.apply_event({"type": "segment_reopened", "id": "T6", "source": "coordinator",
@@ -124,9 +121,19 @@ def test_planner_sees_a_reopening_and_is_told_to_re_decide(assessed, no_model):
     run = ResqState(run_id="test", as_of=scenario.now(), previous_plan=Plan(version=2))
     context = planner.build_context(world.get_state(), run)
     events = [e["type"] for e in context["new_events"]]
-    assert "segment_reopened" in events, "the Planner must see that the block was lifted"
-    assert "segment_reopened" in planner.SYSTEM_PROMPT
-    assert "planning from scratch" in planner.SYSTEM_PROMPT
+    assert "segment_blocked" in events and "segment_reopened" in events
+
+
+def test_reopening_a_segment_restores_its_status(assessed, no_model):
+    # The re-plan after a reopening is only comparable to the baseline if the world
+    # really went back: the coordinator's reopening must win over the block.
+    assert world.get_state()["road_segments"]["T6"]["status"] == "open"
+    world.apply_event({"type": "segment_blocked", "id": "T6", "source": "coordinator",
+                       "ts": scenario.next_coordinator_ts()})
+    assert world.get_state()["road_segments"]["T6"]["status"] == "blocked"
+    world.apply_event({"type": "segment_reopened", "id": "T6", "source": "coordinator",
+                       "ts": scenario.next_coordinator_ts()})
+    assert world.get_state()["road_segments"]["T6"]["status"] == "open"
 
 
 def test_blocking_t6_makes_the_critical_minimum_infeasible(assessed, no_model):
