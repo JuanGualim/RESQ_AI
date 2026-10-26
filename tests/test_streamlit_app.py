@@ -17,6 +17,19 @@ from app.streamlit_app import (
 APP_PATH = Path(__file__).resolve().parents[1] / "app" / "streamlit_app.py"
 
 
+def test_live_mode_can_import_the_agent_package():
+    # Streamlit runs the app with app/ as the script directory, so without the repo
+    # root on sys.path live mode failed with "Live services are not ready:
+    # No module named 'resq'" while example mode kept working.
+    app = AppTest.from_file(str(APP_PATH), default_timeout=30).run()
+    assert not app.exception
+    import importlib
+
+    source = APP_PATH.read_text(encoding="utf-8")
+    assert "sys.path.insert" in source, "the app must put the repo root on sys.path"
+    assert importlib.import_module("resq.run").execute
+
+
 def test_example_versions_load_expected_state():
     baseline, baseline_map = load_example_run("baseline")
     blocked, blocked_map = load_example_run("blocked")

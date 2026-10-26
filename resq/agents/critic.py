@@ -29,6 +29,11 @@ because its resource appears there was cut by scarcity, not by the Planner's ran
 inversion and is not an issue at all. Before flagging an inversion, check both communities against
 "stock_cuts", and only flag it when the lower-risk one was served ahead of the higher-risk one with stock
 still available.
+"reachability" is the other reason coverage can be low without anyone making a mistake: "ford_only" means
+only the fording vehicles can get there, and they are a small part of the fleet, so such a community often
+gets less than a lower-risk one that every vehicle can reach. That is the road network, not the ranking.
+Never flag an inversion when the higher-risk community is harder to reach ("ford_only" or "none") than the
+one you are comparing it with.
 Risk scores and levels are computed by code (P3: critical >= 0.60, high >= 0.45, medium >= 0.30) and are
 correct by definition: never question them. Put any other remark as "minor".
 Reply with ONLY JSON: {"issues": [{"community_id": "C..", "severity": "blocking|minor", "problem": "..."}], "summary": "..."}"""

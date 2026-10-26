@@ -12,12 +12,17 @@ from __future__ import annotations
 import csv
 import html
 import json
+import sys
 from pathlib import Path
 from typing import Any, Iterable
 
 import streamlit as st
 
 ROOT = Path(__file__).resolve().parents[1]
+# Streamlit runs this file with app/ as the script directory, so the repo root is not
+# importable and live mode fails with "No module named 'resq'".
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 EXAMPLES_DIR = ROOT / "output_examples"
 SAMPLE_DIR = ROOT / "data" / "sample"
 

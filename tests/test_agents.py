@@ -2,7 +2,7 @@
 import pytest
 
 from resq import llm, scenario, world
-from resq.agents import explainer, intake, planner, reconciler, risk_analyst
+from resq.agents import critic, explainer, intake, planner, reconciler, risk_analyst
 from resq.agents.critic import route_after_critic, stock_cuts
 from resq.schemas import Assignment, Plan, ResqState
 from resq.tools.packing import pack
@@ -113,12 +113,48 @@ def test_planner_plan_passes_hard_rules(assessed):
     assert plan.assignments and validate_plan(plan, assessed) == []
 
 
+def test_planner_sees_the_coordinator_events_that_caused_the_replan(assessed, no_model):
+    world.apply_event({"type": "segment_blocked", "id": "T6", "source": "coordinator",
+                       "ts": scenario.next_coordinator_ts()})
+    world.apply_event({"type": "segment_reopened", "id": "T6", "source": "coordinator",
+                       "ts": scenario.next_coordinator_ts()})
+    run = ResqState(run_id="test", as_of=scenario.now(), previous_plan=Plan(version=2))
+    context = planner.build_context(world.get_state(), run)
+    events = [e["type"] for e in context["new_events"]]
+    assert "segment_blocked" in events and "segment_reopened" in events
+
+
+def test_reopening_a_segment_restores_its_status(assessed, no_model):
+    # The re-plan after a reopening is only comparable to the baseline if the world
+    # really went back: the coordinator's reopening must win over the block.
+    assert world.get_state()["road_segments"]["T6"]["status"] == "open"
+    world.apply_event({"type": "segment_blocked", "id": "T6", "source": "coordinator",
+                       "ts": scenario.next_coordinator_ts()})
+    assert world.get_state()["road_segments"]["T6"]["status"] == "blocked"
+    world.apply_event({"type": "segment_reopened", "id": "T6", "source": "coordinator",
+                       "ts": scenario.next_coordinator_ts()})
+    assert world.get_state()["road_segments"]["T6"]["status"] == "open"
+
+
 def test_blocking_t6_makes_the_critical_minimum_infeasible(assessed, no_model):
     assert critical_minimum_gaps(assessed) == []
     world.apply_event({"type": "segment_blocked", "id": "T6", "source": "coordinator", "ts": scenario.next_coordinator_ts()})
     risk_analyst.node_risk_analyst(ResqState(run_id="test", as_of=scenario.now()))
     gaps = critical_minimum_gaps(world.get_state())
     assert any("fording vehicles carry 13,800 kg" in gap for gap in gaps)
+
+
+def test_review_payload_carries_reachability(assessed):
+    # The phase 3 battery showed 9-10 false blocks per 30 turns on the blocking
+    # scenarios: the Critic could not see that a community had become ford_only and
+    # read its lower coverage as a ranking mistake.
+    from resq.agents.common import plan_by_community
+    plan = Plan(assignments=[Assignment(community_id="C07", origin_id="W1", resource="water_20l", quantity=10,
+                                        vehicle_id="V1", route=[], priority=1, reason="x", evidence=[])])
+    summary = plan_by_community(plan, assessed)
+    assert "reachability" in summary["C07"]
+    assert summary["C07"]["reachability"] in ("all", "ford_only", "none")
+    assert "reachability" in critic.SYSTEM_PROMPT and "ford_only" in critic.SYSTEM_PROMPT
 
 
 def test_critic_tells_stock_cuts_apart_from_other_risks():

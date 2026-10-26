@@ -17,6 +17,9 @@ def plan_by_community(plan: Plan, current: dict) -> dict:
         needs = community.get("needs", {})
         entry.update(name=community.get("name"), risk_level=community.get("risk_level"), risk_score=community.get("risk_score"),
                      reported_status=community.get("reported_status"), need=needs,
+                     # Reviewers need this: a ford_only community is limited by the part of the
+                     # fleet that can reach it, so lower coverage there is not a ranking mistake.
+                     reachability=community.get("reachability"),
                      coverage={r: round(entry["delivered"].get(r, 0) / n, 2) for r, n in needs.items() if n},
                      unserved=community_id in plan.unserved)
     return summary

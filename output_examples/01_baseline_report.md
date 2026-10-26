@@ -1,31 +1,31 @@
-# Situation
-- Critical communities C07, C12, C03, and C05 have received full or essential-tier allocations, but C05 has partial hygiene and blanket coverage (0.5) due to stock constraints.
-- High-risk communities C04 and C06 have received minimum-tier allocations; C04 shows 0.0 hygiene coverage.
-- Medium-risk communities C01, C08, and C11 remain unserved with zero coverage across all need categories.
+# Aid Distribution Report
 
-# Plan
-- Allocation follows protocol P5.1/P5.2: critical communities (C07, C12, C03, C05) receive full or essential tiers before high-risk (C04, C06) receive minimum tiers, and medium-risk (C01, C08, C11) receive none.
-- C07 El Zapotal: full coverage (1.0) for all need categories.
-- C12 El Paraiso: full coverage (1.0) for all need categories.
-- C03 Los Amates: full coverage (1.0) for all need categories.
-- C05 Playitas: essential tier with water/food at 1.0, medical at 1.0, but hygiene at 0.5 and blanket at 0.5 due to stock scarcity.
-- C04 Las Pozas: minimum tier with water/food at 0.5, medical at 1.0, hygiene at 0.0.
-- C06 Rio Blanco: minimum tier with water/food at 0.5, medical at 1.0, hygiene at 0.0.
-- C01 Cerro Verde, C08 El Mirador, and C11 Nuevo Esfuerzo: unserved with 0.0 coverage.
+## Situation
+- C07 El Zapotal: critical risk (0.72) driven by isolation factor 0.0 and full exposure 1.0 despite all reachability; reported isolated status.
+- C12 El Paraiso: critical risk (0.699) driven by high vulnerability 0.75 and dependents 0.707; reported needs aid status.
+- C03 Los Amates: critical risk (0.659) driven by maximum vulnerability 1.0 and dependents 0.845; reported needs aid status.
+- C05 Playitas: critical risk (0.615) driven by full exposure 1.0 and vulnerability 0.75; reported evacuating status.
+- C04 Las Pozas: high risk (0.574) driven by exposure 0.8 and dependents 0.693; reported needs aid status.
 
-# Why the plan changed
-(No events since previous plan; plan_version 1 with previous_version null.)
+## Plan
+Distribution prioritizes by risk tier and coverage gaps:
+1. **Critical risk with unmet needs**: C07 (isolated, 0% coverage), C03 (80% coverage gap in medical_kit), C12 (13% coverage gap in medical_kit), C05 (evacuating, 0% coverage).
+2. **High risk with partial coverage**: C04 (50% water_20l and food_kit coverage after C07-C05 stock depletion; medical_kit and 50% hygiene_kit preserved).
+3. **Remaining high risk**: C06 (0% water_20l/food_kit coverage after C04 depletes essential tier; minimum tier provides 50% water_20l and food_kit with full medical_kit).
+4. **Unserved communities**: C01, C08, C11 have 0% coverage across all tiers; no aid delivered due to stock exhaustion.
 
-# Risks and decisions for you
-- P7.1: shelter S2 Salon Comunal Loma Alta cannot receive people (full).
-- P7.2: C05 Playitas is evacuating; nearest shelter with room: S4 Centro Deportivo Los Amates (4.8 km).
-- P7.2: C07 El Zapotal is isolated; nearest shelter with room: S4 Centro Deportivo Los Amates (8.8 km).
-- Medical kits near exhaustion (86/90 used).
-- Hygiene kits tight (410/473 used).
-- Blankets fully allocated to criticals (720/753).
-- Medium communities unserved per protocol.
-- No reachability constraints.
-- Escalated: false. No human decision needed at this time.
+Evidence: C07 needs aid despite reachability; C04 and C06 stock depletion documented in R012 and R030.
+
+## Why the plan changed
+No events since previous plan; plan_version 1 with no prior version.
+
+## Risks and decisions for you
+- Verify C07 isolation status and road accessibility for delivery.
+- Verify C04 and C06 stock levels: water_20l and food_kit exhausted after C07-C05 allocations; medical_kit and 50% hygiene_kit remain for C04.
+- If escalation were needed: human decision required for C07 isolated status and C04/C06 tier depletion, using reasons P6.2 (stock ran out) and C07 0.72 risk score.
+
+**escalation_reasons**: []  
+**risks**: ["P7.1: shelter S2 Salon Comunal Loma Alta cannot receive people (full)", "P7.2: C05 Playitas is evacuating; nearest shelter with room: S4 Centro Deportivo Los Amates (4.8 km)", "P7.2: C07 El Zapotal is isolated; nearest shelter with room: S4 Centro Deportivo Los Amates (8.8 km)", "P6.2: C04 water_20l: stock ran out, 196 of 254 units", "P6.2: C04 food_kit: stock ran out, 197 of 254 units", "P6.2: C06 water_20l: stock ran out, 0 of 7 units", "P6.2: C06 food_kit: stock ran out, 0 of 7 units", "C07 0.72"]
 
 ### Assignments (plan v1)
 
@@ -64,15 +64,15 @@
 | 26 | C05 | food_kit | 75 | V6 | W2 | T1-T3-T7-T9 |
 | 26 | C05 | food_kit | 35 | V6 | W2 | T1-T3-T7-T9 |
 | 26 | C05 | food_kit | 14 | V1 | W1 | T3-T6-T10-T11-T12 |
-| 27 | C05 | hygiene_kit | 62 | V1 | W1 | T3-T6-T10-T11-T12 |
+| 27 | C05 | hygiene_kit | 104 | V1 | W1 | T3-T6-T10-T11-T12 |
+| 27 | C05 | hygiene_kit | 20 | V5 | W2 | T1-T3-T6-T10-T11-T12 |
 | 28 | C05 | blanket | 80 | V1 | W1 | T3-T6-T10-T11-T12 |
-| 28 | C05 | blanket | 44 | V5 | W2 | T1-T3-T6-T10-T11-T12 |
+| 28 | C05 | blanket | 168 | V5 | W2 | T1-T3-T6-T10-T11-T12 |
 | 29 | C04 | water_20l | 106 | V1 | W1 | T3-T6-T8 |
-| 29 | C04 | water_20l | 21 | V5 | W2 | T1-T3-T6-T8 |
+| 29 | C04 | water_20l | 90 | V5 | W2 | T1-T3-T6-T8 |
 | 30 | C04 | food_kit | 23 | V1 | W1 | T3-T6-T8 |
-| 30 | C04 | food_kit | 104 | V5 | W2 | T1-T3-T6-T8 |
+| 30 | C04 | food_kit | 174 | V5 | W2 | T1-T3-T6-T8 |
 | 31 | C04 | medical_kit | 8 | V1 | W1 | T3-T6-T8 |
 | 31 | C04 | medical_kit | 5 | V5 | W2 | T1-T3-T6-T8 |
-| 32 | C06 | water_20l | 7 | V5 | W2 | T1-T3-T6-T10 |
-| 33 | C06 | food_kit | 7 | V5 | W2 | T1-T3-T6-T10 |
-| 34 | C06 | medical_kit | 2 | V5 | W2 | T1-T3-T6-T10 |
+| 32 | C04 | hygiene_kit | 64 | V5 | W2 | T1-T3-T6-T8 |
+| 33 | C06 | medical_kit | 2 | V5 | W2 | T1-T3-T6-T10 |
