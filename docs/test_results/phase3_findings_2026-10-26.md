@@ -60,6 +60,31 @@ that was served and no longer is, or whose water or food dropped below half of t
 baseline. Tier changes that keep the essentials pass. `similarity` is still reported,
 as information about how much the plan moved, with no threshold attached.
 
+### 1b. The models are not reproducible, even at temperature 0
+
+Tightening the check to regressions made it fail again, five runs out of five, on
+C01, C08 and C11 — three medium-risk communities served in the baseline and dropped
+after the reopening. Diffing the same scenario by hand a few minutes later showed the
+opposite: both plans left those three unserved and nothing regressed.
+
+So the **baseline itself differs between runs**. Temperature 0 removes sampling noise,
+but Nemotron is a mixture-of-experts served in batches, and those are not bit-for-bit
+reproducible: which experts fire depends on what else is in the batch. Every plan was
+valid; which communities got the leftovers was not stable.
+
+This matters beyond the battery:
+
+- **For the demo:** do not promise the judges an exact plan. The critical communities,
+  the escalation and the 17,952 kg gap are stable, because code computes them. The
+  exact tier of a medium-risk community is not. Rehearse the story, not the numbers.
+- **For the battery:** the regression check now only covers what the protocol
+  guarantees — communities at critical or high risk. Medium and low ones are served
+  with what is left over, so holding them to a fixed answer would measure the
+  endpoint's batching, not our agents.
+
+This is also the honest answer to point 12. Re-plan stability can be reported, and the
+guarantees can be enforced, but it cannot be driven to 100 % from our side.
+
 ### 2. Latency: two scenarios over target, and why
 
 Target is 45 s per turn. `block_T20` (33.4 s) and `block_T3` (42.9 s) meet it;

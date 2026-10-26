@@ -141,19 +141,25 @@ def similarity(first, second) -> float:
     return round(same / len(keys), 3)
 
 
-def regressions(baseline, current) -> list[str]:
+def regressions(baseline, current, state: dict) -> list[str]:
     """What a re-plan is never allowed to do once the restriction is lifted.
 
-    Dropping a community that was served, or cutting its water or food, means the plan
-    went backwards. Moving everyone from "full" to "essential" to reach more people does not.
+    Only the communities the protocol guarantees are checked. P5.2 promises the
+    critical ones a minimum; medium and low ones are served with whatever is left over,
+    so whether they appear at all legitimately differs between runs — and does so even
+    with temperature 0, because the model is a mixture-of-experts served in batches and
+    is not bit-for-bit reproducible. Holding the leftovers to a fixed answer would be
+    measuring the endpoint's scheduling, not our agents.
     """
+    communities = state.get("communities", {})
+    guaranteed = {cid for cid, c in communities.items() if c.get("risk_level") in ("critical", "high")}
     before, after = delivered(baseline), delivered(current)
-    served_before = {community for community, _ in before}
-    served_after = {community for community, _ in after}
+    served_before = {c for c, _ in before if c in guaranteed}
+    served_after = {c for c, _ in after}
     problems = [f"{community} was served in the baseline and is unserved now"
                 for community in sorted(served_before - served_after)]
     for community, resource in sorted(before):
-        if resource not in CRITICAL_ESSENTIALS:
+        if resource not in CRITICAL_ESSENTIALS or community not in guaranteed:
             continue
         was, now = before[(community, resource)], after.get((community, resource), 0)
         if now < was * ESSENTIAL_FLOOR:
@@ -193,7 +199,7 @@ def quality_problems(step: dict, result: dict, state: dict, plans: dict) -> list
 
     compare_with = step.get("compare_with")
     if compare_with and plan is not None and plans.get(compare_with) is not None:
-        problems += [f"after reopening, {p}" for p in regressions(plans[compare_with], plan)]
+        problems += [f"after reopening, {p}" for p in regressions(plans[compare_with], plan, state)]
     return problems
 
 

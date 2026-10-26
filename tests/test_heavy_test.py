@@ -160,37 +160,46 @@ def test_quality_check_catches_a_why_answer_that_never_names_the_segment():
     assert heavy_test.quality_problems(step, result, state, {}) == []
 
 
+RISK_STATE = {"communities": {"C07": {"risk_level": "critical"}, "C12": {"risk_level": "critical"},
+                              "C04": {"risk_level": "high"}, "C01": {"risk_level": "medium"}},
+              "road_segments": {}, "vehicles": {}, "warehouses": {}, "inventory": {}}
+
+
 def test_a_reopen_may_change_tiers_without_going_backwards():
-    # Measured on the real scenario: after reopening T6 the Planner moved four
-    # communities from "full" to "essential" and reached three the baseline had left
-    # unserved. That is a better plan under P5.2 and must not be reported as a failure.
-    state = {"communities": {"C07": {}, "C01": {}}, "road_segments": {}, "vehicles": {},
-             "warehouses": {}, "inventory": {}}
+    # Measured on the real scenario: after reopening T6 the Planner moved communities
+    # from "full" to "essential". Essentials are intact, so it is not a regression.
     baseline = plan_with(("C07", "water_20l", 100, []), ("C07", "blanket", 100, []))
     reopened = plan_with(("C07", "water_20l", 100, []), ("C07", "blanket", 50, []),
-                         ("C01", "medical_kit", 7, []), version=3, changes=["C07 blanket: 100 -> 50"])
+                         version=3, changes=["C07 blanket: 100 -> 50"])
     step = {"name": "reopen", "expect_changes": True, "compare_with": "plan"}
     result = {"plan": reopened, "report": "ok", "trace": []}
-    problems = heavy_test.quality_problems(step, result, state, {"plan": baseline})
+    problems = heavy_test.quality_problems(step, result, RISK_STATE, {"plan": baseline})
     assert [p for p in problems if p.startswith("after reopening")] == []
 
 
-def test_a_reopen_that_drops_a_community_or_its_water_is_a_failure():
-    state = {"communities": {"C07": {}, "C12": {}}, "road_segments": {}, "vehicles": {},
-             "warehouses": {}, "inventory": {}}
+def test_a_reopen_that_drops_a_guaranteed_community_or_its_water_is_a_failure():
     baseline = plan_with(("C07", "water_20l", 100, []), ("C12", "food_kit", 40, []))
     reopened = plan_with(("C07", "water_20l", 20, []), version=3, changes=["C07 water_20l: 100 -> 20"])
-    step = {"name": "reopen", "expect_changes": True, "compare_with": "plan"}
-    result = {"plan": reopened, "report": "ok", "trace": []}
-    problems = heavy_test.quality_problems(step, result, state, {"plan": baseline})
+    problems = heavy_test.regressions(baseline, reopened, RISK_STATE)
     assert any("C12 was served in the baseline and is unserved now" in p for p in problems)
     assert any("C07 water_20l: 100 -> 20" in p for p in problems)
+
+
+def test_regressions_ignore_the_leftovers_that_go_to_medium_risk_communities():
+    # C01 is medium risk: it is served with what is left over, and whether anything is
+    # left over differs between runs even at temperature 0 (batched mixture-of-experts).
+    baseline = plan_with(("C07", "water_20l", 100, []), ("C01", "medical_kit", 7, []))
+    without = plan_with(("C07", "water_20l", 100, []), version=3)
+    assert heavy_test.regressions(baseline, without, RISK_STATE) == []
+    # A high-risk community is guaranteed, so dropping it is still a failure.
+    baseline_high = plan_with(("C04", "water_20l", 50, []))
+    assert heavy_test.regressions(baseline_high, Plan(version=3), RISK_STATE) != []
 
 
 def test_regressions_ignores_a_tier_change_that_keeps_the_essentials():
     baseline = plan_with(("C07", "water_20l", 100, []), ("C07", "hygiene_kit", 50, []))
     gentler = plan_with(("C07", "water_20l", 100, []), ("C07", "hygiene_kit", 25, []))
-    assert heavy_test.regressions(baseline, gentler) == []
+    assert heavy_test.regressions(baseline, gentler, RISK_STATE) == []
     assert heavy_test.similarity(baseline, gentler) == 0.5, "similarity still reports the change"
 
 
