@@ -2,7 +2,7 @@
 import pytest
 
 from resq import llm, scenario, world
-from resq.agents import explainer, intake, planner, reconciler, risk_analyst
+from resq.agents import critic, explainer, intake, planner, reconciler, risk_analyst
 from resq.agents.critic import route_after_critic, stock_cuts
 from resq.schemas import Assignment, Plan, ResqState
 from resq.tools.packing import pack
@@ -135,6 +135,19 @@ def test_blocking_t6_makes_the_critical_minimum_infeasible(assessed, no_model):
     risk_analyst.node_risk_analyst(ResqState(run_id="test", as_of=scenario.now()))
     gaps = critical_minimum_gaps(world.get_state())
     assert any("fording vehicles carry 13,800 kg" in gap for gap in gaps)
+
+
+def test_review_payload_carries_reachability(assessed):
+    # The phase 3 battery showed 9-10 false blocks per 30 turns on the blocking
+    # scenarios: the Critic could not see that a community had become ford_only and
+    # read its lower coverage as a ranking mistake.
+    from resq.agents.common import plan_by_community
+    plan = Plan(assignments=[Assignment(community_id="C07", origin_id="W1", resource="water_20l", quantity=10,
+                                        vehicle_id="V1", route=[], priority=1, reason="x", evidence=[])])
+    summary = plan_by_community(plan, assessed)
+    assert "reachability" in summary["C07"]
+    assert summary["C07"]["reachability"] in ("all", "ford_only", "none")
+    assert "reachability" in critic.SYSTEM_PROMPT and "ford_only" in critic.SYSTEM_PROMPT
 
 
 def test_critic_tells_stock_cuts_apart_from_other_risks():
