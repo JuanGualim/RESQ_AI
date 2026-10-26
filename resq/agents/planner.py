@@ -35,7 +35,10 @@ Protocol:
   critical communities as possible in rank order (best effort); the rest is escalated to a human.
 Reason: at most 20 words citing evidence (risk level/score, report ids R0.., rules P#).
 If critic_feedback is present, fix every point (raise the tier of communities that were short, lower others).
-If previous_plan is present, keep what still works.
+If previous_plan is present, keep what still works. Check "new_events" before you do: a "segment_reopened"
+means the restriction that shaped the previous plan is gone, so decide every tier again from "communities",
+"scarcity" and "feasibility" as if you were planning from scratch. Never keep a community on a lower tier
+only because the previous plan had it there.
 Reply with ONLY JSON:
 {"priorities": [{"community_id": "C..", "rank": 1, "tier": "full|essential|minimum|none", "reason": "...",
   "evidence": ["..."]}], "unserved": ["C.."], "risks": ["max 5 short strings"], "confidence": 0.0}"""
