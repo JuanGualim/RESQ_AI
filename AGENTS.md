@@ -273,7 +273,7 @@ Done:
 
 Pending (blocking for the submission):
 - [ ] **Repository is private**: make it public right before submitting (judges must open and run it)
-- [ ] **Merge PR #8** (Harry, CI green): `output_examples/` regenerated on Nightshift + Zetaris (deep lane on Ultra, 17,952 kg), `python -m resq.llm --check` all PASS on Nightshift, console screenshots in `docs/evidence/`
+- [x] **PR #8 merged** (Harry): `output_examples/` regenerated on Nightshift + Zetaris (deep lane on Ultra, 17,952 kg), `python -m resq.llm --check` all PASS on Nightshift, console screenshots in `docs/evidence/`
 - [ ] **Demo video** with English narration (audio is required by the official guide), following the new `docs/VIDEO_SCRIPT.md`; filename `OAH2026-RESQAI-ReasoningArchitecture-Demo.mp4`; link must open in a private window; backup copy; link in the README
 - [ ] Slide deck (the eight required points, naming Track 3), HackOS form with the sponsor explanation and pre-existing components (`docs/SUBMISSION.md`)
 - [ ] Cursor usage sentence for Juan and Chema in `docs/SUBMISSION.md`
@@ -292,7 +292,7 @@ Harry: record the video following `docs/VIDEO_SCRIPT.md` (English voice-over; fr
 
 Chema: slide deck with the final numbers and the architecture slide used in the video; clean-setup run of README paths 1 and 2.
 
-Juan: merge PR #8 and this branch; add the video link to the README and `docs/SUBMISSION.md`; repeat the secret scan; make the repo public and test it logged out; confirm the HackOS roster; fill the HackOS form from `docs/SUBMISSION.md`; submit before 12:00.
+Juan: add the video link to the README and `docs/SUBMISSION.md`; repeat the secret scan; make the repo public and test it logged out; confirm the HackOS roster; fill the HackOS form from `docs/SUBMISSION.md`; submit before 12:00.
 
 ## 10. Decision log
 
