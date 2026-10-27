@@ -1,31 +1,19 @@
-# Aid Distribution Report
+# RESQ AI Distribution Report
 
 ## Situation
-- C07 El Zapotal: critical risk (0.72) driven by isolation factor 0.0 and full exposure 1.0 despite all reachability; reported isolated status.
-- C12 El Paraiso: critical risk (0.699) driven by high vulnerability 0.75 and dependents 0.707; reported needs aid status.
-- C03 Los Amates: critical risk (0.659) driven by maximum vulnerability 1.0 and dependents 0.845; reported needs aid status.
-- C05 Playitas: critical risk (0.615) driven by full exposure 1.0 and vulnerability 0.75; reported evacuating status.
-- C04 Las Pozas: high risk (0.574) driven by exposure 0.8 and dependents 0.693; reported needs aid status.
+- Critical risk communities C07, C12, and C03 have full coverage across all need categories despite isolation/evacuation statuses.
+- High risk communities C04 and C06 have partial coverage (50% water/food, 0% hygiene) with remaining stock nearly exhausted.
+- Medium risk communities C01, C08, and C11 remain unserved with zero coverage across all categories.
 
 ## Plan
-Distribution prioritizes by risk tier and coverage gaps:
-1. **Critical risk with unmet needs**: C07 (isolated, 0% coverage), C03 (80% coverage gap in medical_kit), C12 (13% coverage gap in medical_kit), C05 (evacuating, 0% coverage).
-2. **High risk with partial coverage**: C04 (50% water_20l and food_kit coverage after C07-C05 stock depletion; medical_kit and 50% hygiene_kit preserved).
-3. **Remaining high risk**: C06 (0% water_20l/food_kit coverage after C04 depletes essential tier; minimum tier provides 50% water_20l and food_kit with full medical_kit).
-4. **Unserved communities**: C01, C08, C11 have 0% coverage across all tiers; no aid delivered due to stock exhaustion.
-
-Evidence: C07 needs aid despite reachability; C04 and C06 stock depletion documented in R012 and R030.
+Distribution follows risk-tiered priority: critical communities C07→C12→C03→C05 receive full allocation; high communities C04→C06 receive minimum tier within remaining stock; medium communities C01, C08, C11 receive none until critical/high needs are met. C05 (Playitas) coverage is limited at 50% for hygiene kits and blankets due to essential tier conservation. C04 (Las Pozas) hygiene kit coverage is 0% despite high risk level.
 
 ## Why the plan changed
-No events since previous plan; plan_version 1 with no prior version.
+No events since previous plan (events_since_previous_plan is empty); distribution priority order remains unchanged from prior allocation cycle.
 
 ## Risks and decisions for you
-- Verify C07 isolation status and road accessibility for delivery.
-- Verify C04 and C06 stock levels: water_20l and food_kit exhausted after C07-C05 allocations; medical_kit and 50% hygiene_kit remain for C04.
-- If escalation were needed: human decision required for C07 isolated status and C04/C06 tier depletion, using reasons P6.2 (stock ran out) and C07 0.72 risk score.
-
-**escalation_reasons**: []  
-**risks**: ["P7.1: shelter S2 Salon Comunal Loma Alta cannot receive people (full)", "P7.2: C05 Playitas is evacuating; nearest shelter with room: S4 Centro Deportivo Los Amates (4.8 km)", "P7.2: C07 El Zapotal is isolated; nearest shelter with room: S4 Centro Deportivo Los Amates (8.8 km)", "P6.2: C04 water_20l: stock ran out, 196 of 254 units", "P6.2: C04 food_kit: stock ran out, 197 of 254 units", "P6.2: C06 water_20l: stock ran out, 0 of 7 units", "P6.2: C06 food_kit: stock ran out, 0 of 7 units", "C07 0.72"]
+- **Escalation needed**: false
+- **Risks**: P7.1: shelter S2 Salon Comunal Loma Alta cannot receive people (full); P7.2: C05 Playitas is evacuating; nearest shelter with room: S4 Centro Deportivo Los Amates (4.8 km); P7.2: C07 El Zapotal is isolated; nearest shelter with room: S4 Centro Deportivo Los Amates (8.8 km); water_20l:99% used; food_kit:99% used; blanket:99% used; hygiene_kit:84% used; medical_kit:62% used
 
 ### Assignments (plan v1)
 
@@ -64,15 +52,15 @@ No events since previous plan; plan_version 1 with no prior version.
 | 26 | C05 | food_kit | 75 | V6 | W2 | T1-T3-T7-T9 |
 | 26 | C05 | food_kit | 35 | V6 | W2 | T1-T3-T7-T9 |
 | 26 | C05 | food_kit | 14 | V1 | W1 | T3-T6-T10-T11-T12 |
-| 27 | C05 | hygiene_kit | 104 | V1 | W1 | T3-T6-T10-T11-T12 |
-| 27 | C05 | hygiene_kit | 20 | V5 | W2 | T1-T3-T6-T10-T11-T12 |
+| 27 | C05 | hygiene_kit | 62 | V1 | W1 | T3-T6-T10-T11-T12 |
 | 28 | C05 | blanket | 80 | V1 | W1 | T3-T6-T10-T11-T12 |
-| 28 | C05 | blanket | 168 | V5 | W2 | T1-T3-T6-T10-T11-T12 |
+| 28 | C05 | blanket | 44 | V5 | W2 | T1-T3-T6-T10-T11-T12 |
 | 29 | C04 | water_20l | 106 | V1 | W1 | T3-T6-T8 |
-| 29 | C04 | water_20l | 90 | V5 | W2 | T1-T3-T6-T8 |
+| 29 | C04 | water_20l | 21 | V5 | W2 | T1-T3-T6-T8 |
 | 30 | C04 | food_kit | 23 | V1 | W1 | T3-T6-T8 |
-| 30 | C04 | food_kit | 174 | V5 | W2 | T1-T3-T6-T8 |
+| 30 | C04 | food_kit | 104 | V5 | W2 | T1-T3-T6-T8 |
 | 31 | C04 | medical_kit | 8 | V1 | W1 | T3-T6-T8 |
 | 31 | C04 | medical_kit | 5 | V5 | W2 | T1-T3-T6-T8 |
-| 32 | C04 | hygiene_kit | 64 | V5 | W2 | T1-T3-T6-T8 |
-| 33 | C06 | medical_kit | 2 | V5 | W2 | T1-T3-T6-T10 |
+| 32 | C06 | water_20l | 7 | V5 | W2 | T1-T3-T6-T10 |
+| 33 | C06 | food_kit | 7 | V5 | W2 | T1-T3-T6-T10 |
+| 34 | C06 | medical_kit | 2 | V5 | W2 | T1-T3-T6-T10 |
