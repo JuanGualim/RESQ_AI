@@ -67,6 +67,15 @@ class Settings:
     max_retries: int = 2
     max_critic_rounds: int = 3
 
+    @property
+    def model_provider(self) -> str:
+        """Human-readable provider behind model_base_url (shown in checks and the demo)."""
+        if not self.model_base_url:
+            return "not configured"
+        if "nvidia.com" in self.model_base_url:
+            return "NVIDIA direct (development only)"
+        return "Meterless Nightshift"
+
     def lane_model(self, lane: str) -> str:
         """Model name for a lane ("fast" | "deep")."""
         if lane == "fast":
@@ -78,7 +87,7 @@ class Settings:
 
 def load_settings() -> Settings:
     """Build settings from the current environment (no caching)."""
-    model_name = _env("NEMOTRON_MODEL")
+    model_name = _env("NEMOTRON_MODEL") or _env("METERLESS_MODEL")
     fast_model = _env("LANE_FAST_MODEL") or model_name
     return Settings(
         zetaris_rest_url=_env("ZETARIS_REST_URL").rstrip("/"),
@@ -92,8 +101,10 @@ def load_settings() -> Settings:
         pg_user=_env("RESQ_PG_USER", "resq"),
         pg_password=_env("RESQ_PG_PASSWORD"),
         pg_host_for_zetaris=_env("RESQ_PG_HOST_FOR_ZETARIS", "resq-postgres:5432"),
-        model_base_url=_env("MODEL_BASE_URL").rstrip("/"),
-        model_api_key=_env("MODEL_API_KEY"),
+        # Meterless Nightshift is the primary provider: METERLESS_* is used unless MODEL_* overrides it
+        # (MODEL_* exists so a developer can point at direct NVIDIA without touching the Meterless values).
+        model_base_url=(_env("MODEL_BASE_URL") or _env("METERLESS_BASE_URL")).rstrip("/"),
+        model_api_key=_env("MODEL_API_KEY") or _env("METERLESS_RUNTIME_TOKEN"),
         model_name=model_name,
         lane_fast_model=fast_model,
         lane_deep_model=_env("LANE_DEEP_MODEL") or fast_model,
