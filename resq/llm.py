@@ -129,3 +129,76 @@ def chat_json(messages: list[dict], lane: str = "fast", max_tokens: int | None =
         second = chat(repair, lane=lane, max_tokens=max_tokens)
         second["duration_ms"] += reply["duration_ms"]
         return parse_json(second["content"]), second
+
+
+PRIMARY_PROVIDER_CHECK = "meterless primary provider"
+
+
+def check(lanes: tuple[str, ...] = ("fast", "deep")) -> list[tuple[str, bool, str]]:
+    """Meterless Runtime checks: connection, authorization, model discovery and one text request per lane.
+
+    Returns (check, ok, detail) rows. Never prints or returns the token.
+    """
+    settings = get_settings()
+    rows: list[tuple[str, bool, str]] = []
+    host = settings.model_base_url.split("//")[-1].split("/")[0] if settings.model_base_url else "-"
+    rows.append(("provider", bool(settings.model_base_url and settings.model_api_key),
+                 f"{settings.model_provider} at {host}"))
+    if not rows[-1][1]:
+        rows.append(("configuration", False, "set METERLESS_BASE_URL and METERLESS_RUNTIME_TOKEN (from the Nightshift Console)"))
+        return rows
+    rows.append((PRIMARY_PROVIDER_CHECK, settings.model_provider == "Meterless Nightshift",
+                 "requests go through Nightshift" if settings.model_provider == "Meterless Nightshift"
+                 else "not Meterless: fine for development, but the demo must run on Nightshift (AGENTS.md rule 2)"))
+    try:
+        models = [m.id for m in _client().models.list()]
+    except APIError as error:
+        status = getattr(error, "status_code", None)
+        if status == 401:
+            detail = "token rejected (401): copy the Runtime token again from the Nightshift Console"
+        elif status == 404:
+            detail = "404: the base URL must end in /v1"
+        else:
+            detail = f"{type(error).__name__}: {str(error)[:120]}"
+        rows.append(("connection + authorization", False, detail))
+        return rows
+    except Exception as error:  # noqa: BLE001 - unreachable host, DNS, TLS: report, do not crash
+        rows.append(("connection + authorization", False, f"unreachable: {type(error).__name__}"))
+        return rows
+    rows.append(("connection + authorization", True, "GET /v1/models answered"))
+    rows.append(("model discovery", bool(models), f"{len(models)} models" + (f", e.g. {', '.join(models[:3])}" if models else "")))
+    for lane in lanes:
+        model = settings.lane_model(lane)
+        listed = model in models
+        rows.append((f"{lane} lane model", listed, model + ("" if listed else " (not listed by the Runtime)")))
+        try:
+            reply = chat([{"role": "user", "content": "Reply with the single word: ready"}], lane=lane, max_tokens=50)
+        except LLMError as error:
+            rows.append((f"{lane} lane request", False, str(error)[:160]))
+            continue
+        ok = bool(reply["content"])
+        rows.append((f"{lane} lane request", ok,
+                     f"{reply['model']} answered in {reply['duration_ms']} ms" if ok else "empty reply (thinking not turned off?)"))
+    return rows
+
+
+def main(argv: list[str] | None = None) -> int:
+    import argparse
+
+    parser = argparse.ArgumentParser(prog="python -m resq.llm", description="Check the Meterless Nightshift provider")
+    parser.add_argument("--check", action="store_true", help="connection, authorization, discovery and a request per lane")
+    parser.add_argument("--lane", choices=sorted(LANES), action="append", help="only this lane (repeatable)")
+    args = parser.parse_args(argv)
+    if not args.check:
+        parser.print_help()
+        return 0
+    rows = check(tuple(args.lane or ("fast", "deep")))
+    for name, ok, detail in rows:
+        mark = "PASS" if ok else ("WARN" if name == PRIMARY_PROVIDER_CHECK else "FAIL")
+        print(f"{mark}  {name:28} {detail}")
+    # Direct NVIDIA is allowed in development, so it warns instead of failing the check.
+    return 0 if all(ok for name, ok, _ in rows if name != PRIMARY_PROVIDER_CHECK) else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

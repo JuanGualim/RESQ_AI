@@ -86,6 +86,16 @@ python -m resq.run --question "How should we distribute aid right now?"
 python -m resq.run --event block:T6
 ```
 
+## 7. Check the Meterless provider
+
+```bash
+python -m resq.llm --check   # connection, authorization, model discovery, one request per lane
+```
+
+On the demo machine the first line must say `Meterless Nightshift`; a `401` means the Runtime token must be copied again from the Nightshift Console.
+
+Windows from scratch: the problems Harry hit, step by step, are in [`windows_install_notes.md`](windows_install_notes.md) (Tailscale with a GitHub login creates its own tailnet; join through the invitation instead).
+
 ## Troubleshooting
 
 | Symptom | Fix |
