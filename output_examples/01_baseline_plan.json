@@ -14,11 +14,14 @@
         "T12"
       ],
       "priority": 1,
-      "reason": "Critical risk 0.72, isolated, all needs deliverable within stock",
+      "reason": "Highest risk critical community (0.72); full allocation meets P5.1/P5.2",
       "evidence": [
+        "risk_score:0.72",
+        "risk_level:critical",
         "R006",
         "R019",
-        "risk_score 0.72"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -34,11 +37,14 @@
         "T12"
       ],
       "priority": 2,
-      "reason": "Critical risk 0.72, isolated, all needs deliverable within stock",
+      "reason": "Highest risk critical community (0.72); full allocation meets P5.1/P5.2",
       "evidence": [
+        "risk_score:0.72",
+        "risk_level:critical",
         "R006",
         "R019",
-        "risk_score 0.72"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -54,11 +60,14 @@
         "T12"
       ],
       "priority": 3,
-      "reason": "Critical risk 0.72, isolated, all needs deliverable within stock",
+      "reason": "Highest risk critical community (0.72); full allocation meets P5.1/P5.2",
       "evidence": [
+        "risk_score:0.72",
+        "risk_level:critical",
         "R006",
         "R019",
-        "risk_score 0.72"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -74,10 +83,13 @@
         "T20"
       ],
       "priority": 4,
-      "reason": "Critical risk 0.699, reachable, all needs deliverable within stock",
+      "reason": "Second highest critical risk (0.699); full allocation within stock limits",
       "evidence": [
+        "risk_score:0.699",
+        "risk_level:critical",
         "R025",
-        "risk_score 0.699"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -93,10 +105,13 @@
         "T20"
       ],
       "priority": 5,
-      "reason": "Critical risk 0.699, reachable, all needs deliverable within stock",
+      "reason": "Second highest critical risk (0.699); full allocation within stock limits",
       "evidence": [
+        "risk_score:0.699",
+        "risk_level:critical",
         "R025",
-        "risk_score 0.699"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -112,10 +127,13 @@
         "T20"
       ],
       "priority": 6,
-      "reason": "Critical risk 0.699, reachable, all needs deliverable within stock",
+      "reason": "Second highest critical risk (0.699); full allocation within stock limits",
       "evidence": [
+        "risk_score:0.699",
+        "risk_level:critical",
         "R025",
-        "risk_score 0.699"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -129,10 +147,13 @@
         "T6"
       ],
       "priority": 7,
-      "reason": "Critical risk 0.659, reachable, all needs deliverable within stock",
+      "reason": "Third critical risk (0.659); small needs allow full allocation",
       "evidence": [
+        "risk_score:0.659",
+        "risk_level:critical",
         "R027",
-        "risk_score 0.659"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -146,10 +167,13 @@
         "T6"
       ],
       "priority": 8,
-      "reason": "Critical risk 0.659, reachable, all needs deliverable within stock",
+      "reason": "Third critical risk (0.659); small needs allow full allocation",
       "evidence": [
+        "risk_score:0.659",
+        "risk_level:critical",
         "R027",
-        "risk_score 0.659"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -163,10 +187,13 @@
         "T6"
       ],
       "priority": 9,
-      "reason": "Critical risk 0.659, reachable, all needs deliverable within stock",
+      "reason": "Third critical risk (0.659); small needs allow full allocation",
       "evidence": [
+        "risk_score:0.659",
+        "risk_level:critical",
         "R027",
-        "risk_score 0.659"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -181,10 +208,13 @@
         "T9"
       ],
       "priority": 10,
-      "reason": "Critical risk 0.615, reachable, all needs deliverable within stock",
+      "reason": "Fourth critical risk (0.615); essential tier conserves stock for all criticals",
       "evidence": [
+        "risk_score:0.615",
+        "risk_level:critical",
         "R020",
-        "risk_score 0.615"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -199,10 +229,13 @@
         "T9"
       ],
       "priority": 11,
-      "reason": "Critical risk 0.615, reachable, all needs deliverable within stock",
+      "reason": "Fourth critical risk (0.615); essential tier conserves stock for all criticals",
       "evidence": [
+        "risk_score:0.615",
+        "risk_level:critical",
         "R020",
-        "risk_score 0.615"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -217,10 +250,13 @@
         "T9"
       ],
       "priority": 12,
-      "reason": "Critical risk 0.615, reachable, all needs deliverable within stock",
+      "reason": "Fourth critical risk (0.615); essential tier conserves stock for all criticals",
       "evidence": [
+        "risk_score:0.615",
+        "risk_level:critical",
         "R020",
-        "risk_score 0.615"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -236,11 +272,14 @@
         "T12"
       ],
       "priority": 13,
-      "reason": "Critical risk 0.72, isolated, all needs deliverable within stock",
+      "reason": "Highest risk critical community (0.72); full allocation meets P5.1/P5.2",
       "evidence": [
+        "risk_score:0.72",
+        "risk_level:critical",
         "R006",
         "R019",
-        "risk_score 0.72"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -256,11 +295,14 @@
         "T11"
       ],
       "priority": 13,
-      "reason": "Critical risk 0.72, isolated, all needs deliverable within stock",
+      "reason": "Highest risk critical community (0.72); full allocation meets P5.1/P5.2",
       "evidence": [
+        "risk_score:0.72",
+        "risk_level:critical",
         "R006",
         "R019",
-        "risk_score 0.72"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -276,11 +318,14 @@
         "T12"
       ],
       "priority": 14,
-      "reason": "Critical risk 0.72, isolated, all needs deliverable within stock",
+      "reason": "Highest risk critical community (0.72); full allocation meets P5.1/P5.2",
       "evidence": [
+        "risk_score:0.72",
+        "risk_level:critical",
         "R006",
         "R019",
-        "risk_score 0.72"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -296,11 +341,14 @@
         "T11"
       ],
       "priority": 14,
-      "reason": "Critical risk 0.72, isolated, all needs deliverable within stock",
+      "reason": "Highest risk critical community (0.72); full allocation meets P5.1/P5.2",
       "evidence": [
+        "risk_score:0.72",
+        "risk_level:critical",
         "R006",
         "R019",
-        "risk_score 0.72"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -316,11 +364,14 @@
         "T12"
       ],
       "priority": 15,
-      "reason": "Critical risk 0.72, isolated, all needs deliverable within stock",
+      "reason": "Highest risk critical community (0.72); full allocation meets P5.1/P5.2",
       "evidence": [
+        "risk_score:0.72",
+        "risk_level:critical",
         "R006",
         "R019",
-        "risk_score 0.72"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -336,11 +387,14 @@
         "T11"
       ],
       "priority": 15,
-      "reason": "Critical risk 0.72, isolated, all needs deliverable within stock",
+      "reason": "Highest risk critical community (0.72); full allocation meets P5.1/P5.2",
       "evidence": [
+        "risk_score:0.72",
+        "risk_level:critical",
         "R006",
         "R019",
-        "risk_score 0.72"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -356,11 +410,14 @@
         "T11"
       ],
       "priority": 16,
-      "reason": "Critical risk 0.72, isolated, all needs deliverable within stock",
+      "reason": "Highest risk critical community (0.72); full allocation meets P5.1/P5.2",
       "evidence": [
+        "risk_score:0.72",
+        "risk_level:critical",
         "R006",
         "R019",
-        "risk_score 0.72"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -376,10 +433,13 @@
         "T20"
       ],
       "priority": 17,
-      "reason": "Critical risk 0.699, reachable, all needs deliverable within stock",
+      "reason": "Second highest critical risk (0.699); full allocation within stock limits",
       "evidence": [
+        "risk_score:0.699",
+        "risk_level:critical",
         "R025",
-        "risk_score 0.699"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -395,10 +455,13 @@
         "T20"
       ],
       "priority": 18,
-      "reason": "Critical risk 0.699, reachable, all needs deliverable within stock",
+      "reason": "Second highest critical risk (0.699); full allocation within stock limits",
       "evidence": [
+        "risk_score:0.699",
+        "risk_level:critical",
         "R025",
-        "risk_score 0.699"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -414,10 +477,13 @@
         "T20"
       ],
       "priority": 19,
-      "reason": "Critical risk 0.699, reachable, all needs deliverable within stock",
+      "reason": "Second highest critical risk (0.699); full allocation within stock limits",
       "evidence": [
+        "risk_score:0.699",
+        "risk_level:critical",
         "R025",
-        "risk_score 0.699"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -433,10 +499,13 @@
         "T20"
       ],
       "priority": 20,
-      "reason": "Critical risk 0.699, reachable, all needs deliverable within stock",
+      "reason": "Second highest critical risk (0.699); full allocation within stock limits",
       "evidence": [
+        "risk_score:0.699",
+        "risk_level:critical",
         "R025",
-        "risk_score 0.699"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -450,10 +519,13 @@
         "T6"
       ],
       "priority": 21,
-      "reason": "Critical risk 0.659, reachable, all needs deliverable within stock",
+      "reason": "Third critical risk (0.659); small needs allow full allocation",
       "evidence": [
+        "risk_score:0.659",
+        "risk_level:critical",
         "R027",
-        "risk_score 0.659"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -467,10 +539,13 @@
         "T6"
       ],
       "priority": 22,
-      "reason": "Critical risk 0.659, reachable, all needs deliverable within stock",
+      "reason": "Third critical risk (0.659); small needs allow full allocation",
       "evidence": [
+        "risk_score:0.659",
+        "risk_level:critical",
         "R027",
-        "risk_score 0.659"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -484,10 +559,13 @@
         "T6"
       ],
       "priority": 23,
-      "reason": "Critical risk 0.659, reachable, all needs deliverable within stock",
+      "reason": "Third critical risk (0.659); small needs allow full allocation",
       "evidence": [
+        "risk_score:0.659",
+        "risk_level:critical",
         "R027",
-        "risk_score 0.659"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -501,10 +579,13 @@
         "T6"
       ],
       "priority": 24,
-      "reason": "Critical risk 0.659, reachable, all needs deliverable within stock",
+      "reason": "Third critical risk (0.659); small needs allow full allocation",
       "evidence": [
+        "risk_score:0.659",
+        "risk_level:critical",
         "R027",
-        "risk_score 0.659"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -520,10 +601,13 @@
         "T9"
       ],
       "priority": 25,
-      "reason": "Critical risk 0.615, reachable, all needs deliverable within stock",
+      "reason": "Fourth critical risk (0.615); essential tier conserves stock for all criticals",
       "evidence": [
+        "risk_score:0.615",
+        "risk_level:critical",
         "R020",
-        "risk_score 0.615"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -539,10 +623,13 @@
         "T9"
       ],
       "priority": 25,
-      "reason": "Critical risk 0.615, reachable, all needs deliverable within stock",
+      "reason": "Fourth critical risk (0.615); essential tier conserves stock for all criticals",
       "evidence": [
+        "risk_score:0.615",
+        "risk_level:critical",
         "R020",
-        "risk_score 0.615"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -558,10 +645,13 @@
         "T9"
       ],
       "priority": 25,
-      "reason": "Critical risk 0.615, reachable, all needs deliverable within stock",
+      "reason": "Fourth critical risk (0.615); essential tier conserves stock for all criticals",
       "evidence": [
+        "risk_score:0.615",
+        "risk_level:critical",
         "R020",
-        "risk_score 0.615"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -577,10 +667,13 @@
         "T9"
       ],
       "priority": 26,
-      "reason": "Critical risk 0.615, reachable, all needs deliverable within stock",
+      "reason": "Fourth critical risk (0.615); essential tier conserves stock for all criticals",
       "evidence": [
+        "risk_score:0.615",
+        "risk_level:critical",
         "R020",
-        "risk_score 0.615"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -596,10 +689,13 @@
         "T9"
       ],
       "priority": 26,
-      "reason": "Critical risk 0.615, reachable, all needs deliverable within stock",
+      "reason": "Fourth critical risk (0.615); essential tier conserves stock for all criticals",
       "evidence": [
+        "risk_score:0.615",
+        "risk_level:critical",
         "R020",
-        "risk_score 0.615"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -616,17 +712,20 @@
         "T12"
       ],
       "priority": 26,
-      "reason": "Critical risk 0.615, reachable, all needs deliverable within stock",
+      "reason": "Fourth critical risk (0.615); essential tier conserves stock for all criticals",
       "evidence": [
+        "risk_score:0.615",
+        "risk_level:critical",
         "R020",
-        "risk_score 0.615"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
       "community_id": "C05",
       "origin_id": "W1",
       "resource": "hygiene_kit",
-      "quantity": 104,
+      "quantity": 62,
       "vehicle_id": "V1",
       "route": [
         "T3",
@@ -636,31 +735,13 @@
         "T12"
       ],
       "priority": 27,
-      "reason": "Critical risk 0.615, reachable, all needs deliverable within stock",
+      "reason": "Fourth critical risk (0.615); essential tier conserves stock for all criticals",
       "evidence": [
+        "risk_score:0.615",
+        "risk_level:critical",
         "R020",
-        "risk_score 0.615"
-      ]
-    },
-    {
-      "community_id": "C05",
-      "origin_id": "W2",
-      "resource": "hygiene_kit",
-      "quantity": 20,
-      "vehicle_id": "V5",
-      "route": [
-        "T1",
-        "T3",
-        "T6",
-        "T10",
-        "T11",
-        "T12"
-      ],
-      "priority": 27,
-      "reason": "Critical risk 0.615, reachable, all needs deliverable within stock",
-      "evidence": [
-        "R020",
-        "risk_score 0.615"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -677,17 +758,20 @@
         "T12"
       ],
       "priority": 28,
-      "reason": "Critical risk 0.615, reachable, all needs deliverable within stock",
+      "reason": "Fourth critical risk (0.615); essential tier conserves stock for all criticals",
       "evidence": [
+        "risk_score:0.615",
+        "risk_level:critical",
         "R020",
-        "risk_score 0.615"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
       "community_id": "C05",
       "origin_id": "W2",
       "resource": "blanket",
-      "quantity": 168,
+      "quantity": 44,
       "vehicle_id": "V5",
       "route": [
         "T1",
@@ -698,10 +782,13 @@
         "T12"
       ],
       "priority": 28,
-      "reason": "Critical risk 0.615, reachable, all needs deliverable within stock",
+      "reason": "Fourth critical risk (0.615); essential tier conserves stock for all criticals",
       "evidence": [
+        "risk_score:0.615",
+        "risk_level:critical",
         "R020",
-        "risk_score 0.615"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -716,17 +803,20 @@
         "T8"
       ],
       "priority": 29,
-      "reason": "Critical risk 0.574, reachable; water_20l and food_kit stock exhausted after C07-C05, essential tier preserves medical_kit and 50% hygiene_kit",
+      "reason": "Highest high-risk community; minimum tier after all criticals served per P5.2",
       "evidence": [
+        "risk_score:0.574",
+        "risk_level:high",
         "R012",
-        "risk_score 0.574"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
       "community_id": "C04",
       "origin_id": "W2",
       "resource": "water_20l",
-      "quantity": 90,
+      "quantity": 21,
       "vehicle_id": "V5",
       "route": [
         "T1",
@@ -735,10 +825,13 @@
         "T8"
       ],
       "priority": 29,
-      "reason": "Critical risk 0.574, reachable; water_20l and food_kit stock exhausted after C07-C05, essential tier preserves medical_kit and 50% hygiene_kit",
+      "reason": "Highest high-risk community; minimum tier after all criticals served per P5.2",
       "evidence": [
+        "risk_score:0.574",
+        "risk_level:high",
         "R012",
-        "risk_score 0.574"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -753,17 +846,20 @@
         "T8"
       ],
       "priority": 30,
-      "reason": "Critical risk 0.574, reachable; water_20l and food_kit stock exhausted after C07-C05, essential tier preserves medical_kit and 50% hygiene_kit",
+      "reason": "Highest high-risk community; minimum tier after all criticals served per P5.2",
       "evidence": [
+        "risk_score:0.574",
+        "risk_level:high",
         "R012",
-        "risk_score 0.574"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
       "community_id": "C04",
       "origin_id": "W2",
       "resource": "food_kit",
-      "quantity": 174,
+      "quantity": 104,
       "vehicle_id": "V5",
       "route": [
         "T1",
@@ -772,10 +868,13 @@
         "T8"
       ],
       "priority": 30,
-      "reason": "Critical risk 0.574, reachable; water_20l and food_kit stock exhausted after C07-C05, essential tier preserves medical_kit and 50% hygiene_kit",
+      "reason": "Highest high-risk community; minimum tier after all criticals served per P5.2",
       "evidence": [
+        "risk_score:0.574",
+        "risk_level:high",
         "R012",
-        "risk_score 0.574"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -790,10 +889,13 @@
         "T8"
       ],
       "priority": 31,
-      "reason": "Critical risk 0.574, reachable; water_20l and food_kit stock exhausted after C07-C05, essential tier preserves medical_kit and 50% hygiene_kit",
+      "reason": "Highest high-risk community; minimum tier after all criticals served per P5.2",
       "evidence": [
+        "risk_score:0.574",
+        "risk_level:high",
         "R012",
-        "risk_score 0.574"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -809,29 +911,57 @@
         "T8"
       ],
       "priority": 31,
-      "reason": "Critical risk 0.574, reachable; water_20l and food_kit stock exhausted after C07-C05, essential tier preserves medical_kit and 50% hygiene_kit",
+      "reason": "Highest high-risk community; minimum tier after all criticals served per P5.2",
       "evidence": [
+        "risk_score:0.574",
+        "risk_level:high",
         "R012",
-        "risk_score 0.574"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
-      "community_id": "C04",
+      "community_id": "C06",
       "origin_id": "W2",
-      "resource": "hygiene_kit",
-      "quantity": 64,
+      "resource": "water_20l",
+      "quantity": 7,
       "vehicle_id": "V5",
       "route": [
         "T1",
         "T3",
         "T6",
-        "T8"
+        "T10"
       ],
       "priority": 32,
-      "reason": "Critical risk 0.574, reachable; water_20l and food_kit stock exhausted after C07-C05, essential tier preserves medical_kit and 50% hygiene_kit",
+      "reason": "Second high-risk community; minimum tier within remaining stock",
       "evidence": [
-        "R012",
-        "risk_score 0.574"
+        "risk_score:0.507",
+        "risk_level:high",
+        "R030",
+        "P5.1",
+        "P5.2"
+      ]
+    },
+    {
+      "community_id": "C06",
+      "origin_id": "W2",
+      "resource": "food_kit",
+      "quantity": 7,
+      "vehicle_id": "V5",
+      "route": [
+        "T1",
+        "T3",
+        "T6",
+        "T10"
+      ],
+      "priority": 33,
+      "reason": "Second high-risk community; minimum tier within remaining stock",
+      "evidence": [
+        "risk_score:0.507",
+        "risk_level:high",
+        "R030",
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -846,11 +976,14 @@
         "T6",
         "T10"
       ],
-      "priority": 33,
-      "reason": "High risk 0.507, reachable; after C04 essential tier depletes remaining stock, minimum tier provides 50% water_20l and food_kit with full medical_kit",
+      "priority": 34,
+      "reason": "Second high-risk community; minimum tier within remaining stock",
       "evidence": [
+        "risk_score:0.507",
+        "risk_level:high",
         "R030",
-        "risk_score 0.507"
+        "P5.1",
+        "P5.2"
       ]
     }
   ],
@@ -863,17 +996,13 @@
     "P7.1: shelter S2 Salon Comunal Loma Alta cannot receive people (full)",
     "P7.2: C05 Playitas is evacuating; nearest shelter with room: S4 Centro Deportivo Los Amates (4.8 km)",
     "P7.2: C07 El Zapotal is isolated; nearest shelter with room: S4 Centro Deportivo Los Amates (8.8 km)",
-    "P6.2: C04 water_20l: stock ran out, 196 of 254 units",
-    "P6.2: C04 food_kit: stock ran out, 197 of 254 units",
-    "P6.2: C06 water_20l: stock ran out, 0 of 7 units",
-    "P6.2: C06 food_kit: stock ran out, 0 of 7 units",
-    "C07 0.72",
-    "C12 0.699",
-    "C03 0.659",
-    "C05 0.615",
-    "C04 0.574"
+    "water_20l:99% used",
+    "food_kit:99% used",
+    "blanket:99% used",
+    "hygiene_kit:84% used",
+    "medical_kit:62% used"
   ],
-  "confidence": 0.85,
+  "confidence": 0.92,
   "escalated": false,
   "changes_vs_previous": []
 }

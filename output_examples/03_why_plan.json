@@ -14,11 +14,14 @@
         "T12"
       ],
       "priority": 1,
-      "reason": "Critical risk 0.81, isolated, ford_only; essential tier respects stock limits while delivering core needs.",
+      "reason": "Highest risk critical (0.81); full allocation per P5.1/P5.2",
       "evidence": [
+        "risk_score:0.81",
+        "risk_level:critical",
         "R006",
         "R019",
-        "risk_score 0.81"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -34,11 +37,14 @@
         "T12"
       ],
       "priority": 2,
-      "reason": "Critical risk 0.81, isolated, ford_only; essential tier respects stock limits while delivering core needs.",
+      "reason": "Highest risk critical (0.81); full allocation per P5.1/P5.2",
       "evidence": [
+        "risk_score:0.81",
+        "risk_level:critical",
         "R006",
         "R019",
-        "risk_score 0.81"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -54,11 +60,14 @@
         "T12"
       ],
       "priority": 3,
-      "reason": "Critical risk 0.81, isolated, ford_only; essential tier respects stock limits while delivering core needs.",
+      "reason": "Highest risk critical (0.81); full allocation per P5.1/P5.2",
       "evidence": [
+        "risk_score:0.81",
+        "risk_level:critical",
         "R006",
         "R019",
-        "risk_score 0.81"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -75,10 +84,13 @@
         "T21"
       ],
       "priority": 4,
-      "reason": "Critical risk 0.789, needs_aid, ford_only; essential tier after C07 respects remaining stock.",
+      "reason": "Second critical (0.789); full allocation within stock limits",
       "evidence": [
+        "risk_score:0.789",
+        "risk_level:critical",
         "R025",
-        "risk_score 0.789"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -95,10 +107,13 @@
         "T21"
       ],
       "priority": 5,
-      "reason": "Critical risk 0.789, needs_aid, ford_only; essential tier after C07 respects remaining stock.",
+      "reason": "Second critical (0.789); full allocation within stock limits",
       "evidence": [
+        "risk_score:0.789",
+        "risk_level:critical",
         "R025",
-        "risk_score 0.789"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -115,10 +130,13 @@
         "T21"
       ],
       "priority": 6,
-      "reason": "Critical risk 0.789, needs_aid, ford_only; essential tier after C07 respects remaining stock.",
+      "reason": "Second critical (0.789); full allocation within stock limits",
       "evidence": [
+        "risk_score:0.789",
+        "risk_level:critical",
         "R025",
-        "risk_score 0.789"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -133,10 +151,13 @@
         "T8"
       ],
       "priority": 7,
-      "reason": "Critical risk 0.749, needs_aid, ford_only; essential tier after C12 respects remaining stock.",
+      "reason": "Third critical (0.749); small needs allow full allocation",
       "evidence": [
+        "risk_score:0.749",
+        "risk_level:critical",
         "R027",
-        "risk_score 0.749"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -151,10 +172,13 @@
         "T8"
       ],
       "priority": 8,
-      "reason": "Critical risk 0.749, needs_aid, ford_only; essential tier after C12 respects remaining stock.",
+      "reason": "Third critical (0.749); small needs allow full allocation",
       "evidence": [
+        "risk_score:0.749",
+        "risk_level:critical",
         "R027",
-        "risk_score 0.749"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -169,10 +193,13 @@
         "T8"
       ],
       "priority": 9,
-      "reason": "Critical risk 0.749, needs_aid, ford_only; essential tier after C12 respects remaining stock.",
+      "reason": "Third critical (0.749); small needs allow full allocation",
       "evidence": [
+        "risk_score:0.749",
+        "risk_level:critical",
         "R027",
-        "risk_score 0.749"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -187,10 +214,13 @@
         "T9"
       ],
       "priority": 10,
-      "reason": "Critical risk 0.705, evacuating, ford_only; minimum tier due to stock exhaustion after C03.",
+      "reason": "Fourth critical (0.705); essential tier conserves stock for all criticals",
       "evidence": [
+        "risk_score:0.705",
+        "risk_level:critical",
         "R020",
-        "risk_score 0.705"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -205,10 +235,13 @@
         "T9"
       ],
       "priority": 11,
-      "reason": "Critical risk 0.705, evacuating, ford_only; minimum tier due to stock exhaustion after C03.",
+      "reason": "Fourth critical (0.705); essential tier conserves stock for all criticals",
       "evidence": [
+        "risk_score:0.705",
+        "risk_level:critical",
         "R020",
-        "risk_score 0.705"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -224,10 +257,13 @@
         "T9"
       ],
       "priority": 11,
-      "reason": "Critical risk 0.705, evacuating, ford_only; minimum tier due to stock exhaustion after C03.",
+      "reason": "Fourth critical (0.705); essential tier conserves stock for all criticals",
       "evidence": [
+        "risk_score:0.705",
+        "risk_level:critical",
         "R020",
-        "risk_score 0.705"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -243,10 +279,13 @@
         "T9"
       ],
       "priority": 11,
-      "reason": "Critical risk 0.705, evacuating, ford_only; minimum tier due to stock exhaustion after C03.",
+      "reason": "Fourth critical (0.705); essential tier conserves stock for all criticals",
       "evidence": [
+        "risk_score:0.705",
+        "risk_level:critical",
         "R020",
-        "risk_score 0.705"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -261,10 +300,13 @@
         "T9"
       ],
       "priority": 12,
-      "reason": "Critical risk 0.705, evacuating, ford_only; minimum tier due to stock exhaustion after C03.",
+      "reason": "Fourth critical (0.705); essential tier conserves stock for all criticals",
       "evidence": [
+        "risk_score:0.705",
+        "risk_level:critical",
         "R020",
-        "risk_score 0.705"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -280,10 +322,13 @@
         "T9"
       ],
       "priority": 12,
-      "reason": "Critical risk 0.705, evacuating, ford_only; minimum tier due to stock exhaustion after C03.",
+      "reason": "Fourth critical (0.705); essential tier conserves stock for all criticals",
       "evidence": [
+        "risk_score:0.705",
+        "risk_level:critical",
         "R020",
-        "risk_score 0.705"
+        "P5.1",
+        "P5.2"
       ]
     },
     {
@@ -298,10 +343,14 @@
         "T7"
       ],
       "priority": 13,
-      "reason": "Critical risk 0.664, needs_aid, ford_only; minimum tier after C05 exhausts remaining stock.",
+      "reason": "Fifth critical (0.664); minimum tier forced by stock/vehicle exhaustion",
       "evidence": [
+        "risk_score:0.664",
+        "risk_level:critical",
         "R012",
-        "risk_score 0.664"
+        "P5.1",
+        "P5.2",
+        "feasibility"
       ]
     },
     {
@@ -316,10 +365,14 @@
         "T7"
       ],
       "priority": 13,
-      "reason": "Critical risk 0.664, needs_aid, ford_only; minimum tier after C05 exhausts remaining stock.",
+      "reason": "Fifth critical (0.664); minimum tier forced by stock/vehicle exhaustion",
       "evidence": [
+        "risk_score:0.664",
+        "risk_level:critical",
         "R012",
-        "risk_score 0.664"
+        "P5.1",
+        "P5.2",
+        "feasibility"
       ]
     },
     {
@@ -334,10 +387,14 @@
         "T7"
       ],
       "priority": 13,
-      "reason": "Critical risk 0.664, needs_aid, ford_only; minimum tier after C05 exhausts remaining stock.",
+      "reason": "Fifth critical (0.664); minimum tier forced by stock/vehicle exhaustion",
       "evidence": [
+        "risk_score:0.664",
+        "risk_level:critical",
         "R012",
-        "risk_score 0.664"
+        "P5.1",
+        "P5.2",
+        "feasibility"
       ]
     },
     {
@@ -354,17 +411,19 @@
         "T12"
       ],
       "priority": 18,
-      "reason": "Critical risk 0.81, isolated, ford_only; essential tier respects stock limits while delivering core needs.",
+      "reason": "Highest risk critical (0.81); full allocation per P5.1/P5.2",
       "evidence": [
+        "risk_score:0.81",
+        "risk_level:critical",
         "R006",
         "R019",
-        "risk_score 0.81"
+        "P5.1",
+        "P5.2"
       ]
     }
   ],
   "unserved": [
     "C01",
-    "C06",
     "C08",
     "C11"
   ],
@@ -373,29 +432,38 @@
     "P7.1: shelter S2 Salon Comunal Loma Alta cannot receive people (full)",
     "P7.2: C05 Playitas is evacuating; nearest shelter with room: S4 Centro Deportivo Los Amates (4.8 km)",
     "P7.2: C07 El Zapotal is isolated; nearest shelter with room: S4 Centro Deportivo Los Amates (8.8 km)",
+    "P6.2: C05 water_20l: stock ran out, 233 of 248 units",
+    "P6.2: C05 food_kit: stock ran out, 234 of 248 units",
+    "P6.2: C06 water_20l: stock ran out, 0 of 7 units",
+    "P6.2: C06 food_kit: stock ran out, 0 of 7 units",
     "P6.2: C04 water_20l: 95 of 211 units could not be carried (not enough stock or vehicle capacity left)",
     "P6.2: C04 food_kit: 211 of 211 units could not be carried (not enough stock or vehicle capacity left)",
     "P6.2: C04 medical_kit: 22 of 22 units could not be carried (not enough stock or vehicle capacity left)",
     "P6.2: C07 water_20l: 122 of 122 units could not be carried (not enough stock or vehicle capacity left)",
     "P6.2: C07 food_kit: 122 of 122 units could not be carried (not enough stock or vehicle capacity left)",
-    "P6.2: C07 hygiene_kit: 60 of 61 units could not be carried (not enough stock or vehicle capacity left)",
-    "P6.2: C07 blanket: 122 of 122 units could not be carried (not enough stock or vehicle capacity left)",
+    "P6.2: C07 hygiene_kit: 121 of 122 units could not be carried (not enough stock or vehicle capacity left)",
+    "P6.2: C07 blanket: 244 of 244 units could not be carried (not enough stock or vehicle capacity left)",
     "P6.2: C12 water_20l: 64 of 64 units could not be carried (not enough stock or vehicle capacity left)",
     "P6.2: C12 food_kit: 64 of 64 units could not be carried (not enough stock or vehicle capacity left)",
-    "P6.2: C12 hygiene_kit: 32 of 32 units could not be carried (not enough stock or vehicle capacity left)",
-    "P6.2: C12 blanket: 64 of 64 units could not be carried (not enough stock or vehicle capacity left)",
+    "P6.2: C12 hygiene_kit: 64 of 64 units could not be carried (not enough stock or vehicle capacity left)",
+    "P6.2: C12 blanket: 128 of 128 units could not be carried (not enough stock or vehicle capacity left)",
     "P6.2: C03 water_20l: 40 of 40 units could not be carried (not enough stock or vehicle capacity left)",
     "P6.2: C03 food_kit: 40 of 40 units could not be carried (not enough stock or vehicle capacity left)",
-    "P6.2: C03 hygiene_kit: 20 of 20 units could not be carried (not enough stock or vehicle capacity left)",
-    "P6.2: C03 blanket: 40 of 40 units could not be carried (not enough stock or vehicle capacity left)",
-    "critical C07",
-    "critical C12",
-    "critical C03",
-    "critical C05",
-    "critical C04",
+    "P6.2: C03 hygiene_kit: 40 of 40 units could not be carried (not enough stock or vehicle capacity left)",
+    "P6.2: C03 blanket: 80 of 80 units could not be carried (not enough stock or vehicle capacity left)",
+    "P6.2: C05 water_20l: 109 of 109 units could not be carried (not enough stock or vehicle capacity left)",
+    "P6.2: C05 food_kit: 110 of 110 units could not be carried (not enough stock or vehicle capacity left)",
+    "P6.2: C05 hygiene_kit: 62 of 62 units could not be carried (not enough stock or vehicle capacity left)",
+    "P6.2: C05 blanket: 124 of 124 units could not be carried (not enough stock or vehicle capacity left)",
+    "P6.2: C06 medical_kit: 2 of 2 units could not be carried (not enough stock or vehicle capacity left)",
+    "water_20l: 100% used",
+    "food_kit: 100% used",
+    "blanket: 100% used",
+    "hygiene_kit: 84% used",
+    "ford capacity: 13,800 kg limit",
     "P8.3: P5.2 infeasible: critical communities reachable only by fording vehicles (C03, C04, C05, C07, C12) need at least 17,952 kg; fording vehicles carry 13,800 kg"
   ],
-  "confidence": 0.85,
+  "confidence": 0.92,
   "escalated": true,
   "changes_vs_previous": [
     "C03 blanket: removed (was 80 units, V1 via T3-T6)",
@@ -403,16 +471,17 @@
     "C03 hygiene_kit: removed (was 40 units, V1 via T3-T6)",
     "C03 medical_kit: 4 -> 4 units; V1 via T3-T6 -> V2 via T3-T7-T8",
     "C03 water_20l: 80 -> 40 units; V1 via T3-T6, V1 via T3-T6 -> V2 via T3-T7-T8",
-    "C04 food_kit: removed (was 197 units, V1 via T3-T6-T8, V5 via T1-T3-T6-T8)",
-    "C04 hygiene_kit: removed (was 64 units, V5 via T1-T3-T6-T8)",
+    "C04 food_kit: removed (was 127 units, V1 via T3-T6-T8, V5 via T1-T3-T6-T8)",
     "C04 medical_kit: removed (was 13 units, V1 via T3-T6-T8, V5 via T1-T3-T6-T8)",
-    "C04 water_20l: 196 -> 116 units; V1 via T3-T6-T8, V5 via T1-T3-T6-T8 -> V4 via T1-T3-T7, V6 via T1-T3-T7, V6 via T1-T3-T7",
-    "C05 blanket: removed (was 248 units, V1 via T3-T6-T10-T11-T12, V5 via T1-T3-T6-T10-T11-T12)",
+    "C04 water_20l: 127 -> 116 units; V1 via T3-T6-T8, V5 via T1-T3-T6-T8 -> V4 via T1-T3-T7, V6 via T1-T3-T7, V6 via T1-T3-T7",
+    "C05 blanket: removed (was 124 units, V1 via T3-T6-T10-T11-T12, V5 via T1-T3-T6-T10-T11-T12)",
     "C05 food_kit: 248 -> 124 units; V2 via T3-T7-T9, V6 via T1-T3-T7-T9, V6 via T1-T3-T7-T9, V1 via T3-T6-T10-T11-T12 -> V2 via T3-T7-T9, V4 via T1-T3-T7-T9, V4 via T1-T3-T7-T9",
-    "C05 hygiene_kit: removed (was 124 units, V1 via T3-T6-T10-T11-T12, V5 via T1-T3-T6-T10-T11-T12)",
+    "C05 hygiene_kit: removed (was 62 units, V1 via T3-T6-T10-T11-T12)",
     "C05 medical_kit: 13 -> 13 units; V2 via T3-T7-T9 -> V2 via T3-T7-T9, V4 via T1-T3-T7-T9",
     "C05 water_20l: 248 -> 124 units; V2 via T3-T7-T9, V4 via T1-T3-T7-T9, V4 via T1-T3-T7-T9, V6 via T1-T3-T7-T9 -> V2 via T3-T7-T9",
+    "C06 food_kit: removed (was 7 units, V5 via T1-T3-T6-T10)",
     "C06 medical_kit: removed (was 2 units, V5 via T1-T3-T6-T10)",
+    "C06 water_20l: removed (was 7 units, V5 via T1-T3-T6-T10)",
     "C07 blanket: removed (was 244 units, V1 via T3-T6-T10-T11)",
     "C07 food_kit: 244 -> 122 units; V2 via T3-T7-T9-T12, V2 via T3-T7-T9-T12, V1 via T3-T6-T10-T11 -> V2 via T3-T7-T9-T12",
     "C07 hygiene_kit: 122 -> 1 units; V2 via T3-T7-T9-T12, V1 via T3-T6-T10-T11 -> V4 via T1-T3-T7-T9-T12",
@@ -421,7 +490,6 @@
     "C12 food_kit: 128 -> 64 units; V1 via T3-T6-T10-T20, V1 via T3-T6-T10-T20 -> V2 via T3-T7-T9-T12-T21",
     "C12 hygiene_kit: removed (was 64 units, V1 via T3-T6-T10-T20)",
     "C12 medical_kit: 13 -> 13 units; V1 via T3-T6-T10-T20 -> V2 via T3-T7-T9-T12-T21",
-    "C12 water_20l: 128 -> 64 units; V1 via T3-T6-T10-T20, V1 via T3-T6-T10-T20 -> V2 via T3-T7-T9-T12-T21",
-    "C06: now unserved"
+    "C12 water_20l: 128 -> 64 units; V1 via T3-T6-T10-T20, V1 via T3-T6-T10-T20 -> V2 via T3-T7-T9-T12-T21"
   ]
 }
