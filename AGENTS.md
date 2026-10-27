@@ -2,7 +2,7 @@
 
 > **Read this whole file before touching code.** It is the project's source of truth for people and AI agents (Cursor, Claude Code, Codex). At the end of every work session, update **§8 Current status**, **§9 Next steps** and, if you decided something, **§10 Decision log**.
 
-Last updated: 2026-10-26 (GT) · by: Juan (with Claude Code): compliance review against the event rules; submission docs, Meterless provider check, README for judges
+Last updated: 2026-10-27 (GT) · by: Juan (with Claude Code): video script rewritten to the official Demo Video Guide; review against the strong/weak examples and the submission form preview
 
 ---
 
@@ -273,10 +273,11 @@ Done:
 
 Pending (blocking for the submission):
 - [ ] **Repository is private**: make it public right before submitting (judges must open and run it)
-- [ ] **Nightshift in the final runs**: PR #6 ran on direct NVIDIA because Nightshift answered 401 to the old token. Renew the token from the Nightshift Console, pass `python -m resq.llm --check` with "Meterless Nightshift", regenerate `output_examples/` through Nightshift, record the demo through Nightshift (rule 2, NVIDIA award)
-- [ ] Demo video (1–4 min), slide deck, HackOS form with the sponsor explanation and pre-existing components (`docs/SUBMISSION.md`)
-- [ ] Cursor usage sentence per member in `docs/SUBMISSION.md`
-- [ ] Nightshift console screenshots in `docs/evidence/`
+- [x] **PR #8 merged** (Harry): `output_examples/` regenerated on Nightshift + Zetaris (deep lane on Ultra, 17,952 kg), `python -m resq.llm --check` all PASS on Nightshift, console screenshots in `docs/evidence/`
+- [ ] **Demo video** with English narration (audio is required by the official guide), following the new `docs/VIDEO_SCRIPT.md`; filename `OAH2026-RESQAI-ReasoningArchitecture-Demo.mp4`; link must open in a private window; backup copy; link in the README
+- [ ] Slide deck (the eight required points, naming Track 3), HackOS form with the sponsor explanation and pre-existing components (`docs/SUBMISSION.md`)
+- [ ] Cursor usage sentence for Juan and Chema in `docs/SUBMISSION.md`
+- [ ] HackOS roster final before creating the submission (the team locks then); prize split agreed; GitHub usernames match the contributors
 
 Not blocking:
 - [ ] Ask in HackOS whether the vendored World Model reference counts as a working engine (conformance passes either way)
@@ -287,11 +288,11 @@ Not blocking:
 
 Submission **Tuesday 27, 12:00 Guatemala** (hard limit 17:45 = 23:45 UTC). Checklist with owners: `docs/SUBMISSION.md`.
 
-Harry (tonight): renew the Nightshift token → `python -m resq.llm --check` passes on Nightshift → `python scripts/run_demo.py` on Nightshift + Zetaris → commit `output_examples/` → console screenshots in `docs/evidence/` → record the video following `docs/VIDEO_SCRIPT.md` (show the provider check, a trace with the Nemotron model ids, the critic revision, block T6 → escalation, "why", the World Model timeline).
+Harry: record the video following `docs/VIDEO_SCRIPT.md` (English voice-over; fresh Nightshift token first; narrate only the Critic send-back that happened in the take); upload it so anyone with the link can watch; keep a backup copy.
 
-Chema (tonight): slide deck with the final numbers; clean-setup run of README paths 1 and 2 on his Windows machine.
+Chema: slide deck with the final numbers and the architecture slide used in the video; clean-setup run of README paths 1 and 2.
 
-Juan (Tuesday morning): merge the last PRs; repeat the secret scan; make the repo public; fill the HackOS form from `docs/SUBMISSION.md` (track Reasoning Architecture, links, sponsor explanation, pre-existing components); submit before 12:00.
+Juan: add the video link to the README and `docs/SUBMISSION.md`; repeat the secret scan; make the repo public and test it logged out; confirm the HackOS roster; fill the HackOS form from `docs/SUBMISSION.md`; submit before 12:00.
 
 ## 10. Decision log
 
@@ -335,3 +336,4 @@ Juan (Tuesday morning): merge the last PRs; repeat the secret scan; make the rep
 | 2026-10-26 | Both lanes at temperature 0; deep lane `nemotron-3-ultra-550b-a55b` with thinking off (Harry) | Super 120B is not available to our accounts; thinking was 5× slower with timeouts; temperature 0 made the demo rehearsable |
 | 2026-10-26 | `METERLESS_*` are the default provider settings; `MODEL_*` only override them; `python -m resq.llm --check` runs the Power Prompt checks (connection, authorization, model discovery, one request per lane) | The setup guide asks for Meterless as a first-class provider with those settings and checks; direct NVIDIA warns instead of passing |
 | 2026-10-26 | Compliance review against the event documents: eligibility rules met (Zetaris via API, World Model engine with conformance, Nightshift as primary provider in code, Cursor); open items are the public repo, a final Nightshift run, video, deck and the HackOS form | Recorded so nobody submits with a private repo or a demo on direct NVIDIA |
+| 2026-10-27 | Demo video narrated in English and structured as the official Demo Video Guide (problem → solution → agents → live run → sponsor tech → output); Zetaris shown in its SQL editor and the run header, since the JSONL trace does not log SQL calls | The guide requires audio and wants sponsor technology visibly doing work; adding SQL lines to the trace after feature freeze was not worth the risk |
