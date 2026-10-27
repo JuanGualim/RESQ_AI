@@ -29,7 +29,11 @@ During a flood, field reports contradict each other, supplies and vehicles do no
 
 **NVIDIA (Nemotron through Nightshift).** Both lanes are pinned to Nemotron models through Nightshift: `nvidia/nemotron-3.5-lightning-30b-a3b` on the fast lane (Reconciler deciding contested reports, Risk Analyst summary, Explainer report) and `nvidia/nemotron-3-ultra-550b-a55b` on the deep lane (Planner choosing delivery tiers under scarcity, Critic reviewing the reasons). Every model call is recorded with its model id in the JSONL trace. Nemotron's thinking mode is turned off per lane after measuring it (5× slower, one call in three over the 90 s timeout); both lanes run at temperature 0 for a rehearsable demo.
 
-**Cursor (development).** The team developed RESQ AI in Cursor. `AGENTS.md` is the shared context file the coding agent reads before every task (rules, contracts between modules, status, decision log), which let three people and their agents work on separate branches against the same contracts; Claude Code and Codex, which the rules allow, used the same file. **[team]** add one or two concrete things each member did with Cursor's Agent (for example: Juan — Zetaris registration and World Model service; Harry — heavy test battery and prompt fixes; Chema — dashboard and validators).
+**Cursor (development).** The team developed RESQ AI in Cursor. `AGENTS.md` is the shared context file the coding agent reads before every task (rules, contracts between modules, status, decision log), which let three people and their agents work on separate branches against the same contracts; Claude Code and Codex, which the rules allow, used the same file.
+
+- **Harry:** built the heavy test battery with its automatic quality checks and failure classification (`scripts/heavy_test.py`), then used its results to fix the agents — the Critic was rejecting correct plans because it could not see which communities a road block had left reachable only by fording vehicles, and both lanes moved to temperature 0 after measuring that the Planner's answers changed between runs. The agent also ran the model comparisons that decided the deep lane (thinking off, Nemotron 3 Ultra) and caught that the dashboard's live mode never started because the repo root was missing from `sys.path`.
+- **[team]** Juan — one or two concrete things (e.g. Zetaris registration and the World Model service).
+- **[team]** Chema — one or two concrete things (e.g. the dashboard and the validators).
 
 **What was unique in our use of the sponsor technologies.**
 - The World Model is the agents' only shared memory, not a cache next to it: re-plans, explanations and "what did we believe then?" all come from its event history and provenance.
@@ -53,9 +57,9 @@ See the README section "For judges: three ways to run it": the dashboard's examp
 
 | Item | Owner | Done |
 | --- | --- | --- |
-| Nightshift Console token renewed; `python -m resq.llm --check` passes with "Meterless Nightshift" | Harry | [ ] |
-| `python scripts/run_demo.py` on Nightshift + Zetaris; `output_examples/` regenerated and committed | Harry | [ ] |
-| Nightshift console screenshots (resq-ai requests on Nemotron, no keys visible) in `docs/evidence/` | Harry | [ ] |
+| Nightshift Console token renewed; `python -m resq.llm --check` passes with "Meterless Nightshift" | Harry | [x] 8/8 PASS, no WARN |
+| `python scripts/run_demo.py` on Nightshift + Zetaris; `output_examples/` regenerated and committed | Harry | [x] PR #8, 17,952 kg |
+| Nightshift console screenshots (resq-ai requests on Nemotron, no keys visible) in `docs/evidence/` | Harry | [x] PR #8 |
 | Demo video 1–4 min: problem, plan, critic revision, block T6 → re-plan and escalation, "why", Zetaris + World Model + Nightshift/Nemotron shown | Harry | [ ] |
 | Slide deck: problem and users, solution, agent architecture, stack, Zetaris and Meterless use and what was unique, screenshots, future work | Chema | [ ] |
 | Cursor usage sentence per member (above) | All | [ ] |
