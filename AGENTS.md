@@ -2,7 +2,7 @@
 
 > **Read this whole file before touching code.** It is the project's source of truth for people and AI agents (Cursor, Claude Code, Codex). At the end of every work session, update **§8 Current status**, **§9 Next steps** and, if you decided something, **§10 Decision log**.
 
-Last updated: 2026-10-25 (GT) · by: Juan (with Claude Code): merged Harry's Nightshift validation (PR #5) and Juan's CI + World Model inspection (PR #4); status after the first Nightshift batteries
+Last updated: 2026-10-26 (GT) · by: Juan (with Claude Code): compliance review against the event rules; submission docs, Meterless provider check, README for judges
 
 ---
 
@@ -73,8 +73,8 @@ Framework: **LangGraph** (`resq/graph.py`). Graph state = `ResqState` (pydantic)
 
 - **Nemotron 3.5 thinks by default.** With thinking on, a plan request spends the whole token budget reasoning and returns empty content (seen with 16k tokens), or takes longer than the 90 s timeout. `llm.py` sends `chat_template_kwargs.enable_thinking=false` on the fast lane, and on the deep lane unless `LANE_DEEP_THINKING=true`. On Nightshift the fast lane answers in 2–6 s with no empty replies (45 turns, 0 failures), so the setting works there in practice; not yet written down explicitly by Harry.
 - The fast model is weak at arithmetic over continuous numbers (it invented decreasing coverages), so the Planner chooses **discrete tiers** and code does the math.
-- The fast lane runs at **temperature 0** (Harry, PR #2): at 0.2 the Reconciler decided contested objects differently between runs.
-- **Measured on Nightshift** (Harry, `docs/test_results/heavy_test_2026-10-25.md`): fast lane `nvidia/nemotron-3.5-lightning-30b-a3b`, deep lane `nvidia/nemotron-3-ultra-550b-a55b`. Mean turn 27–46 s; 0 failures in 45 turns; critic rounds on the base plan 1.0 (was 2.0). The slow case is the **Critic on the Ultra model** (26 s mean when T3 is blocked vs 5 s for T6), not prompt size (the Planner context is under 5 KB).
+- **Both lanes run at temperature 0** (Harry, PRs #2 and #6) and thinking stays off on the deep lane (measured: 5× slower, one call in three over the timeout; `docs/test_results/deep_lane_decision_2026-10-26.md`). `nemotron-3-super-120b-a12b` returns 404 for our accounts, so the deep lane is `nemotron-3-ultra-550b-a55b`. Nemotron is still not fully reproducible at temperature 0 (mixture-of-experts batching): rehearse the story, not the exact tiers.
+- **Final battery** (Harry, `docs/test_results/heavy_test_final_2026-10-26.md`, direct NVIDIA + `SAMPLE_MODE`): 4 scenarios × 5 runs, **60 turns, 0 failures, 1.0 critic rounds, 0 false blocks**, 29–50 s mean per turn. **First Nightshift battery** (`docs/test_results/heavy_test_2026-10-25.md`): fast lane `nvidia/nemotron-3.5-lightning-30b-a3b`, deep lane `nvidia/nemotron-3-ultra-550b-a55b`. Mean turn 27–46 s; 0 failures in 45 turns; critic rounds on the base plan 1.0 (was 2.0). The slow case is the **Critic on the Ultra model** (26 s mean when T3 is blocked vs 5 s for T6), not prompt size (the Planner context is under 5 KB).
 
 ## 4. Stack and services
 
@@ -85,7 +85,7 @@ Framework: **LangGraph** (`resq/graph.py`). Graph state = `ResqState` (pydantic)
 | Routing | networkx over `road_segments` (`tools/routing.py`) |
 | UI | Streamlit dashboard `app/streamlit_app.py` (Chema): example mode (offline, `output_examples/`) and live mode (`resq.run.execute()` + `world.get_state()`); SVG road map, plan table, trace, escalation banner, Plan / Block segment / Why buttons. Theme in `.streamlit/config.toml`, design notes in `DESIGN.md` / `PRODUCT.md` |
 | Zetaris | Runs on Juan's laptop (Docker). UI `:3000`, REST `:8888/api/v1.0`. The team connects through Tailscale. Responses: `{"headers": [...], "data": [[...]]}` with **every value as text** (`run_sql` parses numbers) |
-| Nightshift | Runs on Harry's Windows machine. Base URL `:8088/v1`. Lanes: fast = `nvidia/nemotron-3.5-lightning-30b-a3b`; deep = `nvidia/nemotron-3-ultra-550b-a55b` (set with `LANE_FAST_MODEL` / `LANE_DEEP_MODEL`) |
+| Nightshift | Runs on Harry's Windows machine, published on the tailnet. Base URL `:8088/v1`. Configured with `METERLESS_BASE_URL` / `METERLESS_RUNTIME_TOKEN` / `METERLESS_MODEL` (`MODEL_*` override them for development). Lanes pinned in `.env`: fast = `nvidia/nemotron-3.5-lightning-30b-a3b`; deep = `nvidia/nemotron-3-ultra-550b-a55b`. `python -m resq.llm --check` = connection, authorization, model discovery, one request per lane |
 | World Model | `world_service/`: Node HTTP service over the **vendored Meterless World Model reference** (`world_service/vendor/world-model`, Apache-2.0, commit `1742dec`). Conformance 8/8. Python client in `resq/world/`; in-memory fallback when `WORLD_MODEL_URL` is empty (tests and dev only) |
 | Meterless prompts | https://meterless.ai/engines.html (IMPLEMENT → *Keep parallel agents in sync*; POWER → *Add Meterless as a provider*) |
 
@@ -119,7 +119,8 @@ RESQ_AI/
 ├── smoke_test.py              # checks Zetaris + model (from the official guide)
 ├── DESIGN.md · PRODUCT.md · .streamlit/ · .impeccable/   # UI design notes and theme (Chema)
 ├── .github/workflows/tests.yml   # CI: offline pytest (Python 3.12) + World Model conformance (Node 22)
-├── docs/  ARCHITECTURE.md · PLAN.md · TEAM_SETUP.md · protocol.md (rules P1–P8) · VIDEO_SCRIPT.md · DECK_OUTLINE.md
+├── docs/  ARCHITECTURE.md · SUBMISSION.md (HackOS text + final checklist) · PLAN.md · TEAM_SETUP.md · windows_install_notes.md
+│         protocol.md (rules P1–P8) · VIDEO_SCRIPT.md · DECK_OUTLINE.md
 │         test_results/heavy_test_<date>.md   # battery summaries (raw JSON stays in logs/)
 ├── resq/
 │   ├── config.py              # Settings from .env (get_settings)
@@ -140,7 +141,7 @@ RESQ_AI/
 ├── data/  README.md · sample/*.csv
 ├── input_examples/README.md · output_examples/ (reports, plans, traces of a real run)
 ├── logs/                      # traces and battery JSON (whole folder gitignored)
-└── tests/                     # 166 tests, all offline (incl. test_contract.py, test_failures.py)
+└── tests/                     # 182 tests, all offline (incl. test_contract.py, test_failures.py, test_llm_check.py)
 ```
 
 ## 6. Contracts between modules
@@ -155,6 +156,7 @@ def table(name: str) -> str: ...                              # "communities" or
 # resq/llm.py  (Harry)
 def chat(messages, lane="fast", tools=None, max_tokens=None) -> dict: ...  # content, reasoning, model, lane, usage, duration_ms
 def chat_json(messages, lane="fast", max_tokens=None) -> tuple[object, dict]: ...  # parsed JSON + reply; one repair round
+def check(lanes=("fast", "deep")) -> list[tuple[str, bool, str]]: ...  # Meterless Runtime checks (python -m resq.llm --check)
 
 # resq/world/  (Juan)
 def get_state() -> dict: ...                 # tables keyed by id + verified facts (status, risk_level, needs, …)
@@ -218,7 +220,8 @@ python -m venv .venv && source .venv/bin/activate      # Windows: py -3.12 -m ve
 pip install -r requirements.txt
 cp .env.example .env                                   # then fill in real values
 python smoke_test.py                                   # 3 PASS expected
-pytest                                                 # 166 passed
+pytest                                                 # 182 passed
+python -m resq.llm --check                             # Meterless provider: connection, auth, discovery, one request per lane
 python scripts/generate_data.py                        # rebuild data/sample/ (add --fetch-rainfall to refresh rainfall)
 docker compose up -d && python scripts/load_postgres.py && python scripts/register_zetaris.py   # Zetaris host only
 
@@ -243,9 +246,9 @@ python -m resq.world summary                           # World Model: summary | 
 | `ZETARIS_DATASOURCE` | Datasource of our tables in Zetaris (default `resq_pg`) |
 | `ZETARIS_RAINFALL_TABLE` | Qualified Open-Meteo REST table, if not `<datasource>.rainfall` |
 | `RESQ_PG_DB`, `RESQ_PG_USER`, `RESQ_PG_PASSWORD`, `RESQ_PG_PORT` | Scenario Postgres (Zetaris host only); `RESQ_PG_HOST_FOR_ZETARIS` = how Zetaris reaches it (default `resq-postgres:5432`) |
-| `METERLESS_BASE_URL`, `METERLESS_RUNTIME_TOKEN`, `METERLESS_MODEL` | Nightshift (primary provider) |
-| `MODEL_BASE_URL`, `MODEL_API_KEY`, `NEMOTRON_MODEL` | Active model (Nightshift by default; direct NVIDIA only in development) |
-| `LANE_FAST_MODEL`, `LANE_DEEP_MODEL` | Model per lane (both default to `NEMOTRON_MODEL`) |
+| `METERLESS_BASE_URL`, `METERLESS_RUNTIME_TOKEN`, `METERLESS_MODEL` | Nightshift: the primary provider, used by the agent unless `MODEL_*` is set |
+| `MODEL_BASE_URL`, `MODEL_API_KEY`, `NEMOTRON_MODEL` | Read by `smoke_test.py`; when set they override `METERLESS_*` (direct NVIDIA only in development) |
+| `LANE_FAST_MODEL`, `LANE_DEEP_MODEL` | Model per lane, pinned to Nemotron in `.env.example` (fallback: `NEMOTRON_MODEL`, then `METERLESS_MODEL`) |
 | `LANE_DEEP_THINKING` | `true` = Nemotron reasoning on the deep lane (default `false`, see §3 model notes) |
 | `SAMPLE_MODE` | `true` = run the same SQL on `data/sample/` (SQLite) instead of Zetaris |
 | `WORLD_MODEL_URL` | World Model service, e.g. `http://127.0.0.1:4380`; empty = in-memory fallback (dev only) |
@@ -255,57 +258,40 @@ python -m resq.world summary                           # World Model: summary | 
 
 ## 8. Current status
 
-**Current phase: 3 (product and reliability).** Estimated overall progress: **~70 %** (system ~90 %, UI ~75 %, testing ~60 %, submission package ~25 %). The system runs end to end on Zetaris data (Juan's machine), on **Meterless Nightshift with Nemotron** (Harry's machine), with the real World Model service and a coordinator dashboard. All feature branches are merged into `main` (PRs #1–#5); CI is green.
+**Current phase: 4 (package and submit).** Feature freeze has passed; only fixes and submission work remain. Technically complete: the system runs end to end on Zetaris data with the real World Model service and Nemotron, CI is green, 182 tests pass. Compliance review against `docs/informacion_evento/` done on 2026-10-26 (see §10).
 
 Done:
-- [x] Track 3 chosen; RESQ AI idea defined; repo in English (code, docs, contracts)
-- [x] Zetaris on Juan's laptop; scenario in our own Postgres registered as `resq_pg`; every agent query returns the same rows as `SAMPLE_MODE`
-- [x] Skeleton, `config.py`, `docs/TEAM_SETUP.md`, `docs/protocol.md` (P1–P8), `docs/ARCHITECTURE.md`
-- [x] Synthetic scenario + Eta rainfall snapshot (`scripts/generate_data.py`, `data/sample/`), incl. `road_nodes` for the map
-- [x] Tools: `run_sql`, `best_route`, `reachability`, `validate_plan` (incl. shortest-route check), `critical_minimum_gaps` (water + food), `pack`
-- [x] `llm.py`: lanes, Meterless headers, retries, JSON repair; thinking off by default; fast lane at temperature 0
-- [x] **World Model:** service over the vendored Meterless reference, conformance **8/8**; point-in-time state, per-object timelines, audit, `python -m resq.world` inspector
-- [x] Six agents + LangGraph graph + CLI: critic loop (max 3), one model review, escalation with exact gap, re-plan on events, "why" answers
-- [x] Tailscale up (Juan `100.85.62.9`); Zetaris REST published with `tailscale serve`
-- [x] **Chema (PR #3):** validator hardening; Streamlit dashboard (example + live mode); video script and deck outline
-- [x] **Harry (PRs #2, #5):** `heavy_test.py` with quality checks (plan passes `validate_plan`, blocked segment never used, changes after a block, "why" mentions the segment, no invented ids), failure classification, `reopen_T6` scenario, re-plan stability and Critic false-block metrics; **first batteries on Nightshift: 45 turns, 0 failures**; base-plan critic rounds 2.0 → 1.0; `execute()` escalates instead of raising when Zetaris or the World Model is down; `tests/test_contract.py` pins the UI contract; `output_examples/` regenerated on Nightshift
-- [x] **Juan (PR #4):** CI on GitHub Actions (offline pytest on Python 3.12 + World Model conformance on Node 22); full-history secret scan clean (2026-10-25)
-- [x] `pytest`: **166 passed**; CI green on `main`
+- [x] Data: scenario in our own Postgres, registered in Zetaris as `resq_pg`; all 9 tables answer through Zetaris from Juan's and Harry's machines (re-verified 2026-10-26 21:45 GT)
+- [x] Engine: World Model as the agents' shared state; conformance **8/8** (re-run 2026-10-26); point-in-time state, timelines, audit, `python -m resq.world`
+- [x] Six agents + LangGraph graph: critic loop (max 3), one model review, escalation with the exact gap (17,952 kg vs 13,800 kg after blocking T6), re-plan on events, "why" answers, escalation instead of a crash when a service is down
+- [x] Final battery: 60 turns, 0 failures, 1.0 critic rounds, 0 false blocks; `output_examples/` regenerated on Zetaris data with the 17,952 kg figure
+- [x] Dashboard: example mode (offline) and live mode (verified by Harry in the browser)
+- [x] Meterless provider check `python -m resq.llm --check`; `METERLESS_*` are the default provider settings; both lanes pinned to Nemotron in `.env.example`
+- [x] README for judges (three run paths, sponsor table incl. Cursor and what was unique, limitations, pre-existing components), `data/README.md` sources and Open-Meteo CC BY 4.0 licence, `docs/SUBMISSION.md` draft
+- [x] Secret scan of the whole history clean (2026-10-26); first commit 2026-10-23 08:47 UTC (inside the build window)
+- [x] CI green on `main`; `pytest`: **182 passed**
 
-Pending / known issues:
-- [ ] **Harry's runs used `SAMPLE_MODE`**: on his machine `resq_pg.<table>` returned `TABLE_OR_VIEW_NOT_FOUND`. Either the battery ran before the datasource was registered, or his Zetaris user is not assigned the `resq_pg` datasource (non-admin users only see assigned objects). Re-test from Harry's machine; if it still fails, assign the datasource to his user in the Zetaris UI. **Blocks the demo on Zetaris data.**
-- [ ] `output_examples/` were regenerated on Nightshift from a checkout older than PR #3, so the T6 report still says **18,337 kg**; regenerate again from current `main` (correct figure: 17,952 kg)
-- [ ] Battery on Zetaris data, Phase 3 battery (3 × 10 + `reopen_T6`), and deep-lane comparison (Critic on Ultra vs lightning) — latency for block T3 is 46.5 s mean, above the 45 s target
-- [ ] No Nightshift evidence screenshots in `docs/evidence/` yet (rule 2 / NVIDIA prize)
-- [ ] UI live mode not yet tested on Harry's machine with Nightshift + Zetaris
-- [ ] Ask in HackOS whether the vendored World Model reference counts as a working engine
-- [ ] Submission package: deck, video recording, final README pass, HackOS upload
-- [ ] Optional: Open-Meteo as a live Zetaris REST table (rainfall is a snapshot in Postgres)
+Pending (blocking for the submission):
+- [ ] **Repository is private**: make it public right before submitting (judges must open and run it)
+- [ ] **Nightshift in the final runs**: PR #6 ran on direct NVIDIA because Nightshift answered 401 to the old token. Renew the token from the Nightshift Console, pass `python -m resq.llm --check` with "Meterless Nightshift", regenerate `output_examples/` through Nightshift, record the demo through Nightshift (rule 2, NVIDIA award)
+- [ ] Demo video (1–4 min), slide deck, HackOS form with the sponsor explanation and pre-existing components (`docs/SUBMISSION.md`)
+- [ ] Cursor usage sentence per member in `docs/SUBMISSION.md`
+- [ ] Nightshift console screenshots in `docs/evidence/`
+
+Not blocking:
+- [ ] Ask in HackOS whether the vendored World Model reference counts as a working engine (conformance passes either way)
+- [ ] Optional: Open-Meteo as a live Zetaris REST table
 - [ ] `CLAUDE.md` is gitignored although §5 lists it
 
 ## 9. Next steps (in order)
 
-Feature freeze **Monday 26, 14:00** · demo rehearsal **Monday 16:00** · submission **Tuesday 27, 12:00**.
+Submission **Tuesday 27, 12:00 Guatemala** (hard limit 17:45 = 23:45 UTC). Checklist with owners: `docs/SUBMISSION.md`.
 
-Harry:
-1. Re-test Zetaris from his machine (`python scripts/register_zetaris.py --verify` with his `.env`); if `TABLE_OR_VIEW_NOT_FOUND` persists, Juan assigns `resq_pg` to his user.
-2. Regenerate `output_examples/` from current `main` on Nightshift + Zetaris (17,952 kg gap).
-3. Battery on Zetaris data; deep-lane comparison (Critic on lightning vs Ultra) and split the lanes if the review quality holds; then the Phase 3 battery (3 × 10 + `reopen_T6`) with a summary in `docs/test_results/`.
-4. Nightshift console screenshots in `docs/evidence/`.
-5. Expose Nightshift on the tailnet for Chema; pair with Chema on the dashboard's live mode.
+Harry (tonight): renew the Nightshift token → `python -m resq.llm --check` passes on Nightshift → `python scripts/run_demo.py` on Nightshift + Zetaris → commit `output_examples/` → console screenshots in `docs/evidence/` → record the video following `docs/VIDEO_SCRIPT.md` (show the provider check, a trace with the Nemotron model ids, the critic revision, block T6 → escalation, "why", the World Model timeline).
 
-Chema:
-1. Dashboard live mode against Harry's Nightshift (or direct NVIDIA); polish with the new `output_examples/`; show the World Model timeline (`world.timeline`) for the blocked segment if time allows.
-2. `input_examples/`: the four battery scenarios as coordinator inputs.
-3. Fresh `SAMPLE_MODE` install on his Windows machine following the README.
-4. Deck with the Nightshift numbers; final video script.
+Chema (tonight): slide deck with the final numbers; clean-setup run of README paths 1 and 2 on his Windows machine.
 
-Juan:
-1. Fix Harry's Zetaris access if needed; ask HackOS about the vendored World Model reference.
-2. Keep Zetaris, Postgres and Tailscale up during work blocks; review and merge PRs.
-3. Review Reconciler / Risk Analyst output on Nightshift; `data/README.md` final pass; final README pass; repeat the secret scan before submission; upload to HackOS.
-
-Together: Monday 16:00 rehearsal on Harry's machine following `docs/VIDEO_SCRIPT.md`; Monday night video + backup recording.
+Juan (Tuesday morning): merge the last PRs; repeat the secret scan; make the repo public; fill the HackOS form from `docs/SUBMISSION.md` (track Reasoning Architecture, links, sponsor explanation, pre-existing components); submit before 12:00.
 
 ## 10. Decision log
 
@@ -346,3 +332,6 @@ Together: Monday 16:00 rehearsal on Harry's machine following `docs/VIDEO_SCRIPT
 | 2026-10-25 | Deep lane on `nvidia/nemotron-3-ultra-550b-a55b` via Nightshift; fast lane stays on `nemotron-3.5-lightning` (Harry) | First Nightshift batteries: 0 failures; the Critic on Ultra is the latency outlier, to be compared with lightning before deciding a split |
 | 2026-10-25 | `execute()` escalates (plan=None, escalated=True) when Zetaris or the World Model is unreachable; real bugs still raise (Harry) | A down service is a reason for a human decision, not a traceback in the UI; `tests/test_failures.py` |
 | 2026-10-25 | The whole `logs/` folder is gitignored; battery summaries go to `docs/test_results/` (Harry) | Raw battery JSON is large and machine-specific |
+| 2026-10-26 | Both lanes at temperature 0; deep lane `nemotron-3-ultra-550b-a55b` with thinking off (Harry) | Super 120B is not available to our accounts; thinking was 5× slower with timeouts; temperature 0 made the demo rehearsable |
+| 2026-10-26 | `METERLESS_*` are the default provider settings; `MODEL_*` only override them; `python -m resq.llm --check` runs the Power Prompt checks (connection, authorization, model discovery, one request per lane) | The setup guide asks for Meterless as a first-class provider with those settings and checks; direct NVIDIA warns instead of passing |
+| 2026-10-26 | Compliance review against the event documents: eligibility rules met (Zetaris via API, World Model engine with conformance, Nightshift as primary provider in code, Cursor); open items are the public repo, a final Nightshift run, video, deck and the HackOS form | Recorded so nobody submits with a private repo or a demo on direct NVIDIA |
